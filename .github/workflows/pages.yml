@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       base_path:
-        description: "Override URL prefix. Leave empty to auto-detect (user site vs /repo-name)."
+        description: "URL prefix. Leave empty to auto-detect. Use / or root for a custom domain (site at /). Use /RepoName for user.github.io/RepoName."
         required: false
         default: ""
 
@@ -56,17 +56,48 @@ jobs:
         working-directory: ${{ steps.app.outputs.dir }}
       - name: Resolve GitHub Pages base path
         id: base
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ -n "${{ github.event.inputs.base_path }}" ]; then
-            echo "path=${{ github.event.inputs.base_path }}" >> "$GITHUB_OUTPUT"
+          INPUT="${{ github.event.inputs.base_path }}"
+          if [ "$INPUT" = "/" ] || [ "$INPUT" = "root" ] || [ "$INPUT" = "none" ]; then
+            echo "path=" >> "$GITHUB_OUTPUT"
+            echo "Using site root (workflow override)"
             exit 0
           fi
+          if [ -n "$INPUT" ]; then
+            echo "path=$INPUT" >> "$GITHUB_OUTPUT"
+            echo "Using override $INPUT"
+            exit 0
+          fi
+
+          # Custom domains are always served at / — /repo-name CSS URLs 404 there.
+          if [ -f CNAME ] || [ -f public/CNAME ]; then
+            echo "path=" >> "$GITHUB_OUTPUT"
+            echo "CNAME file present — using site root"
+            exit 0
+          fi
+          PAGES_JSON=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pages" || true)
+          CNAME=$(printf '%s' "$PAGES_JSON" | python -c "import sys,json
+try:
+  d=json.load(sys.stdin)
+  print(d.get('cname') or '')
+except Exception:
+  print('')")
+          if [ -n "$CNAME" ]; then
+            echo "path=" >> "$GITHUB_OUTPUT"
+            echo "Custom domain $CNAME — using site root"
+            exit 0
+          fi
+
           OWNER="${{ github.repository_owner }}"
           NAME="${{ github.event.repository.name }}"
           if [ "$NAME" = "${OWNER}.github.io" ]; then
             echo "path=" >> "$GITHUB_OUTPUT"
           else
             echo "path=/${NAME}" >> "$GITHUB_OUTPUT"
+            echo "Project Pages URL — prefix /${NAME}"
           fi
       - name: Export static web
         run: npm run build:web
