@@ -1,10 +1,20 @@
 Copy EVERYTHING inside this folder into the ROOT of your GitHub repo
-(the same place as .gitignore). Do not put it inside another folder
-named VistaImageStudio.
+(the same place as .gitignore). You must see package.json without
+opening another folder.
+
+WRONG:
+  MyRepo / VistaImageStudio / package.json
+
+RIGHT:
+  MyRepo / package.json
+  MyRepo / app
+  MyRepo / .github
+  MyRepo / COPY-TO-GITHUB.txt
 
 Then:
   1. On github.com → your repo → Settings → Pages
      Build and deployment → Source → GitHub Actions → Save
+     (the repo must be Public on a free GitHub account)
   2. GitHub Desktop: Commit → Push to branch "main"
   3. Repo → Actions → wait until "Deploy web to GitHub Pages" is green
   4. Settings → Pages shows the URL, for example:

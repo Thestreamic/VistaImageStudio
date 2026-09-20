@@ -5,6 +5,7 @@
  * multiplexes requests by id, and exposes a promise-based API with an
  * optional progress callback — this is what the store and UI call into.
  */
+import { publicBasePath } from '@/lib/public-url'
 import type { AiRequest, AiResponse } from './workers/ai.worker'
 import type { UpscaleFactor } from './algorithms/upscale'
 
@@ -56,7 +57,7 @@ interface RunOptions {
 
 function run(req: AiRequestPayload, transfer: ArrayBuffer[], opts?: RunOptions): Promise<AiSuccess> {
   const id = nextId()
-  const full = { ...req, id } as AiRequest
+  const full = { ...req, id, publicBasePath: publicBasePath() } as AiRequest
   return new Promise((resolve, reject) => {
     pending.set(id, { resolve, reject, onProgress: opts?.onProgress })
     getWorker().postMessage(full, transfer)

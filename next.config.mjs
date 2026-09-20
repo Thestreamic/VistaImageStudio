@@ -18,6 +18,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Inlined into the AI worker so /models/*.onnx resolve under GitHub project Pages.
+  env: {
+    NEXT_PUBLIC_BASE_PATH: process.env.NEXT_PUBLIC_BASE_PATH || basePath || '',
+  },
   // Next.js 16 defaults to Turbopack; declaring this (even empty) opts in
   // explicitly instead of erroring on the absence of Turbopack-specific
   // config. onnxruntime-web's wasm loader guards its own `fs`/`path` use

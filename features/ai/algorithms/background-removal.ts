@@ -10,9 +10,8 @@
  */
 
 import { loadOrtWasm, resolvePublicHref } from '@/features/ai/ort-runtime'
-import { publicUrl } from '@/lib/public-url'
 
-export const MODNET_URL = publicUrl('/models/modnet.onnx')
+export const MODNET_URL = '/models/modnet.onnx'
 export const MODNET_REF_SIZE = 512
 
 export interface BgRemovalParams {

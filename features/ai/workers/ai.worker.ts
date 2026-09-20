@@ -5,6 +5,7 @@
  */
 /// <reference lib="webworker" />
 
+import { setPublicBasePath } from '@/lib/public-url'
 import { inpaintObject } from '../algorithms/inpaint'
 import { applyAlphaMatte, segmentWithModel } from '../algorithms/background-removal'
 import { upscaleWithModel, type UpscaleFactor } from '../algorithms/upscale'
@@ -67,8 +68,9 @@ function respondGated(id: string, out: GatedResult) {
   })
 }
 
-ctx.onmessage = async (e: MessageEvent<AiRequest>) => {
+ctx.onmessage = async (e: MessageEvent<AiRequest & { publicBasePath?: string }>) => {
   const req = e.data
+  if (typeof req.publicBasePath === 'string') setPublicBasePath(req.publicBasePath)
   try {
     switch (req.op) {
       case 'auto-color': {

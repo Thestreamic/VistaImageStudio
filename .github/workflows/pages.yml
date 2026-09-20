@@ -25,11 +25,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Find app folder (package.json)
+        id: app
+        run: |
+          if [ -f package.json ]; then
+            echo "dir=." >> "$GITHUB_OUTPUT"
+            echo "Found package.json at repository root"
+            exit 0
+          fi
+          found=""
+          for d in */package.json; do
+            [ -f "$d" ] || continue
+            found=$(dirname "$d")
+            break
+          done
+          if [ -z "$found" ]; then
+            echo "::error::package.json is missing. Copy the Git folder CONTENTS into the repo root (you must see package.json next to .gitignore)."
+            echo "Repo layout:"
+            find . -maxdepth 3 -not -path './.git/*' | head -80
+            exit 1
+          fi
+          echo "dir=$found" >> "$GITHUB_OUTPUT"
+          echo "Found package.json in $found"
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
+          cache-dependency-path: ${{ steps.app.outputs.dir }}/package-lock.json
       - run: npm ci
+        working-directory: ${{ steps.app.outputs.dir }}
       - name: Resolve GitHub Pages base path
         id: base
         run: |
@@ -46,12 +70,15 @@ jobs:
           fi
       - name: Export static web
         run: npm run build:web
+        working-directory: ${{ steps.app.outputs.dir }}
         env:
           BASE_PATH: ${{ steps.base.outputs.path }}
           NEXT_PUBLIC_BASE_PATH: ${{ steps.base.outputs.path }}
+          STRICT_MODELS: "1"
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: out-web
+          path: ${{ steps.app.outputs.dir }}/out-web
 
   deploy:
     needs: build

@@ -173,7 +173,7 @@ export function inpaint(
 
 export const inpaintDiffusion = inpaint
 
-/** Carve/LaMa-ONNX lama_fp32.onnx — fixed spatial size. */
+/** Carve/LaMa-ONNX lama_fp32.onnx — fixed spatial size. Path is resolved at load time. */
 export const LAMA_MODEL_SIZE = 512
 export const LAMA_URL = '/models/lama.onnx'
 

@@ -5,7 +5,7 @@
  * `/_next/static/media/ort-wasm-simd-threaded.mjs`, which 404s. Pointing
  * `env.wasm.wasmPaths` at the copied public assets avoids that.
  */
-import { publicUrl } from '@/lib/public-url'
+import { absolutePublicHref } from '@/lib/public-url'
 
 export type OrtWasm = {
   env: { wasm: { proxy: boolean; numThreads: number; wasmPaths: string } }
@@ -22,16 +22,7 @@ function unwrapOrt(mod: unknown): OrtWasm {
 
 /** Absolute href for a public/ file so workers do not resolve against a blob: URL. */
 export function resolvePublicHref(path: string): string {
-  const rel = publicUrl(path)
-  if (typeof self === 'undefined' || !self.location) return rel
-  const { protocol, origin, href } = self.location
-  if (protocol === 'http:' || protocol === 'https:') {
-    return new URL(rel, origin).href
-  }
-  const marker = '/_next/'
-  const cut = href.lastIndexOf(marker)
-  const base = cut >= 0 ? href.slice(0, cut + 1) : href.replace(/[^/]+$/, '')
-  return new URL(rel.replace(/^\//, ''), base).href
+  return absolutePublicHref(path)
 }
 
 export function resolveOrtWasmPrefix(): string {
