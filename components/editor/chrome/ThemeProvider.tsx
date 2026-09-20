@@ -20,6 +20,11 @@ export function ThemeProvider() {
 
   useEffect(() => {
     document.documentElement.classList.toggle('theme-light', theme === 'light')
+    document.documentElement.style.colorScheme = theme === 'light' ? 'light' : 'dark'
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta instanceof HTMLMetaElement) {
+      meta.content = theme === 'light' ? '#efe6d8' : '#2a2d33'
+    }
   }, [theme])
 
   return null

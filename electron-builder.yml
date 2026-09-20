@@ -1,0 +1,79 @@
+appId: com.vistaimagestudio.app
+productName: Vista Image Studio
+copyright: Copyright © 2026 Vista Image Studio
+
+directories:
+  output: dist
+  buildResources: resources
+
+files:
+  - out/**/*
+  - dist-electron/**/*
+  - package.json
+  - "!**/*.map"
+
+extraResources:
+  - from: public/models
+    to: models
+    filter: ["**/*.onnx"]
+  - from: public/music
+    to: music
+  - from: public/THIRD-PARTY-LICENSES.txt
+    to: THIRD-PARTY-LICENSES.txt
+  - from: THIRD_PARTY_NOTICES.md
+    to: THIRD_PARTY_NOTICES.md
+  - from: resources/ffmpeg
+    to: ffmpeg
+  - from: resources/icon.ico
+    to: icon.ico
+  - from: resources/icon.png
+    to: icon.png
+
+asar: true
+asarUnpack:
+  - public/models/**
+
+win:
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+    - target: portable
+      arch: [x64]
+  publisherName: Vista Image Studio
+  requestedExecutionLevel: asInvoker
+  icon: resources/icon.ico
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Vista Image Studio
+  installerIcon: resources/icon.ico
+  uninstallerIcon: resources/icon.ico
+  installerHeaderIcon: resources/icon.ico
+
+appx:
+  identityName: VistaImageStudio.Desktop
+  publisher: CN=Vista Image Studio
+  publisherDisplayName: Vista Image Studio
+  displayName: Vista Image Studio
+  applicationId: VistaImageStudio
+
+mac:
+  target: [dmg, zip]
+  category: public.app-category.graphics-design
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  icon: resources/icon.png
+
+linux:
+  target: [AppImage, deb]
+  category: Graphics
+  icon: resources/icon.png
+
+# Auto-update off by default; wire a provider here if/when needed.
+publish: null

@@ -12,7 +12,7 @@ export function AdjustmentsPanel() {
   const resetAdjustments = useEditorStore((s) => s.resetAdjustments)
 
   if (!layer) {
-    return <div className="p-3 text-xs text-muted-foreground">No layer selected.</div>
+    return <div className="p-3 text-[13px] text-muted-foreground">No layer selected.</div>
   }
 
   const a = layer.adjustments

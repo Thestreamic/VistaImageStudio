@@ -1,0 +1,322 @@
+/** Canonical End-User License Agreement for desktop and web. Do not fork this text. */
+
+export const EULA_TITLE = 'End-User License Agreement (EULA)'
+export const EULA_PRODUCT = 'Vista Image Studio'
+export const EULA_VERSION = '2026-09-20'
+export const EULA_LAST_UPDATED = 'September 20, 2026'
+export const EULA_LICENSOR = 'The Streamic'
+export const EULA_CONTACT = 'thestreamic@gmail.com'
+export const EULA_CONTACT_MAILTO = `mailto:${EULA_CONTACT}`
+export const EULA_SITE_PRIMARY = 'https://vistaimagestudio.thestreamic.in'
+export const EULA_SITE_PUBLISHER = 'https://thestreamic.in'
+export const EULA_STORAGE_KEY = 'vista-eula-accepted'
+export const EULA_COPYRIGHT_YEAR = 2026
+
+export const EULA_PATH = '/eula'
+export const PRIVACY_PATH = '/privacy'
+export const NOTICES_PATH = '/notices'
+export const NOTICES_FILE_PATH = '/THIRD-PARTY-LICENSES.txt'
+
+export const EULA_TEXT = `END-USER LICENSE AGREEMENT (EULA)
+VISTA IMAGE STUDIO
+
+Last Updated: September 20, 2026
+
+PLEASE READ THIS END-USER LICENSE AGREEMENT ("AGREEMENT") CAREFULLY BEFORE
+INSTALLING, ACCESSING, OR USING VISTA IMAGE STUDIO (THE "SOFTWARE"). BY
+DOWNLOADING, INSTALLING, ACCESSING, OR USING THE SOFTWARE, OR BY CLICKING
+"I AGREE," YOU ("YOU" OR "USER") ACCEPT AND AGREE TO BE BOUND BY THE TERMS
+OF THIS AGREEMENT. IF YOU DO NOT AGREE TO THESE TERMS, DO NOT DOWNLOAD,
+INSTALL, ACCESS, OR USE THE SOFTWARE.
+
+This Agreement is between you and The Streamic ("Licensor," "we," "us," or
+"our"), the publisher and distributor of Vista Image Studio, accessible via
+vistaimagestudio.thestreamic.in and thestreamic.in.
+
+--------------------------------------------------------------------------
+1. DEFINITIONS
+--------------------------------------------------------------------------
+
+1.1 "Software" means the Vista Image Studio application in any form
+distributed by Licensor, including the desktop application, all
+associated files, on-device AI models and algorithms bundled with it,
+documentation, updates, and any successor versions.
+
+1.2 "User Content" means any photos, images, files, or other content that
+you import into, create with, or export from the Software.
+
+1.3 "Third-Party Components" means any open-source or third-party
+software, libraries, models, or code incorporated into or distributed
+with the Software, as identified in the accompanying NOTICES or
+THIRD-PARTY-LICENSES file.
+
+--------------------------------------------------------------------------
+2. LICENSE GRANT
+--------------------------------------------------------------------------
+
+2.1 Grant. Subject to your compliance with this Agreement, Licensor
+grants you a limited, non-exclusive, non-transferable, non-sublicensable,
+revocable license to install and use the Software, currently made
+available free of charge, for personal or internal business use on
+devices you own or control.
+
+2.2 Restrictions. You shall not, and shall not permit any third party to:
+  (a) copy, modify, adapt, translate, or create derivative works of the
+      Software, except as expressly permitted by this Agreement or
+      applicable law;
+  (b) reverse engineer, decompile, disassemble, or otherwise attempt to
+      derive the source code of the Software, except to the extent such
+      restriction is prohibited by applicable law;
+  (c) rent, lease, lend, sell, sublicense, redistribute, or otherwise
+      transfer the Software or any rights therein to any third party;
+  (d) remove, alter, or obscure any proprietary notices, labels, or marks
+      on or in the Software;
+  (e) use the Software for any unlawful purpose, or to process, generate,
+      or distribute content that infringes the rights of any third party
+      or violates applicable law;
+  (f) use the Software to process content depicting child sexual abuse,
+      non-consensual intimate imagery, or any other content prohibited
+      under applicable law; or
+  (g) circumvent, disable, or interfere with any security or
+      license-verification features of the Software.
+
+2.3 Reservation of Rights. All rights not expressly granted to you are
+reserved by Licensor. This Agreement does not grant you any rights to
+Licensor's trademarks, trade names, logos, or brand features (including
+"Vista Image Studio," "The Streamic," "SignalBytes," or "AssetVista")
+except as necessary to identify that you are a user of the Software.
+
+2.4 Free Availability; No Guarantee of Continued Availability. The
+Software is currently offered free of charge as part of a promotional
+launch. Licensor reserves the right, at its sole discretion and at any
+time, to (a) begin charging for the Software or any features, (b) offer
+paid tiers alongside a free tier, (c) discontinue free access, or (d)
+discontinue the Software entirely, in each case with or without notice,
+subject to Section 9 (Term and Termination).
+
+--------------------------------------------------------------------------
+3. YOUR CONTENT AND DATA
+--------------------------------------------------------------------------
+
+3.1 Ownership of User Content. As between you and Licensor, you retain
+all right, title, and interest in and to your User Content, including
+all photos and images you import, edit, or export using the Software.
+Licensor claims no ownership over, and no license to, your User Content.
+
+3.2 Local Processing. The Software is designed to process User Content
+locally on your device. Licensor does not transmit, upload, collect, or
+have access to your User Content through your ordinary use of the
+Software's editing, AI-processing, or export features. You acknowledge
+that this representation applies to the Software's core image-processing
+functionality as designed and does not extend to any separate, clearly
+labeled online services you may choose to use (e.g., visiting Licensor's
+website, submitting a support request, or any future opt-in online
+feature that is separately disclosed to you at the time of use).
+
+3.3 Your Responsibility for Content. You are solely responsible for your
+User Content and for ensuring you have all rights necessary to import,
+edit, process, and export it using the Software, including rights
+related to any third-party images, likenesses, trademarks, or copyrighted
+material contained in your User Content. Licensor has no ability to
+review, moderate, or control User Content processed locally on your
+device and disclaims all responsibility for it.
+
+3.4 AI-Assisted Features. The Software includes on-device, automated
+features (including but not limited to background removal, denoising,
+upscaling, face enhancement, low-light correction, dehaze, clarity
+adjustment, and natural-language command parsing) that algorithmically
+alter User Content ("AI Features"). You acknowledge that:
+  (a) AI Features are automated and may produce unexpected, inaccurate,
+      or undesirable results;
+  (b) face enhancement and similar features are experimental and may not
+      perform reliably;
+  (c) you are responsible for reviewing all output before relying on,
+      publishing, or distributing it; and
+  (d) Licensor makes no representation that AI Feature output will be
+      accurate, suitable, or fit for any particular purpose.
+
+--------------------------------------------------------------------------
+4. PRIVACY
+--------------------------------------------------------------------------
+
+4.1 No Account, No Cloud, No Analytics by Default. The Software does not
+require account creation and does not send User Content to Licensor's
+servers or any third party as part of its core editing functionality.
+The Software's Privacy Centre panel is provided to give you visibility
+into file paths accessed by the Software and the current state of any
+data-related settings.
+
+4.2 Limited Data We May Receive. If you contact Licensor (e.g., via
+thestreamic@gmail.com) for support or feedback, or if the Software
+includes an optional update-check or crash-reporting feature, Licensor
+may receive limited technical information as necessary to provide that
+specific function. Any such feature will be disclosed to you in-app.
+This Agreement does not itself constitute a full Privacy Policy; where a
+separate Privacy Policy is published for the Software, its terms apply
+in addition to this Section 4.
+
+--------------------------------------------------------------------------
+5. THIRD-PARTY COMPONENTS
+--------------------------------------------------------------------------
+
+5.1 The Software may include Third-Party Components licensed under
+separate open-source or third-party license terms, identified in the
+accompanying NOTICES or THIRD-PARTY-LICENSES file distributed with the
+Software. Your use of such Third-Party Components is subject to the
+applicable third-party license terms in addition to this Agreement.
+Licensor makes no representations or warranties regarding Third-Party
+Components beyond what is stated in their respective licenses.
+
+--------------------------------------------------------------------------
+6. UPDATES
+--------------------------------------------------------------------------
+
+6.1 Licensor may, but is not obligated to, provide updates, patches, or
+new versions of the Software. Such updates may be applied automatically
+or may require your action. This Agreement governs any updates unless
+accompanied by a separate license.
+
+--------------------------------------------------------------------------
+7. DISCLAIMER OF WARRANTIES
+--------------------------------------------------------------------------
+
+7.1 THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTY
+OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY. TO THE MAXIMUM
+EXTENT PERMITTED BY APPLICABLE LAW, LICENSOR EXPRESSLY DISCLAIMS ALL
+WARRANTIES, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
+NON-INFRINGEMENT, AND ANY WARRANTIES ARISING OUT OF COURSE OF DEALING OR
+USAGE OF TRADE.
+
+7.2 LICENSOR DOES NOT WARRANT THAT: (A) THE SOFTWARE WILL BE
+UNINTERRUPTED, ERROR-FREE, OR SECURE; (B) ANY DEFECTS WILL BE CORRECTED;
+(C) THE SOFTWARE IS FREE OF VIRUSES OR OTHER HARMFUL COMPONENTS; OR (D)
+RESULTS OBTAINED FROM USE OF THE SOFTWARE, INCLUDING AI FEATURE OUTPUT,
+WILL MEET YOUR REQUIREMENTS OR EXPECTATIONS.
+
+7.3 YOU ARE SOLELY RESPONSIBLE FOR MAINTAINING BACKUP COPIES OF YOUR USER
+CONTENT. LICENSOR IS NOT RESPONSIBLE FOR ANY LOSS, CORRUPTION, OR
+UNINTENDED MODIFICATION OF USER CONTENT, WHETHER CAUSED BY THE SOFTWARE,
+A SOFTWARE DEFECT, USER ERROR, OR ANY OTHER CAUSE.
+
+--------------------------------------------------------------------------
+8. LIMITATION OF LIABILITY
+--------------------------------------------------------------------------
+
+8.1 TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL
+LICENSOR, ITS FOUNDER, AFFILIATES, OR ANY RELATED BRANDS (INCLUDING THE
+STREAMIC, SIGNALBYTES, OR ASSETVISTA) BE LIABLE FOR ANY INDIRECT,
+INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES,
+INCLUDING BUT NOT LIMITED TO LOSS OF DATA, LOSS OF PROFITS, LOSS OF
+GOODWILL, BUSINESS INTERRUPTION, OR COST OF SUBSTITUTE SOFTWARE, ARISING
+OUT OF OR RELATED TO YOUR USE OF OR INABILITY TO USE THE SOFTWARE, EVEN
+IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+8.2 TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, LICENSOR'S TOTAL
+CUMULATIVE LIABILITY TO YOU FOR ALL CLAIMS ARISING OUT OF OR RELATED TO
+THIS AGREEMENT OR THE SOFTWARE SHALL NOT EXCEED THE GREATER OF (A) THE
+AMOUNT YOU PAID FOR THE SOFTWARE IN THE TWELVE (12) MONTHS PRECEDING THE
+CLAIM, OR (B) TEN EUROS (EUR 10). BECAUSE THE SOFTWARE IS CURRENTLY
+PROVIDED FREE OF CHARGE, YOU ACKNOWLEDGE THAT THE AMOUNT UNDER (A) MAY BE
+ZERO.
+
+8.3 The limitations in this Section 8 apply regardless of the legal
+theory on which a claim is based (contract, tort, negligence, strict
+liability, or otherwise) and even if any limited remedy fails of its
+essential purpose. Some jurisdictions do not allow the exclusion or
+limitation of certain damages or implied warranties; in such
+jurisdictions, the above limitations apply only to the maximum extent
+permitted by applicable law, and Licensor's liability will be limited to
+the smallest amount permitted by law.
+
+8.4 Nothing in this Agreement excludes or limits liability that cannot be
+excluded or limited under applicable law, including liability for death
+or personal injury caused by negligence, or fraud.
+
+--------------------------------------------------------------------------
+9. INDEMNIFICATION
+--------------------------------------------------------------------------
+
+9.1 To the maximum extent permitted by applicable law, you agree to
+indemnify, defend, and hold harmless Licensor and its founder from and
+against any claims, liabilities, damages, losses, and expenses (including
+reasonable legal fees) arising out of or in any way connected with: (a)
+your User Content; (b) your use or misuse of the Software; (c) your
+violation of this Agreement; or (d) your violation of any rights of a
+third party.
+
+--------------------------------------------------------------------------
+10. TERM AND TERMINATION
+--------------------------------------------------------------------------
+
+10.1 This Agreement is effective upon your first use of the Software and
+continues until terminated.
+
+10.2 You may terminate this Agreement at any time by uninstalling the
+Software and destroying all copies in your possession.
+
+10.3 Licensor may terminate or suspend your license to use the Software
+at any time if you breach this Agreement, without prejudice to any other
+rights or remedies available to Licensor.
+
+10.4 Upon termination, all rights granted to you under this Agreement
+immediately cease. Sections 3.1, 3.3, 5, 7, 8, 9, 11, and 12 shall
+survive termination.
+
+--------------------------------------------------------------------------
+11. EXPORT AND COMPLIANCE
+--------------------------------------------------------------------------
+
+11.1 You agree to comply with all applicable export control and economic
+sanctions laws and regulations in connection with your use of the
+Software.
+
+--------------------------------------------------------------------------
+12. GENERAL
+--------------------------------------------------------------------------
+
+12.1 Entire Agreement. This Agreement, together with any Privacy Policy
+and NOTICES/THIRD-PARTY-LICENSES file, constitutes the entire agreement
+between you and Licensor regarding the Software and supersedes all prior
+agreements and understandings.
+
+12.2 Changes to this Agreement. Licensor may update this Agreement from
+time to time. Material changes will be indicated by an updated "Last
+Updated" date and, where practicable, notice within the Software.
+Continued use of the Software after changes take effect constitutes
+acceptance of the revised Agreement.
+
+12.3 Severability. If any provision of this Agreement is held invalid or
+unenforceable, that provision shall be enforced to the maximum extent
+permissible, and the remaining provisions shall remain in full force and
+effect.
+
+12.4 No Waiver. No failure or delay by Licensor in exercising any right
+under this Agreement shall operate as a waiver of that right.
+
+12.5 Assignment. You may not assign or transfer this Agreement without
+Licensor's prior written consent. Licensor may assign this Agreement
+without restriction, including in connection with a merger, acquisition,
+or sale of assets.
+
+12.6 Governing Law. This Agreement shall be governed by the laws of
+Ireland, without regard to its conflict of laws principles.
+
+12.7 Dispute Resolution. The courts of Ireland shall have exclusive
+jurisdiction over any dispute arising out of or relating to this
+Agreement or the Software.
+
+12.8 Contact. Questions about this Agreement may be directed to
+thestreamic@gmail.com.
+
+--------------------------------------------------------------------------
+ACKNOWLEDGEMENT
+--------------------------------------------------------------------------
+
+BY CLICKING "I AGREE," OR BY DOWNLOADING, INSTALLING, OR USING THE
+SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ THIS AGREEMENT, UNDERSTAND
+IT, AND AGREE TO BE BOUND BY ITS TERMS.
+
+(c) 2026 The Streamic. All rights reserved.`
+
+export const EULA_MARKDOWN = EULA_TEXT

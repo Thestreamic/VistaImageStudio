@@ -84,3 +84,45 @@ limitations under the License.
   `mask` (float32 NCHW, 1 = hole). The hole is zeroed in RGB before inference.
   Output RGB is typically already in 0–255.
 
+```
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
+
+LaMa (Resolution-robust Large Mask Inpainting with Fourier Convolutions).
+Original work: Samsung AI Center. ONNX port: Carve/LaMa-ONNX.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+## Runtime libraries
+
+Declared in `package.json`. The shipped attribution file is
+`public/THIRD-PARTY-LICENSES.txt` (copied into Electron extraResources).
+
+| Package | License (as published) |
+| --- | --- |
+| next | MIT |
+| react, react-dom | MIT |
+| onnxruntime-web | MIT |
+| electron | MIT |
+| zustand | MIT |
+| lucide-react | ISC |
+| class-variance-authority | Apache-2.0 |
+| heic-to | LGPL-3.0 |
+| ffmpeg-static (desktop MP4 export) | GPL-3.0-or-later |
+
+Do not invent additional model licenses. Music beds are original CC0-1.0
+(`public/music/README.md`).
+
+

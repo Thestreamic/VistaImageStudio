@@ -27,9 +27,6 @@
   p, li { color: var(--text-dim); font-size: 14px; }
   ul { padding-left: 20px; margin: 8px 0; }
   li { margin-bottom: 6px; }
-  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text-dim); }
-  th { color: var(--text); font-weight: 600; }
   a.link { color: var(--accent); }
   .back { display: inline-block; margin-top: 40px; font-size: 13px; color: var(--text-dim); text-decoration: none; border-bottom: 1px dashed var(--border); }
   .back:hover { color: var(--text); }
@@ -41,66 +38,66 @@
 
   <header>
     <h1>Privacy Policy</h1>
-    <p>Last updated: [DATE] · Applies to Vista Image Studio, currently distributed as a public beta.</p>
+    <p>Last updated: September 20, 2026 · The Streamic · Vista Image Studio</p>
   </header>
 
   <div class="highlight">
-    <strong>Short version:</strong> Your images never leave your device. Editing and AI processing run
-    locally. We do not operate servers that receive, store, or view your photos.
+    <strong>Short version:</strong> Your photos stay on your device. Vista Image Studio does not require an account, does not upload your images, and does not send telemetry by default.
   </div>
 
-  <h2>1. What we do not collect</h2>
+  <h2>1. Who we are</h2>
+  <p>Vista Image Studio is published by The Streamic (“we”, “us”). This Privacy Policy describes the desktop application and the web app at vistaimagestudio.thestreamic.in (together, the “Software”). The publisher site is thestreamic.in.</p>
+  <p>Contact: thestreamic@gmail.com.</p>
+
+  <h2>2. Short version</h2>
+  <p>Your photos stay on your device. Vista Image Studio does not require an account, does not upload your images, and does not send telemetry by default.</p>
+  <p>Editing, export, and on-device AI features (background removal, inpainting, depth/bokeh, and similar tools) run locally in the app process or a local Web Worker. We do not operate servers that receive, store, or view your photos.</p>
+
+  <h2>3. What we do not collect</h2>
+  <p>The Software is designed so that the following never leave your device as part of core editing:</p>
   <ul>
-    <li>The images, photos, or files you open, edit, or export.</li>
-    <li>The content of any layer, adjustment, or AI operation you apply.</li>
-    <li>Your file system paths or folder structure.</li>
+    <li>The photos, images, or files you open, edit, or export</li>
+    <li>The pixels of any layer, adjustment, collage, or AI operation</li>
+    <li>Your file-system paths, except as shown to you in the in-app Privacy Centre on this device</li>
+    <li>An account, advertising identifier, or analytics profile</li>
   </ul>
-  <p>All image processing — adjustments, curves, transforms, and every AI feature (background removal,
-  denoise, upscale, face enhance, object removal, smart select, auto color) — executes locally on your
-  device, in-process or in a local Web Worker. None of it is transmitted anywhere.</p>
 
-  <h2>2. What limited data may be collected</h2>
-  <p>Depending on the version and settings you use, the following limited, non-content data may apply:</p>
-  <table>
-    <tr><th>Data</th><th>Purpose</th><th>Sent where</th></tr>
-    <tr><td>App version check</td><td>Notify you of updates</td><td>GitHub Releases API (public, read-only)</td></tr>
-    <tr><td>Crash diagnostics (if enabled)</td><td>Fix bugs during beta</td><td>Not enabled by default</td></tr>
-  </table>
-  <p>We do not use analytics SDKs, advertising identifiers, or third-party trackers in the Software.</p>
+  <h2>4. What stays on your device</h2>
+  <p>Preferences, theme, first-run state, EULA acceptance, command-chat text, and project autosave are stored locally (browser localStorage / IndexedDB on the web; the operating system application-data folder on desktop). Command chat stores text only — never pixels or file paths.</p>
+  <p>Canvas export rebuilds the bitmap, so camera EXIF is not copied into exported images.</p>
+  <p>Uninstalling the desktop app or clearing this site’s data in your browser removes that locally stored information. We have no server-side copy to export or delete.</p>
 
-  <h2>3. Optional AI model downloads</h2>
-  <p>Some AI features can use optional, higher-quality on-device models. If you choose to enable a
-  model-backed mode, the Software may download the model file itself (not your images) from a hosting
-  location such as GitHub Releases or Hugging Face. This is a one-time file download for the model binary,
-  distinct from image processing, which still happens entirely on your device afterward.</p>
+  <h2>5. Privacy Centre</h2>
+  <p>The in-app Privacy Centre lists the current host (desktop or web), the Content Security Policy connect-src value, analytics = off, and — on desktop — the user-data and autosave paths on this computer. It is a local status panel, not a cloud dashboard.</p>
 
-  <h2>4. Data storage</h2>
-  <p>Any application settings or preferences are stored locally on your device (e.g. in your OS's standard
-  application data folder). We do not maintain user accounts or cloud-synced profiles during the beta.</p>
+  <h2>6. Network, telemetry, and AI</h2>
+  <p>Production Content Security Policy for the Software uses connect-src 'self' blob: data:. The app does not call a photo-upload API and does not use a cloud LLM.</p>
+  <p>Analytics and crash reporting are off by default. There is no telemetry SDK in the editor.</p>
+  <p>On-device model files (for example MODNet, LaMa, and MiDaS, where bundled) are loaded from local folders such as /models. They are not uploaded with your images. See the Third-party notices file shipped with the Software for licenses.</p>
 
-  <h2>5. Third-party services</h2>
-  <p>The Software may make outbound network requests to check for updates against the public GitHub Releases
-  API, and, if you opt into model-backed AI features, to download model files from their hosting provider.
-  These requests do not include your images or personal content.</p>
+  <h2>7. Optional contact</h2>
+  <p>If you email <a class="link" href="mailto:thestreamic@gmail.com">thestreamic@gmail.com</a> for support or feedback, we receive whatever you choose to send (for example your address, message, and any attachments) so we can reply. We do not use that correspondence to build a marketing profile.</p>
 
-  <h2>6. Children's privacy</h2>
-  <p>The Software is not directed at children under 13, and we do not knowingly collect personal information
-  from children.</p>
+  <h2>8. Marketing pages</h2>
+  <p>Standalone marketing HTML (for example a landing page) is not the editor. That page is not shipped inside the desktop app and may request public information such as GitHub Releases. Visiting it is separate from using the Software.</p>
 
-  <h2>7. Changes during and after beta</h2>
-  <p>This Privacy Policy reflects the beta release. The commercial release planned for after the beta period
-  may introduce optional cloud features (e.g. cloud backup, account sync). Any such feature will be opt-in,
-  clearly disclosed, and accompanied by an updated Privacy Policy before it is enabled by default for any
-  user.</p>
+  <h2>9. Children</h2>
+  <p>The Software is not directed at children, and we do not knowingly collect personal information from children through the Software.</p>
 
-  <h2>8. Your choices</h2>
-  <p>Because the Software does not require an account or transmit your content, there is no server-side data
-  of yours to request, export, or delete. Uninstalling the Software removes its locally stored settings.</p>
+  <h2>10. Your choices and rights</h2>
+  <p>Because core use does not require an account and does not transmit your photos to us, there is typically no personal data held by us to access, correct, or erase. You can stop local storage by uninstalling the desktop app or clearing site data.</p>
+  <p>If you have contacted us by email, you may ask us to delete that correspondence. If you are in the EEA/UK, you may also have rights of access, rectification, erasure, restriction, and objection, and a right to lodge a complaint with a supervisory authority (in Ireland, the Data Protection Commission).</p>
 
-  <h2>9. Contact</h2>
-  <p>Questions about this Privacy Policy can be sent to
-  <a class="link" href="mailto:[CONTACT_EMAIL]">[CONTACT_EMAIL]</a>.</p>
+  <h2>11. Changes</h2>
+  <p>We may update this Privacy Policy. Material changes will be indicated by an updated “Last updated” date (September 20, 2026 for this version). Where a new EULA version is published, the app may ask you to accept it again before use.</p>
 
+  <h2>12. Contact</h2>
+  <p>Questions about this Privacy Policy: <a class="link" href="mailto:thestreamic@gmail.com">thestreamic@gmail.com</a>.</p>
+
+  <p style="margin-top:28px;font-size:13px;">
+    <a class="link" href="eula.html">EULA</a> ·
+    <a class="link" href="notices.html">Third-party notices</a>
+  </p>
   <a class="back" href="index.html">← Back to home</a>
 </div>
 </body>

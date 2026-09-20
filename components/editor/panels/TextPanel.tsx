@@ -149,7 +149,7 @@ function TextEditControls({
         onChange={(e) => onPatch({ content: e.target.value }, false)}
         onBlur={() => onPatch({}, true)}
         rows={2}
-        className="w-full bg-[#1a2030] text-white rounded-md px-2.5 py-2 text-[14px] leading-snug border border-white/20 resize-none placeholder:text-white/45"
+        className="w-full bg-secondary text-foreground rounded-md px-2.5 py-2 text-[14px] leading-snug border border-border resize-none placeholder:text-muted-foreground"
         placeholder="Your text…"
       />
 
@@ -208,7 +208,7 @@ function TextEditControls({
         ))}
         <button
           onClick={() => onPatch({ fontFamily: brandKit.font }, true)}
-          className="ml-auto text-[12px] text-foreground hover:text-white border-b border-dashed border-border"
+          className="ml-auto text-[12px] text-foreground hover:text-primary border-b border-dashed border-border"
         >
           Use brand font
         </button>
@@ -253,7 +253,7 @@ function TextEditControls({
           type="button"
           disabled={!canConfirm}
           onClick={onCancel}
-          className="flex-1 h-9 rounded-md bg-[#1a2030] text-white text-[13px] font-semibold flex items-center justify-center gap-1 border border-white/20 disabled:opacity-40"
+          className="flex-1 h-9 rounded-md bg-secondary text-foreground text-[13px] font-semibold flex items-center justify-center gap-1 border border-border disabled:opacity-40"
         >
           <X size={14} /> Cancel
         </button>
@@ -289,22 +289,22 @@ function FontMenu({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full h-9 px-2.5 rounded-md bg-[#1a2030] text-white text-[13px] font-medium border border-white/25 flex items-center justify-between gap-1"
+        className="w-full h-9 px-2.5 rounded-md bg-secondary text-foreground text-[13px] font-medium border border-border flex items-center justify-between gap-1"
         style={current?.fontFamily ? { fontFamily: current.fontFamily } : undefined}
       >
         <span className="truncate">{current?.label ?? value}</span>
-        <ChevronDown size={14} className="shrink-0 text-white/80" />
+        <ChevronDown size={14} className="shrink-0 text-muted-foreground" />
       </button>
       {open && (
-        <div className="absolute z-40 left-0 right-0 top-[calc(100%+4px)] max-h-56 overflow-auto rounded-md border border-white/20 bg-[#121826] shadow-xl">
+        <div className="absolute z-40 left-0 right-0 top-[calc(100%+4px)] max-h-56 overflow-auto rounded-md border border-border bg-popover shadow-xl">
           {options.map((opt) => (
             <button
               key={opt.value}
               type="button"
               onClick={() => { onChange(opt.value); setOpen(false) }}
               className={cn(
-                'w-full text-left px-2.5 py-2 text-[14px] text-white hover:bg-white/12',
-                opt.value === value && 'bg-cyan-500/25 font-semibold',
+                'w-full text-left px-2.5 py-2 text-[14px] text-foreground hover:bg-accent',
+                opt.value === value && 'bg-accent font-semibold',
               )}
               style={opt.fontFamily ? { fontFamily: opt.fontFamily } : undefined}
             >

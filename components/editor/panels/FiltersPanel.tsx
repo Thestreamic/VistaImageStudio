@@ -36,8 +36,8 @@ export function FiltersPanel() {
     return (
       <div className="p-3">
         <span className="panel-label">Looks</span>
-        <p className="p-0 mt-2 text-xs text-muted-foreground">Open an image to apply a look.</p>
-        <p className="text-[10px] text-muted-foreground mt-2">Includes Optimize Image, Original, B&W, Warm, Cool.</p>
+        <p className="p-0 mt-2 text-[13px] text-muted-foreground">Open an image to apply a look.</p>
+        <p className="text-[12px] text-muted-foreground mt-2">Includes Optimize Image, Original, B&W, Warm, Cool.</p>
       </div>
     )
   }
@@ -51,13 +51,13 @@ export function FiltersPanel() {
         type="button"
         onClick={optimizeImage}
         data-testid="auto-optimize"
-        className="w-full flex items-center justify-center gap-2 py-2.5 mb-3 rounded-md brand-gradient-bg text-white text-xs font-semibold"
+        className="w-full flex items-center justify-center gap-2 py-2.5 mb-3 rounded-md brand-gradient-bg text-white text-[13px] font-semibold"
         title="One-click grade: tone, color, vibrance, clarity, sharpness"
       >
         <Sparkles size={14} /> Optimize Image
       </button>
       <span className="panel-label">Looks</span>
-      <p className="text-[10px] text-muted-foreground mt-1 mb-3">
+      <p className="text-[12px] text-muted-foreground mt-1 mb-3">
         Intensity blends toward the original.
       </p>
       <LookGrid
@@ -102,7 +102,7 @@ function LookGrid({
               <img src={thumb} alt="" className="w-full h-full object-contain" style={{ filter: p.css === 'none' ? undefined : p.css }} />
             )}
           </div>
-          <span className="text-[10px] text-muted-foreground group-hover:text-foreground">{p.label}</span>
+          <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground">{p.label}</span>
         </button>
       ))}
     </div>

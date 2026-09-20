@@ -5,8 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: 'IBM Plex Sans', 'IBM Plex Sans Fallback', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'IBM Plex Mono Fallback', ui-monospace, monospace;
+  /* Source Sans 3: humanist UI face (Adobe) — reads as ink on linen, not generic Plex.
+     IBM Plex Mono stays for kbd / .num. next/font self-hosts both into the CSS export. */
+  --font-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -95,40 +97,51 @@
   --sidebar-ring: oklch(0.8 0.14 78);
 }
 
-/* Canva-style light theme, toggled via a preference (see ThemeProvider).
-   Same structural tokens as the dark "studio slate" theme above, so every
-   component that reads --background/--card/etc. just works under either. */
-.theme-light {
+/*
+  Gallery light: warm plaster chrome, a calibrated canvas well, one safelight
+  gold. Panels sit on linen paper; the stage stays a true mid-grey so photo
+  colour is judged against a studio surround, not a fluorescent white page.
+*/
+:root.theme-light {
   color-scheme: light;
-  --background: oklch(0.98 0.004 255);
-  --foreground: oklch(0.22 0.02 255);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.02 255);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.02 255);
-  --primary: oklch(0.62 0.19 300); /* violet, Canva-ish */
-  --primary-foreground: oklch(0.99 0.005 255);
-  --secondary: oklch(0.95 0.006 255);
-  --secondary-foreground: oklch(0.22 0.02 255);
-  --muted: oklch(0.95 0.006 255);
-  --muted-foreground: oklch(0.5 0.014 255);
-  --accent: oklch(0.93 0.02 300);
-  --accent-foreground: oklch(0.3 0.05 300);
-  --destructive: oklch(0.6 0.21 25);
-  --border: oklch(0.22 0.02 255 / 10%);
-  --input: oklch(0.22 0.02 255 / 8%);
-  --ring: oklch(0.62 0.19 300);
-  --canvas: oklch(0.88 0.004 255);
-  --canvas-foreground: oklch(0.3 0 0);
-  --success: oklch(0.6 0.16 160);
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.22 0.02 255);
-  --sidebar-primary: oklch(0.62 0.19 300);
-  --sidebar-primary-foreground: oklch(0.99 0.005 255);
-  --sidebar-accent: oklch(0.95 0.006 255);
-  --sidebar-accent-foreground: oklch(0.22 0.02 255);
-  --sidebar-border: oklch(0.22 0.02 255 / 10%);
-  --sidebar-ring: oklch(0.62 0.19 300);
+  --background: oklch(0.94 0.014 82);
+  --foreground: oklch(0.235 0.022 55);
+  --card: oklch(0.975 0.01 82);
+  --card-foreground: oklch(0.235 0.022 55);
+  --popover: oklch(0.985 0.008 82);
+  --popover-foreground: oklch(0.235 0.022 55);
+  --primary: oklch(0.55 0.13 68);
+  --primary-foreground: oklch(0.99 0.01 85);
+  --secondary: oklch(0.925 0.016 82);
+  --secondary-foreground: oklch(0.28 0.024 55);
+  --muted: oklch(0.92 0.014 82);
+  --muted-foreground: oklch(0.385 0.03 55);
+  --accent: oklch(0.91 0.028 75);
+  --accent-foreground: oklch(0.3 0.04 58);
+  --destructive: oklch(0.54 0.19 25);
+  --border: oklch(0.34 0.024 60 / 13%);
+  --input: oklch(0.34 0.024 60 / 9%);
+  --ring: oklch(0.55 0.13 68);
+  --canvas: oklch(0.73 0.006 78);
+  --canvas-foreground: oklch(0.28 0.02 55);
+  --success: oklch(0.5 0.13 155);
+  --sidebar: oklch(0.968 0.011 82);
+  --sidebar-foreground: oklch(0.235 0.022 55);
+  --sidebar-primary: oklch(0.55 0.13 68);
+  --sidebar-primary-foreground: oklch(0.99 0.01 85);
+  --sidebar-accent: oklch(0.925 0.02 78);
+  --sidebar-accent-foreground: oklch(0.235 0.022 55);
+  --sidebar-border: oklch(0.34 0.024 60 / 12%);
+  --sidebar-ring: oklch(0.55 0.13 68);
+  --brand-1: #c9893a;
+  --brand-2: #b56a2b;
+  --brand-3: #8a5a24;
+  --brand-gradient: linear-gradient(135deg, #d7a24f 0%, #b56a2b 100%);
+  --brand-gradient-soft: linear-gradient(
+    180deg,
+    color-mix(in oklab, #d7a24f 10%, transparent),
+    transparent 70%
+  );
 }
 
 /* Creator-facing accent system — layered on top of the neutral studio slate
@@ -155,19 +168,38 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    font-feature-settings: 'tnum' 1, 'cv05' 1;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    letter-spacing: -0.011em;
+  }
+  html:not(.theme-light) body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html.theme-light body {
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+    letter-spacing: -0.012em;
   }
   ::selection {
     background: oklch(0.8 0.14 78 / 35%);
+  }
+  .theme-light ::selection {
+    background: oklch(0.55 0.13 68 / 28%);
   }
 }
 
 @layer utilities {
   .panel-label {
-    @apply text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground;
+    @apply text-[11px] font-semibold tracking-[0.04em] text-muted-foreground;
+  }
+  html.theme-light .panel-label {
+    color: oklch(0.34 0.032 52);
+    letter-spacing: 0.05em;
   }
   .num {
     @apply font-mono text-[11px] tabular-nums;
+    font-feature-settings: 'tnum' 1, 'kern' 1;
+    letter-spacing: 0;
   }
   .scrollbar-thin {
     scrollbar-width: thin;
@@ -211,6 +243,62 @@
   input[type='range'].slider:focus-visible::-webkit-slider-thumb {
     background: var(--primary);
   }
+  .theme-light .scrollbar-thin {
+    scrollbar-color: oklch(0.35 0.03 60 / 32%) transparent;
+  }
+  .theme-light input[type='range'].slider::-webkit-slider-runnable-track,
+  .theme-light input[type='range'].slider::-moz-range-track {
+    background: oklch(0.32 0.03 60 / 22%);
+  }
+  .theme-light input[type='range'].slider::-webkit-slider-thumb,
+  .theme-light input[type='range'].slider::-moz-range-thumb {
+    background: oklch(0.28 0.03 55);
+    border: 1px solid oklch(0.18 0.03 55 / 30%);
+    box-shadow: 0 1px 2px oklch(0.3 0.03 55 / 18%);
+  }
+}
+
+@media (max-width: 767px) {
+  input[type='range'].slider {
+    height: 44px;
+  }
+  input[type='range'].slider::-webkit-slider-runnable-track,
+  input[type='range'].slider::-moz-range-track {
+    height: 4px;
+  }
+  input[type='range'].slider::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+    margin-top: -12px;
+  }
+  input[type='range'].slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+  }
+  .one-click-tools {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.35rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .one-click-tools > button {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    width: auto;
+    min-height: 44px;
+    padding-inline: 0.85rem;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 767px) and (max-height: 420px) {
+  [data-testid='mobile-sheet'] {
+    max-height: 52vh !important;
+  }
 }
 
 /* Brand-gradient utilities for creator-facing surfaces (drag-drop zone,
@@ -232,12 +320,39 @@
     var(--brand-gradient) border-box;
 }
 .brand-dropzone {
-  border: 2px dashed color-mix(in oklab, var(--brand-2) 45%, transparent);
-  background: var(--brand-gradient-soft);
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  border: 1px dashed color-mix(in oklab, var(--primary) 42%, var(--border));
+  background: var(--card);
+  box-shadow:
+    0 1px 0 oklch(1 0 0 / 8%),
+    0 18px 40px oklch(0 0 0 / 28%);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 .brand-dropzone:hover {
-  border-color: color-mix(in oklab, var(--brand-2) 70%, transparent);
+  border-color: color-mix(in oklab, var(--primary) 72%, var(--border));
+}
+.theme-light .brand-dropzone {
+  background: oklch(0.99 0.008 82);
+  border-color: oklch(0.48 0.08 68 / 38%);
+  box-shadow:
+    0 1px 0 oklch(1 0 0 / 80%),
+    0 22px 48px oklch(0.38 0.04 60 / 16%);
+}
+.theme-light .brand-dropzone:hover {
+  border-color: oklch(0.52 0.13 68 / 70%);
+  box-shadow:
+    0 1px 0 oklch(1 0 0 / 90%),
+    0 26px 56px oklch(0.4 0.05 60 / 18%);
+}
+.theme-light .brand-gradient-text {
+  background: none;
+  color: var(--foreground);
+  -webkit-text-fill-color: currentColor;
+}
+.theme-light .collage-frame {
+  --frame-color: var(--primary);
+  --frame-fill: color-mix(in oklab, var(--primary) 14%, transparent);
+  --frame-glow: color-mix(in oklab, var(--primary) 32%, transparent);
+  --frame-ink: #5c3d12;
 }
 
 /* Canva-style collage frames — colourful rings, round handles, friendly empty boxes. */

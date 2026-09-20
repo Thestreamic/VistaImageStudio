@@ -73,8 +73,9 @@ export function LaunchSplash({
       aria-live="polite"
       aria-label={`${detail}, ${pct} percent`}
     >
-      <div className="w-[72px] h-[72px] rounded-[18px] brand-gradient-bg grid place-items-center shadow-lg shadow-indigo-500/30 mb-[18px]">
-        <span className="text-[34px] font-bold text-white leading-none">L</span>
+      <div className="w-[72px] h-[72px] rounded-[18px] overflow-hidden shadow-lg shadow-black/40 mb-[18px] ring-1 ring-white/10">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/app-icon.png" alt="" width={72} height={72} className="block w-full h-full object-cover" />
       </div>
       <h1 className="text-[22px] font-semibold tracking-wide">Vista Image Studio</h1>
       <p className="mt-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">

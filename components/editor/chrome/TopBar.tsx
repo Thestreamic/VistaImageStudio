@@ -74,7 +74,7 @@ export function TopBar({
         disabled={opts?.disabled}
         data-testid={opts?.testId}
         onClick={() => runTool(action)}
-        className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[12px] rounded-sm hover:bg-secondary disabled:opacity-35 disabled:pointer-events-none"
+        className="w-full flex items-center gap-2 px-2.5 py-1.5 text-[13px] font-medium rounded-sm hover:bg-secondary disabled:opacity-35 disabled:pointer-events-none"
       >
         {Icon ? <Icon size={13} className="text-muted-foreground shrink-0" /> : null}
         <span className="flex-1 text-left">{label}</span>
@@ -96,8 +96,8 @@ export function TopBar({
           }}
           title="Tools"
           className={cn(
-            'flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-md hover:bg-secondary',
-            showTools ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground',
+            'flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md hover:bg-secondary',
+            showTools ? 'bg-secondary text-foreground' : 'text-foreground/80 hover:text-foreground',
           )}
         >
           <Wrench size={14} /> Tools
@@ -115,7 +115,7 @@ export function TopBar({
           </div>
         )}
       </div>
-      <button type="button" onClick={onOpenClick} title="Open image (Ctrl+O)" className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground">
+      <button type="button" onClick={onOpenClick} title="Open image (Ctrl+O)" className="flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md hover:bg-secondary text-foreground/80 hover:text-foreground">
         <FolderOpen size={14} /> Open
       </button>
       <div className="relative">
@@ -126,19 +126,19 @@ export function TopBar({
             setShowRecents((v) => !v)
           }}
           title="Recent projects"
-          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md hover:bg-secondary text-foreground/80 hover:text-foreground"
         >
           Recent
         </button>
         {showRecents && (
           <div className="absolute left-0 top-full mt-1 z-20 w-64 rounded-md border border-border bg-popover shadow-lg p-1">
-            {recents.length === 0 && <p className="px-2 py-1.5 text-[10px] text-muted-foreground">No recent projects</p>}
+            {recents.length === 0 && <p className="px-2 py-1.5 text-[12px] text-muted-foreground">No recent projects</p>}
             {recents.map((r) => (
               <button
                 key={r.path}
                 type="button"
                 onClick={() => { onOpenRecent(r.path); setShowRecents(false) }}
-                className="w-full text-left px-2 py-1.5 text-[11px] rounded hover:bg-secondary truncate"
+                className="w-full text-left px-2 py-1.5 text-[13px] font-medium rounded hover:bg-secondary truncate"
                 title={r.path}
               >
                 {r.name}
@@ -147,7 +147,7 @@ export function TopBar({
           </div>
         )}
       </div>
-      <button type="button" onClick={onSaveClick} disabled={!doc} title="Save project (Ctrl+S)" className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none">
+      <button type="button" onClick={onSaveClick} disabled={!doc} title="Save project (Ctrl+S)" className="flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md hover:bg-secondary text-foreground/80 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none">
         <Save size={14} /> Save{dirty ? ' •' : ''}
       </button>
       <button
@@ -158,7 +158,7 @@ export function TopBar({
         onPointerLeave={() => setHoldPreview(false)}
         disabled={!doc}
         title="Compare before / after — hold to preview original"
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-md disabled:opacity-30 disabled:pointer-events-none ${compareMode ? 'bg-accent text-accent-foreground' : 'hover:bg-secondary text-muted-foreground hover:text-foreground'}`}
+        className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md disabled:opacity-30 disabled:pointer-events-none ${compareMode ? 'bg-accent text-accent-foreground' : 'hover:bg-secondary text-foreground/80 hover:text-foreground'}`}
       >
         <Columns2 size={14} /> Compare
       </button>
@@ -167,13 +167,13 @@ export function TopBar({
         onClick={onExportClick}
         disabled={!doc}
         title="Export (Ctrl+E)"
-        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-medium rounded-md hover:bg-secondary text-foreground/80 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none"
       >
         <Download size={14} /> Export
       </button>
       <div className="flex-1" />
       {doc && (
-        <span className="text-[10px] text-muted-foreground num pr-2">{size?.width} x {size?.height}{dirty ? ' • unsaved' : ''}</span>
+        <span className="text-[11px] text-muted-foreground num pr-2">{size?.width} x {size?.height}{dirty ? ' • unsaved' : ''}</span>
       )}
       <button type="button" onClick={onPrivacyClick} title="Privacy Centre" aria-label="Privacy Centre" className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground">
         <Shield size={14} />

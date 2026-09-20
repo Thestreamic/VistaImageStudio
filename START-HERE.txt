@@ -1,0 +1,46 @@
+Copy this WHOLE folder into your GitHub repo (the one already on your PC).
+Do not pick files out — the website, the Windows .exe, and the .appx all
+come from this same folder. Photos never upload to a server; they stay
+in the visitor's browser, same as the desktop app.
+
+============================================================
+1) PUT THE SITE ONLINE (GitHub Pages)
+============================================================
+
+A. Copy every file from this folder into your local GitHub repo folder.
+B. On github.com open the repo → Settings → Pages.
+   Under "Build and deployment" set Source to "GitHub Actions".
+   Save.
+C. Commit and push to the "main" branch (GitHub Desktop: "Commit" then "Push").
+D. Open the repo → Actions. Wait for "Deploy web to GitHub Pages".
+   When it is green, Settings → Pages shows the live URL.
+   Example: https://YOURNAME.github.io/YOUR-REPO/
+
+First visit can take a minute. After that, anyone can Open / drop photos
+and use templates, looks, text, export — all in the browser.
+
+============================================================
+2) WINDOWS APP  (.exe installer + portable)
+============================================================
+
+Double-click  build-exe.bat
+When it finishes, open the "dist" folder:
+  - Vista Image Studio Setup ...exe   = installer
+  - Vista Image Studio ...exe         = portable (no install)
+
+============================================================
+3) WINDOWS STORE PACKAGE  (.appx)
+============================================================
+
+Double-click  build-appx.bat
+Needs Windows SDK (Visual Studio or standalone SDK).
+The .appx lands in "dist". Sideload it on your PC, or submit that
+file to Partner Center if you have a Store publisher account.
+
+============================================================
+If something fails
+============================================================
+- Website: Actions tab → open the red run → read the log.
+- .exe: read build-exe.log in this folder.
+- .appx: read build-appx.log. If it mentions a certificate / publisher
+  CN, you need a signing cert for Store; the .exe still works without it.

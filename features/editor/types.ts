@@ -123,6 +123,7 @@ export interface Layer {
 
 export const FONT_FAMILIES = [
   'Inter',
+  'Source Sans 3',
   'IBM Plex Sans',
   'Georgia',
   'Poppins',

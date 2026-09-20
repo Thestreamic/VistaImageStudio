@@ -169,7 +169,7 @@ export function renderCollagePlaceholder(width: number, height: number, cellNumb
   ctx.stroke()
 
   ctx.fillStyle = frame.ink
-  ctx.font = `600 ${Math.max(12, Math.min(w, h) * 0.055)}px "IBM Plex Sans", sans-serif`
+  ctx.font = `600 ${Math.max(12, Math.min(w, h) * 0.055)}px "Source Sans 3", sans-serif`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
   ctx.fillText('Add a photo', cx, cy + badge + Math.max(10, badge * 0.35))

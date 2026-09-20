@@ -466,7 +466,7 @@ export function EditorStage({
         <X size={16} strokeWidth={2.25} />
       </button>
     </div>
-      <div className="h-12 shrink-0 flex items-center justify-center bg-card border-t border-border">
+      <div className="h-12 shrink-0 hidden md:flex items-center justify-center bg-card border-t border-border">
         <button
           type="button"
           data-testid="stage-close-tab"
@@ -737,7 +737,7 @@ function CropOverlay({ crop, docW, docH, zoom, interactive, onCropChange, onAppl
   )
 }
 
-// ─── Empty state: colorful, inviting drag-drop landing zone ──────────────────
+// ─── Empty state: quiet studio well, paper card on the canvas ────────────────
 function EmptyState({
   containerRef,
   onOpenClick,
@@ -788,24 +788,28 @@ function EmptyState({
             onDropFile(file)
           })()
         }}
-        className={`brand-dropzone w-full max-w-lg rounded-2xl flex flex-col items-center justify-center gap-4 py-16 px-8 cursor-pointer transition-transform ${dragOver ? 'scale-[1.02]' : ''}`}
+        className={`brand-dropzone w-full max-w-md rounded-xl flex flex-col items-center justify-center gap-5 py-14 px-8 max-md:py-8 max-md:px-5 cursor-pointer ${dragOver ? 'scale-[1.01] border-solid' : ''}`}
       >
-        <div className="w-16 h-16 rounded-2xl brand-gradient-bg flex items-center justify-center shadow-lg shadow-black/30">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="w-14 h-14 rounded-full bg-secondary text-foreground flex items-center justify-center ring-1 ring-border">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 16V4M12 4l-4 4M12 4l4 4" />
             <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
           </svg>
         </div>
         <div className="text-center space-y-1.5">
-          <p className="text-base font-semibold brand-gradient-text">
+          <p className="text-[16px] font-semibold tracking-[-0.018em] text-foreground">
             {dragOver ? 'Drop it right here' : 'Drag & drop a photo'}
           </p>
-          <p className="text-xs text-muted-foreground">or click to browse your files</p>
+          <p className="hidden md:block text-[13px] text-muted-foreground">or click to browse your files</p>
+          <p className="md:hidden text-[13px] text-muted-foreground">or tap to browse your camera roll</p>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70 mt-1">
-          <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border">Ctrl</kbd>
+        <span className="min-h-11 inline-flex items-center justify-center px-4 rounded-md bg-primary text-primary-foreground text-sm font-semibold tracking-[-0.01em]">
+          Browse photos
+        </span>
+        <div className="hidden md:flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
+          <kbd className="px-1.5 py-0.5 rounded-sm bg-secondary border border-border font-mono text-[11px] font-medium">Ctrl</kbd>
           <span>+</span>
-          <kbd className="px-1.5 py-0.5 rounded bg-secondary border border-border">O</kbd>
+          <kbd className="px-1.5 py-0.5 rounded-sm bg-secondary border border-border font-mono text-[11px] font-medium">O</kbd>
           <span className="ml-1">to open</span>
         </div>
       </div>

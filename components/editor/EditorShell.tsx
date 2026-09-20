@@ -12,15 +12,27 @@ import { StatusToast } from './chrome/StatusToast'
 import { LaunchSplash, shouldSkipLaunchSplash } from './chrome/LaunchSplash'
 import { AiProgressOverlay } from './chrome/AiProgressOverlay'
 import { ImportProgressOverlay, type ImportProgress } from './chrome/ImportProgressOverlay'
+import { MobileBottomNav, MobileTopBar, type MobileSheetId } from './chrome/MobileChrome'
+import { MobileBottomSheet } from './chrome/MobileBottomSheet'
+import { MobileOverflowMenu } from './chrome/MobileOverflowMenu'
+import { NewDesignDialog } from './dialogs/NewDesignDialog'
+import { EDITOR_PANELS } from './panels/registry'
+import { useMobileLayout } from '@/lib/hooks/use-mobile-layout'
+import { cn } from '@/lib/utils'
 import { ExportDialog } from './dialogs/ExportDialog'
 import { PhotoVideoDialog } from './dialogs/PhotoVideoDialog'
 import { PrivacyCentre } from './dialogs/PrivacyCentre'
 import { FirstRunDialog, isOnboarded } from './dialogs/FirstRunDialog'
+import { EulaGateDialog, EulaLoadingScreen } from './dialogs/EulaGateDialog'
+import { AboutDialog } from './dialogs/AboutDialog'
+import { LegalViewerDialog, type LegalDocId } from './dialogs/LegalViewerDialog'
 import { RecipesDialog } from './dialogs/RecipesDialog'
 import { BatchDialog } from './dialogs/BatchDialog'
 import { bumpLocalStreak } from './dialogs/PrivacyCentre'
 import { useEditorStore, selectPhotoLayer, RECENT_IMPORTS_CAP } from '@/features/editor/store/editor-store'
 import { getBridge, isElectron } from '@/lib/platform/bridge'
+import { hasAcceptedCurrentEula } from '@/lib/legal/acceptance'
+import { declineEulaAndExit, hydrateEulaAcceptance } from '@/lib/legal/persist-eula'
 import { canvasFromBlob, canvasFromRecentImport, filesFromDataTransfer, isImageFile, looksLikeHeic, IMAGE_FILE_ACCEPT, thumbnailDataUrl, workingCanvasFromSource } from '@/lib/image/canvas'
 import { isCellDrag, isVistaInternalDrag } from '@/features/editor/media-drag'
 import { isCollageDocument } from '@/features/editor/collage/look-targets'
@@ -38,6 +50,15 @@ function transferLooksLikeFiles(transfer: DataTransfer | null | undefined): bool
   return Array.from(transfer.types ?? []).some(
     (type) => type === 'Files' || type === 'application/x-moz-file',
   )
+}
+
+type EulaGate = 'loading' | 'needed' | 'accepted'
+
+function initialEulaGate(): EulaGate {
+  if (typeof window === 'undefined') return 'loading'
+  if (hasAcceptedCurrentEula()) return 'accepted'
+  if (window.lumen) return 'loading'
+  return 'needed'
 }
 
 export function EditorShell() {
@@ -75,15 +96,33 @@ export function EditorShell() {
   const [showRecipes, setShowRecipes] = useState(false)
   const [showBatch, setShowBatch] = useState(false)
   const [showFirstRun, setShowFirstRun] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
+  const [legalDoc, setLegalDoc] = useState<LegalDocId | null>(null)
+  const [eulaGate, setEulaGate] = useState<EulaGate>(initialEulaGate)
+  const eulaAcceptedRef = useRef(eulaGate === 'accepted')
+  eulaAcceptedRef.current = eulaGate === 'accepted'
   const [importJob, setImportJob] = useState<ImportProgress | null>(null)
   const [bootSplash, setBootSplash] = useState(false)
   const [bootComplete, setBootComplete] = useState(true)
   const [binImport, setBinImport] = useState<BinImportProgress | null>(null)
+  const [mobileMenu, setMobileMenu] = useState(false)
+  const [mobileSheet, setMobileSheet] = useState<MobileSheetId | null>(null)
+  const [showNewDialog, setShowNewDialog] = useState(false)
+  const mobile = useMobileLayout()
+
+  useEffect(() => {
+    let cancelled = false
+    void hydrateEulaAcceptance().then((ok) => {
+      if (!cancelled) setEulaGate(ok ? 'accepted' : 'needed')
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     setReady(true)
     bumpLocalStreak()
-    if (!isOnboarded()) setShowFirstRun(true)
     getBridge().notifyUiReady?.()
     // Electron already showed the native splash. Don't wait on fonts/load —
     // that deadlock parked the bar at 84% with a fake media-streams label.
@@ -94,6 +133,10 @@ export function EditorShell() {
     }
     setBootComplete(true)
   }, [])
+
+  useEffect(() => {
+    if (eulaGate === 'accepted' && !isOnboarded()) setShowFirstRun(true)
+  }, [eulaGate])
 
   useEffect(() => {
     void hydrateMediaLibrary()
@@ -168,6 +211,7 @@ export function EditorShell() {
   const lastIngestAt = useRef(0)
   const lastIngestSig = useRef('')
   const ingestFile = useCallback((file: File | null | undefined) => {
+    if (!eulaAcceptedRef.current) return
     if (!file) return
     const now = Date.now()
     const sig = `${file.name}:${file.size}:${file.lastModified}`
@@ -186,6 +230,7 @@ export function EditorShell() {
   }, [ingestProjectJson, loadImage, notify])
 
   const ingestFiles = useCallback(async (files: File[]) => {
+    if (!eulaAcceptedRef.current) return
     if (!files.length) return
     const now = Date.now()
     const sig = files.map((f) => `${f.name}:${f.size}:${f.lastModified}`).join('|')
@@ -495,6 +540,10 @@ export function EditorShell() {
       bridge.on('menu:denoise', () => void runAiMenu('denoise')),
       bridge.on('menu:upscale', () => void runAiMenu('upscale')),
       bridge.on('menu:resize', () => notify('info', 'Use the Transform panel to resize.')),
+      bridge.on('menu:about', () => setShowAbout(true)),
+      bridge.on('menu:eula', () => setLegalDoc('eula')),
+      bridge.on('menu:privacy-policy', () => setLegalDoc('privacy')),
+      bridge.on('menu:notices', () => setLegalDoc('notices')),
       bridge.on('app:before-quit', () => void requestQuit()),
       bridge.on('app:confirm-close', () => void requestQuit()),
     ]
@@ -538,11 +587,43 @@ export function EditorShell() {
     }
   }, [ingestFiles])
 
+  if (eulaGate !== 'accepted') {
+    return (
+      <div
+        data-testid="editor-shell"
+        data-ready={ready}
+        data-eula-accepted="false"
+        className={cn(
+          'w-screen flex flex-col overflow-hidden bg-background text-foreground',
+          mobile ? 'h-dvh' : 'h-screen',
+        )}
+      >
+        <ThemeProvider />
+        {!mobile && (
+          <TitleBar
+            onMinimize={() => getBridge().minimize?.()}
+            onMaximize={() => getBridge().maximize?.()}
+            onClose={() => void declineEulaAndExit()}
+          />
+        )}
+        {eulaGate === 'loading' ? (
+          <EulaLoadingScreen />
+        ) : (
+          <EulaGateDialog onAccepted={() => setEulaGate('accepted')} />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div
       data-testid="editor-shell"
       data-ready={ready}
-      className="h-screen w-screen flex flex-col overflow-hidden bg-background text-foreground"
+      data-eula-accepted="true"
+      className={cn(
+        'w-screen flex flex-col overflow-hidden bg-background text-foreground',
+        mobile ? 'h-dvh' : 'h-screen',
+      )}
       onDragOver={(e) => {
         e.preventDefault()
         e.dataTransfer.dropEffect = 'copy'
@@ -566,53 +647,128 @@ export function EditorShell() {
           if (file) void loadImage(file, file.name)
         }}
       />
-      <TitleBar
-        onMinimize={() => getBridge().minimize?.()}
-        onMaximize={() => getBridge().maximize?.()}
-        onClose={() => void requestQuit()}
-      />
-      <TopBar
-        menu={{
-          onNewProject: () => void startNewProject(),
-          onOpenImage: handleOpen,
-          onOpenProject: () => void handleOpenProject(),
-          onSave: () => void handleSave(false),
-          onSaveAs: () => void handleSave(true),
-          onCloseProject: () => void closeProject(),
-          onExit: () => void requestQuit(),
-          onUndo: undo,
-          onRedo: redo,
-          onPrint: handlePrint,
-        }}
-        onOpenClick={handleOpen}
-        onExportClick={() => setShowExportDialog(true)}
-        onSaveClick={() => void handleSave(false)}
-        onSaveAsClick={() => void handleSave(true)}
-        onOpenProjectClick={() => void handleOpenProject()}
-        onOpenRecent={(path) => void handleOpenRecent(path)}
-        onPrivacyClick={() => setShowPrivacy(true)}
-        onRecipesClick={() => setShowRecipes(true)}
-        onBatchClick={() => setShowBatch(true)}
-      />
-      <div className="flex-1 flex min-h-0">
-        <Toolbar />
-        <ImportedImagesBin
-          onOpenImport={(item) => void loadImage(item.blob, item.name, item.id)}
-          onPlaceImport={(item) => void handlePlaceImport(item)}
-          onImportFolder={(files) => void ingestFiles(files)}
-          progress={binImport}
-          onCancelImport={cancelImport}
+      {!mobile && (
+        <TitleBar
+          onMinimize={() => getBridge().minimize?.()}
+          onMaximize={() => getBridge().maximize?.()}
+          onClose={() => void requestQuit()}
         />
+      )}
+      {mobile ? (
+        <MobileTopBar
+          menuOpen={mobileMenu}
+          onMenu={() => setMobileMenu((v) => !v)}
+          onExportClick={() => setShowExportDialog(true)}
+        />
+      ) : (
+        <TopBar
+          menu={{
+            onNewProject: () => void startNewProject(),
+            onOpenImage: handleOpen,
+            onOpenProject: () => void handleOpenProject(),
+            onSave: () => void handleSave(false),
+            onSaveAs: () => void handleSave(true),
+            onCloseProject: () => void closeProject(),
+            onExit: () => void requestQuit(),
+            onUndo: undo,
+            onRedo: redo,
+            onPrint: handlePrint,
+            onAbout: () => setShowAbout(true),
+          }}
+          onOpenClick={handleOpen}
+          onExportClick={() => setShowExportDialog(true)}
+          onSaveClick={() => void handleSave(false)}
+          onSaveAsClick={() => void handleSave(true)}
+          onOpenProjectClick={() => void handleOpenProject()}
+          onOpenRecent={(path) => void handleOpenRecent(path)}
+          onPrivacyClick={() => setShowPrivacy(true)}
+          onRecipesClick={() => setShowRecipes(true)}
+          onBatchClick={() => setShowBatch(true)}
+        />
+      )}
+      <div className="flex-1 flex min-h-0 relative">
+        <Toolbar variant={mobile ? 'overlay' : 'dock'} />
+        {!mobile && (
+          <ImportedImagesBin
+            onOpenImport={(item) => void loadImage(item.blob, item.name, item.id)}
+            onPlaceImport={(item) => void handlePlaceImport(item)}
+            onImportFolder={(files) => void ingestFiles(files)}
+            progress={binImport}
+            onCancelImport={cancelImport}
+          />
+        )}
         {compareMode && doc ? <CompareView /> : <EditorStage onOpenClick={handleOpen} onDropFile={ingestFile} onClose={() => void closeCenteredPhoto()} />}
-        <aside
-          data-testid="right-sidebar"
-          className="w-72 shrink-0 flex flex-col min-h-0 bg-card border-l border-border"
-        >
-          <div className="min-h-0 flex-1 flex flex-col">
-            <RightPanel />
-          </div>
-        </aside>
+        {!mobile && (
+          <aside
+            data-testid="right-sidebar"
+            className="w-72 shrink-0 flex flex-col min-h-0 bg-sidebar border-l border-sidebar-border"
+          >
+            <div className="min-h-0 flex-1 flex flex-col">
+              <RightPanel />
+            </div>
+          </aside>
+        )}
       </div>
+      {mobile && (
+        <MobileBottomNav
+          active={mobileSheet}
+          onSelect={(id) => setMobileSheet((cur) => (cur === id ? null : id))}
+        />
+      )}
+      {mobile && mobileSheet && (
+        <MobileBottomSheet
+          title={mobileSheet === 'media' ? 'Media' : (EDITOR_PANELS.find((p) => p.id === mobileSheet)?.label ?? 'Tools')}
+          onClose={() => setMobileSheet(null)}
+        >
+          {mobileSheet === 'media' ? (
+            <ImportedImagesBin
+              className="w-full h-full min-h-[16rem] border-0 bg-transparent"
+              onOpenImport={(item) => void loadImage(item.blob, item.name, item.id)}
+              onPlaceImport={(item) => void handlePlaceImport(item)}
+              onImportFolder={(files) => void ingestFiles(files)}
+              progress={binImport}
+              onCancelImport={cancelImport}
+            />
+          ) : (
+            (() => {
+              const Panel = EDITOR_PANELS.find((p) => p.id === mobileSheet)?.Panel
+              return Panel ? <Panel /> : null
+            })()
+          )}
+        </MobileBottomSheet>
+      )}
+      {mobile && (
+        <MobileOverflowMenu
+          open={mobileMenu}
+          onClose={() => setMobileMenu(false)}
+          menu={{
+            onNewProject: () => void startNewProject(),
+            onOpenImage: handleOpen,
+            onOpenProject: () => void handleOpenProject(),
+            onSave: () => void handleSave(false),
+            onSaveAs: () => void handleSave(true),
+            onCloseProject: () => void closeProject(),
+            onExit: () => void requestQuit(),
+            onUndo: undo,
+            onRedo: redo,
+            onPrint: handlePrint,
+            onAbout: () => setShowAbout(true),
+          }}
+          onOpenClick={handleOpen}
+          onExportClick={() => setShowExportDialog(true)}
+          onSaveClick={() => void handleSave(false)}
+          onSaveAsClick={() => void handleSave(true)}
+          onOpenProjectClick={() => void handleOpenProject()}
+          onOpenRecent={(path) => void handleOpenRecent(path)}
+          onPrivacyClick={() => setShowPrivacy(true)}
+          onAboutClick={() => setShowAbout(true)}
+          onRecipesClick={() => setShowRecipes(true)}
+          onBatchClick={() => setShowBatch(true)}
+          onTemplatesClick={() => setShowNewDialog(true)}
+          onMediaClick={() => setMobileSheet('media')}
+        />
+      )}
+      {showNewDialog && <NewDesignDialog onClose={() => setShowNewDialog(false)} />}
       <StatusToast />
       <AiProgressOverlay />
       {importJob && <ImportProgressOverlay job={importJob} onCancel={cancelImport} />}
@@ -630,20 +786,27 @@ export function EditorShell() {
       )}
       {showVideoDialog && <PhotoVideoDialog onClose={() => setShowVideoDialog(false)} />}
       {showPrivacy && <PrivacyCentre onClose={() => setShowPrivacy(false)} />}
+      {showAbout && (
+        <AboutDialog
+          onClose={() => setShowAbout(false)}
+          onOpenLegal={(doc) => setLegalDoc(doc)}
+        />
+      )}
+      {legalDoc && <LegalViewerDialog doc={legalDoc} onClose={() => setLegalDoc(null)} />}
       {showRecipes && <RecipesDialog onClose={() => setShowRecipes(false)} />}
       {showBatch && <BatchDialog onClose={() => setShowBatch(false)} />}
       {showFirstRun && !bootSplash && <FirstRunDialog onClose={() => setShowFirstRun(false)} />}
       {unsavedDialog}
       {dragActive && !importJob && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-[2px] pointer-events-none">
-          <div className="brand-dropzone rounded-2xl px-14 py-10 flex flex-col items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl brand-gradient-bg flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="brand-dropzone rounded-xl px-12 py-9 flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-secondary text-foreground flex items-center justify-center ring-1 ring-border">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 16V4M12 4l-4 4M12 4l4 4" />
                 <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
               </svg>
             </div>
-            <p className="text-sm font-semibold brand-gradient-text">Drop to open as a new image</p>
+            <p className="text-sm font-semibold text-foreground">Drop to open as a new image</p>
           </div>
         </div>
       )}

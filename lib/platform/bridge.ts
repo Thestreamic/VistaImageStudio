@@ -66,6 +66,8 @@ export interface LumenBridge {
   decideClose?(decision: 'allow' | 'cancel'): Promise<{ ok: boolean }>
   notifyUiReady?(): void
   getPrivacyInfo(): Promise<PrivacyInfo>
+  getEulaAcceptance?(): Promise<{ timestamp: string; eulaVersion: string; userAgent?: string } | null>
+  setEulaAcceptance?(record: { timestamp: string; eulaVersion: string; userAgent?: string }): Promise<boolean>
   exportVideoMp4?(payload: {
     frames: { name: string; buffer: ArrayBuffer }[]
     holdSec?: number
@@ -98,6 +100,8 @@ declare global {
       decideClose?(decision: 'allow' | 'cancel'): Promise<{ ok: boolean }>
       notifyUiReady?(): void
       getPrivacyInfo?(): Promise<PrivacyInfo>
+      getEulaAcceptance?(): Promise<{ timestamp: string; eulaVersion: string; userAgent?: string } | null>
+      setEulaAcceptance?(record: { timestamp: string; eulaVersion: string; userAgent?: string }): Promise<boolean>
       exportVideoMp4?(payload: {
         frames: { name: string; buffer: ArrayBuffer }[]
         holdSec?: number
@@ -243,9 +247,15 @@ const webBridge: LumenBridge = {
   async allowQuit() { /* browser has nothing to quit */ },
   async decideClose() { return { ok: true } },
   notifyUiReady() { /* web splash waits on React complete */ },
-  async getPrivacyInfo() {
-    return { ...WEB_PRIVACY, platform: typeof navigator !== 'undefined' ? navigator.platform : 'unknown' }
-  },
+    async getPrivacyInfo() {
+      return { ...WEB_PRIVACY, platform: typeof navigator !== 'undefined' ? navigator.platform : 'unknown' }
+    },
+    async getEulaAcceptance() {
+      return null
+    },
+    async setEulaAcceptance() {
+      return true
+    },
   on(channel, handler) {
     if (!_webListeners.has(channel)) _webListeners.set(channel, new Set())
     _webListeners.get(channel)!.add(handler)
@@ -318,6 +328,14 @@ function makeElectronBridge(): LumenBridge {
     async getPrivacyInfo() {
       if (e.getPrivacyInfo) return e.getPrivacyInfo()
       return WEB_PRIVACY
+    },
+    async getEulaAcceptance() {
+      if (e.getEulaAcceptance) return e.getEulaAcceptance()
+      return null
+    },
+    async setEulaAcceptance(record) {
+      if (e.setEulaAcceptance) return e.setEulaAcceptance(record)
+      return true
     },
     exportVideoMp4(payload) {
       if (e.exportVideoMp4) return e.exportVideoMp4(payload)

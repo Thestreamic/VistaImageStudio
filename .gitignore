@@ -50,8 +50,3 @@ public/models/*.onnx
 public/models/*.onnx.part
 resources/models/*.onnx
 resources/models/*.onnx.part
-
-# Not used by the GitHub Pages site
-electron/
-dist-electron/
-

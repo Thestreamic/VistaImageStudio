@@ -35,8 +35,9 @@ export function TitleBar({
       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
     >
       <div className="flex items-center gap-1.5 px-3 min-w-0">
-        <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
-        <span className="text-[11px] font-medium text-muted-foreground truncate">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/app-icon.png" alt="" width={14} height={14} className="rounded-[3px] shrink-0" />
+        <span className="text-[12px] font-semibold tracking-[-0.01em] text-foreground/80 truncate">
           Vista{doc ? ` — ${doc.fileName}${dirty ? ' •' : ''}` : ''}
         </span>
       </div>

@@ -18,12 +18,14 @@ export function ImportedImagesBin({
   onImportFolder,
   progress,
   onCancelImport,
+  className,
 }: {
   onOpenImport: (item: RecentImport) => void
   onPlaceImport: (item: RecentImport) => void
   onImportFolder: (files: File[]) => void
   progress: BinImportProgress | null
   onCancelImport?: () => void
+  className?: string
 }) {
   const items = useEditorStore((s) => s.recentImports)
   const activeId = useEditorStore((s) => s.activeImportId)
@@ -39,13 +41,16 @@ export function ImportedImagesBin({
   return (
     <div
       data-testid="imported-images-bin"
-      className="w-64 shrink-0 flex flex-col min-h-0 bg-[#12131a] border-r border-border"
+      className={cn(
+        'w-64 shrink-0 flex flex-col min-h-0 bg-sidebar border-r border-sidebar-border',
+        className,
+      )}
     >
       <div className="shrink-0 px-2 pt-2 pb-1.5 space-y-1.5">
         <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-semibold tracking-wide uppercase text-muted-foreground">Media</span>
+          <span className="panel-label">Media</span>
           {items.length > 0 && (
-            <span data-testid="media-bin-count" className="text-[10px] text-muted-foreground tabular-nums">
+            <span data-testid="media-bin-count" className="text-[11px] text-muted-foreground tabular-nums">
               {items.length}
             </span>
           )}
@@ -106,7 +111,7 @@ export function ImportedImagesBin({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Type to search…"
             aria-label="Search imported photos"
-            className="flex-1 min-w-0 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground/70"
+            className="flex-1 min-w-0 bg-transparent text-[12px] outline-none placeholder:text-muted-foreground"
           />
         </div>
         {progress && (
@@ -128,7 +133,7 @@ export function ImportedImagesBin({
                 </button>
               )}
             </div>
-            <p className="text-[10px] text-muted-foreground truncate">
+            <p className="text-[11px] text-muted-foreground truncate">
               Importing {progress.done} / {progress.total} · {progress.name}
             </p>
           </div>
@@ -136,7 +141,7 @@ export function ImportedImagesBin({
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-2">
         {visible.length === 0 && (
-          <p className="text-[11px] text-muted-foreground/70 px-0.5 py-2 leading-relaxed">
+          <p className="text-[12px] text-muted-foreground px-0.5 py-2 leading-relaxed">
             Drop a folder or photos
           </p>
         )}
@@ -172,7 +177,7 @@ export function ImportedImagesBin({
                 }}
                 className={cn(
                   'relative aspect-square rounded-sm overflow-hidden bg-secondary/80 group text-left cursor-grab active:cursor-grabbing',
-                  selected ? 'brand-gradient-border' : 'border border-transparent hover:border-white/25',
+                  selected ? 'brand-gradient-border' : 'border border-transparent hover:border-border',
                 )}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -182,7 +187,7 @@ export function ImportedImagesBin({
                   className="h-full w-full object-cover opacity-90 group-hover:opacity-100"
                   draggable={false}
                 />
-                <span className="absolute inset-x-0 bottom-0 truncate bg-black/75 px-1 py-0.5 text-[9px] leading-tight text-white/90">
+                <span className="absolute inset-x-0 bottom-0 truncate bg-black/75 px-1 py-0.5 text-[10px] leading-tight text-white/90">
                   {item.name}
                 </span>
               </button>
@@ -191,7 +196,7 @@ export function ImportedImagesBin({
         </div>
       </div>
       {items.length > 0 && (
-        <p className="shrink-0 px-2 py-1.5 text-[10px] text-muted-foreground/80 leading-relaxed border-t border-border">
+        <p className="shrink-0 px-2 py-1.5 text-[11px] text-muted-foreground leading-relaxed border-t border-border">
           {collageOpen
             ? 'Double-click fills the next empty frame. Drag onto a box. Photos stay in Media when you switch templates.'
             : 'Import photos or a folder — thumbnails stay in Media. Drag onto a template. File → Open still replaces the canvas.'}
