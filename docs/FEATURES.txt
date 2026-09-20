@@ -1,0 +1,102 @@
+VISTA IMAGE STUDIO — FEATURES + HOW TO USE
+
+ONE LINE: Local photo editor — open a photo, Optimize Image, crop for social, apply looks, erase objects, cut backgrounds, add text/logo, save .lumen, export a creator pack. Everything stays on your PC (no cloud, no account, no LLM).
+
+FEATURES (1 line each)
+
+Open & projects
+Import — PNG, JPEG, WebP, HEIC (iPhone), AVIF, BMP, GIF, TIFF; drag & drop or Open (Ctrl+O).
+Media bin — photos stay in the left rail (saved on this PC) whether a project is open or not; import photos or a folder; drag onto templates. Double-click fills collage frames in order.
+.lumen projects — Save / Open / Save As, dirty flag, autosave, recents, quit prompt.
+Light / dark UI — switch in the title bar; layout stays the same.
+
+Canvas tools
+Move (V) — drag the photo layer on the canvas.
+Crop (C) — live crop with move/resize handles; Free, 1:1 Post, 4:5 Portrait, 9:16 Story, 16:9 Thumb, or custom ratio. Apply keeps it editable; Bake writes pixels.
+Select (M) — box-select a region for Magic Eraser.
+Magic Wand (W) — click a colour to select it (tolerance-based flood fill).
+Hand / Pan (H) — pan a zoomed canvas (middle-mouse also pans).
+Zoom — in / out / fit / actual pixels; scroll-wheel zoom.
+Safe zones — Story / Reel / TikTok chrome overlay so titles stay visible.
+Compare — hold Compare to peek at the original; click for a before/after split (pick how many steps back).
+Undo / Redo — Ctrl+Z / Ctrl+Shift+Z, including AI edits.
+
+One-click AI (on-device, WASM — photos never upload)
+Optimize Image — one-click grade: brightness, colour, vibrance, clarity, sharpness (top of AI and Filters).
+Natural Color — true-to-life mobile grade (sun stays white-gold).
+Auto Color Correct — local auto white-balance / levels.
+Portrait Bokeh — depth-based disc bokeh (MiDaS depth + MODNet subject): sharp subject, soft falloff, highlight orbs.
+Remove Background — MODNet portrait matting; subject on a transparent checkerboard.
+Magic Eraser — select with box or wand, then fill the hole with LaMa inpainting (on-device ONNX). Progress overlay; slower than filters because the model is large.
+Instagram 4:5 — largest centred 4:5 crop, confirm in Transform.
+Low Light — open shadows on dark photos.
+Dehaze — cut atmospheric haze.
+Clarity — lift local contrast.
+Vibrance — pop muted colours without wrecking skin.
+Upscale 2× — enlarge the photo (resizes the document).
+Denoise — strength slider, then Apply Denoise.
+Face Enhance — smoothing + clarity sliders, then Apply Face Enhance.
+
+Looks (Filters panel)
+Optimize Image — same one-click grade as AI, pinned at the top.
+Looks — Original, B&W, Warm, Cool; intensity 0–100 blends toward the original.
+
+Adjust
+Sliders — exposure, brightness, contrast, saturation, temperature, tint, highlights, shadows, whites, blacks, vibrance, sharpness.
+Curves — RGB / per-channel tone curve; reset all.
+
+Transform
+Resize — width × height with lock-aspect.
+Rotate / flip — 90° CW/CCW, flip horizontal / vertical.
+Logo / watermark — PNG/JPEG logo or text handle; corners (TL/TR/BL/BR/Center), opacity, scale.
+
+Text
+Title templates — Bold Headline, Elegant Subtitle, Pull Quote, Highlight Caption, Story Sticker, Minimal Caption.
+Edit text — font, weight, size, align, colour, uppercase, highlight background, outline; OK / Cancel session.
+Brand kit — saved colours + default font for every post.
+
+Layers
+Stack — visibility, lock, opacity, duplicate, reorder, delete.
+Blend modes — normal, multiply, screen, overlay, darken, lighten, soft-light, difference, luminosity.
+Collage cells — click a box to highlight it; drag the photo to pan, edges/corners to resize; Transform Left/Top or arrow keys move the frame (Alt-drag a filled frame).
+
+Templates (Tools → Templates)
+Quick-start sizes — Instagram Announcement, YouTube Thumbnail, LinkedIn Update, Instagram/TikTok Story (text already placed).
+Blank social sizes — grouped by platform.
+Collages — 2-up side-by-side or stacked, 3-up featured+stack, 4-up grid, 5-up featured+row, 6-up grid plus birthday/family/anniversary/wedding/Raksha Bandhan/best wishes; drag photos from Media onto boxes (instant from the media cache); double-click Media to fill frames in order; click a box to highlight, pan/zoom the photo inside; drag the top bar onto another box to rearrange; move frames with Transform or arrow keys. Optimize Image grades filled photos in place (frames stay put).
+
+Export (Ctrl+E)
+Sizes — Original, Instagram Post 1:1, Instagram Portrait 4:5, Story/Reel/TikTok 9:16, YouTube Thumbnail 16:9, Pinterest Pin, LinkedIn, X/Twitter, Facebook.
+Creator pack — export several sizes at once; size estimate; {name}-{preset}-{date} naming.
+Format — PNG / JPEG / WebP + quality; fill or fit.
+Watermark stamp — optional handle on every file.
+Carousel split — slice a wide photo into Instagram carousel tiles.
+No camera EXIF — export re-encodes the canvas.
+Print (Ctrl+P) — File → Print sends the current canvas to the system printer (no cloud).
+Music (CC0) — Export → Make video… → Choose music. 24 original CC0 beds, preview in-app, no download. Commercial use OK, no attribution.
+Photo video — desktop MP4 of stills + optional music (FFmpeg). Browser can preview tracks; saving MP4 is the Windows app.
+
+Recipes & batch (Tools menu)
+Recipes — save crop + look + logo locally; apply later.
+Batch — apply a recipe to a folder of photos; skip failures.
+
+Privacy Centre
+In-app audit — analytics off, CSP/paths, offline claim, first-run walkthrough. Photos never leave the device.
+
+HOW TO USE (very simple)
+1. Open or drop a photo (HEIC from iPhone is fine).
+2. AI or Filters → Optimize Image.
+3. Optional: Portrait Bokeh, Remove Background, or Magic Eraser (Select M / Wand W first).
+4. Transform → crop 4:5 (or AI → Instagram 4:5, then confirm).
+5. Optional: Filters (Warm/Cool/B&W) or Adjust sliders.
+6. Text / logo if you need them.
+7. Ctrl+S → save MyShot.lumen.
+8. Ctrl+E → Creator pack → Export.
+9. Optional: Export → Make video… → Choose music (CC0) → Export MP4 (desktop).
+10. Optional: Tools → Recipes → save current / Batch a folder.
+
+Shortcuts: Ctrl+O open · Ctrl+S save · Ctrl+Shift+S Save As · Ctrl+Shift+O project · Ctrl+E export · Ctrl+P print · Ctrl+Z undo · Ctrl+Shift+Z redo · V move · C crop · M select · W wand · H hand.
+
+Privacy: photos never upload. Export rebuilds pixels (no camera EXIF). AI models (MODNet, MiDaS, LaMa) run on-device via onnxruntime-web.
+Optimize Image is a descriptive local grade inspired by flagship phone colour science — not an Apple product.
+Magic Eraser uses LaMa (Apache-2.0); first run is slower while the ~208MB model loads.

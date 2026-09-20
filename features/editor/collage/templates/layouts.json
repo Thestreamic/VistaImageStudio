@@ -1,0 +1,102 @@
+[
+  {
+    "id": "split-2h",
+    "name": "2 Photos — Side by Side",
+    "category": ["layouts"],
+    "aspectRatio": "square",
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "backgroundColor": "#f4eefc",
+    "backgroundPattern": "none",
+    "slots": [
+      { "id": "a", "x": 0, "y": 0, "width": 0.4925, "height": 1, "shape": "rect", "zIndex": 1 },
+      { "id": "b", "x": 0.5075, "y": 0, "width": 0.4925, "height": 1, "shape": "rect", "zIndex": 2 }
+    ],
+    "decorations": []
+  },
+  {
+    "id": "split-2v",
+    "name": "2 Photos — Stacked",
+    "category": ["layouts"],
+    "aspectRatio": "square",
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "backgroundColor": "#f4eefc",
+    "backgroundPattern": "none",
+    "slots": [
+      { "id": "a", "x": 0, "y": 0, "width": 1, "height": 0.4925, "shape": "rect", "zIndex": 1 },
+      { "id": "b", "x": 0, "y": 0.5075, "width": 1, "height": 0.4925, "shape": "rect", "zIndex": 2 }
+    ],
+    "decorations": []
+  },
+  {
+    "id": "grid-3-classic",
+    "name": "3 Photos — Featured + Stack",
+    "category": ["layouts"],
+    "aspectRatio": "square",
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "backgroundColor": "#f4eefc",
+    "backgroundPattern": "none",
+    "slots": [
+      { "id": "a", "x": 0, "y": 0, "width": 0.5925, "height": 1, "shape": "rect", "zIndex": 1 },
+      { "id": "b", "x": 0.6075, "y": 0, "width": 0.3925, "height": 0.4925, "shape": "rect", "zIndex": 2 },
+      { "id": "c", "x": 0.6075, "y": 0.5075, "width": 0.3925, "height": 0.4925, "shape": "rect", "zIndex": 3 }
+    ],
+    "decorations": []
+  },
+  {
+    "id": "grid-4",
+    "name": "4 Photos — Grid",
+    "category": ["layouts"],
+    "aspectRatio": "square",
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "backgroundColor": "#f4eefc",
+    "backgroundPattern": "none",
+    "slots": [
+      { "id": "a", "x": 0, "y": 0, "width": 0.4925, "height": 0.4925, "shape": "rect", "zIndex": 1 },
+      { "id": "b", "x": 0.5075, "y": 0, "width": 0.4925, "height": 0.4925, "shape": "rect", "zIndex": 2 },
+      { "id": "c", "x": 0, "y": 0.5075, "width": 0.4925, "height": 0.4925, "shape": "rect", "zIndex": 3 },
+      { "id": "d", "x": 0.5075, "y": 0.5075, "width": 0.4925, "height": 0.4925, "shape": "rect", "zIndex": 4 }
+    ],
+    "decorations": []
+  },
+  {
+    "id": "grid-5-featured",
+    "name": "5 Photos — Featured + Row",
+    "category": ["layouts"],
+    "aspectRatio": "square",
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "backgroundColor": "#f4eefc",
+    "backgroundPattern": "none",
+    "slots": [
+      { "id": "hero", "x": 0, "y": 0, "width": 1, "height": 0.6125, "shape": "rect", "zIndex": 1 },
+      { "id": "a", "x": 0, "y": 0.6275, "width": 0.2425, "height": 0.3725, "shape": "rect", "zIndex": 2 },
+      { "id": "b", "x": 0.2575, "y": 0.6275, "width": 0.2425, "height": 0.3725, "shape": "rect", "zIndex": 3 },
+      { "id": "c", "x": 0.5075, "y": 0.6275, "width": 0.2425, "height": 0.3725, "shape": "rect", "zIndex": 4 },
+      { "id": "d", "x": 0.7575, "y": 0.6275, "width": 0.2425, "height": 0.3725, "shape": "rect", "zIndex": 5 }
+    ],
+    "decorations": []
+  },
+  {
+    "id": "grid-6",
+    "name": "6 Photos — Grid",
+    "category": ["layouts"],
+    "aspectRatio": "square",
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "backgroundColor": "#f4eefc",
+    "backgroundPattern": "none",
+    "slots": [
+      { "id": "a", "x": 0, "y": 0, "width": 0.325833, "height": 0.4925, "shape": "rect", "zIndex": 1 },
+      { "id": "b", "x": 0.340833, "y": 0, "width": 0.325833, "height": 0.4925, "shape": "rect", "zIndex": 2 },
+      { "id": "c", "x": 0.674167, "y": 0, "width": 0.325833, "height": 0.4925, "shape": "rect", "zIndex": 3 },
+      { "id": "d", "x": 0, "y": 0.5075, "width": 0.325833, "height": 0.4925, "shape": "rect", "zIndex": 4 },
+      { "id": "e", "x": 0.340833, "y": 0.5075, "width": 0.325833, "height": 0.4925, "shape": "rect", "zIndex": 5 },
+      { "id": "f", "x": 0.674167, "y": 0.5075, "width": 0.325833, "height": 0.4925, "shape": "rect", "zIndex": 6 }
+    ],
+    "decorations": []
+  }
+]

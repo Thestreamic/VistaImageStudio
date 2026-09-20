@@ -1,0 +1,1717 @@
+VISTA IMAGE STUDIO
+ARCHITECTURE AND CONCEPT
+================================================================
+Product name:     Vista Image Studio
+Package name:     vista-image-studio  (package.json)
+App ID:           com.vistaimagestudio.app  (electron-builder.yml)
+Version:          0.1.0 (beta)
+License:          UNLICENSED / proprietary beta (LICENSE)
+Repo folder:      lumen-studio  (legacy directory name on disk)
+Internal IDs:     window.lumen, kind "lumen-project", files "*.lumen"
+Document date:    20 September 2026
+Audience:         product, engineering, packaging, privacy review
+
+This file describes THIS repository. It is not generic Next.js advice.
+AGENTS.md notes that Next.js 16 in this tree can differ from older
+training data. Facts below were read from the source, not assumed.
+
+Related in-repo documents (keep in sync when behaviour changes):
+  docs/ARCHITECTURE.md      process model, engine, security summary
+  docs/PROJECT_SCHEMA.md    .lumen JSON rules
+  docs/FEATURES.txt         user-facing features and how-to
+  docs/AI.md                on-device AI; no LLM
+  docs/PRIVACY.md           no upload, no telemetry
+  docs/ROADMAP.md           shipped vs planned (some items lag code)
+  docs/RELEASE_CHECKLIST.md local pack smoke
+  README.md, START-HERE.txt how to run, Pages, Windows builds
+
+Naming note: the product is Vista Image Studio. The Git working copy
+is still named lumen-studio. Project files, IPC, and the preload API
+keep "lumen" identifiers on purpose. Do not invent a cloud "Lumen
+API". Do not rename .lumen / lumen-project / window.lumen without a
+schema and compatibility plan.
+
+
+TABLE OF CONTENTS
+----------------------------------------------------------------
+  1.  Product concept and positioning
+  2.  High-level architecture
+  3.  Frontend
+  4.  Editor engine
+  5.  AI (on-device)
+  6.  Local "backend" (there is no remote API server)
+  7.  Packages and software
+  8.  Local app vs web
+  9.  Git, repo, and CI
+ 10.  Workflows
+ 11.  Key features (aligned with docs/FEATURES.txt)
+ 12.  Data-flow diagrams (ASCII)
+ 13.  Folder map
+ 14.  Security and privacy
+
+
+================================================================
+1. PRODUCT CONCEPT AND POSITIONING
+================================================================
+
+1.1 What it is
+--------------
+Vista Image Studio is a privacy-first, local-first photo editor for
+people who make social posts. Open a photo (including iPhone HEIC),
+grade it, crop for Instagram / Story / YouTube, cut a background,
+erase an object, lay out a collage, add text or a logo, save a
+.lumen project, and export a creator pack. Everything runs on the
+user's machine.
+
+One-line product claim (docs/FEATURES.txt):
+
+  Local photo editor — open a photo, Optimize Image, crop for social,
+  apply looks, erase objects, cut backgrounds, add text/logo, save
+  .lumen, export a creator pack. Everything stays on your PC (no
+  cloud, no account, no LLM).
+
+1.2 Who it is for
+-----------------
+Primary: creators and small businesses who need social-ready stills
+without uploading photos to a SaaS editor.
+
+Secondary: anyone who wants a desktop or browser editor that works
+offline after assets are on disk.
+
+Not for: RAW photography pipelines, DAM / cloud libraries, team
+collaboration, generative fill from an LLM, or "chat with your
+photos" products.
+
+1.3 Positioning vs typical editors
+----------------------------------
+  - Not Photoshop. Layer stack is real, but the UX is social-post
+    first (looks, 4:5 crop, export kit, collages, templates).
+  - Not Canva-in-the-cloud. Templates and text exist, but pixels
+    never leave the device and there is no account.
+  - Not an LLM photo assistant. Command parsing is a local keyword
+    schema. Unknown phrases never become edits (docs/AI.md).
+  - Dual surface: packaged Electron app and a static web export
+    (GitHub Pages). Same renderer code. Different hosts.
+
+1.4 Privacy model (product promise)
+-----------------------------------
+  - No account, no telemetry, no photo upload API in the app
+    (docs/PRIVACY.md).
+  - Pixels live on HTMLCanvasElement in the renderer. AI runs in a
+    Web Worker via onnxruntime-web WASM.
+  - Production CSP connect-src is: 'self' blob: data:
+  - Export re-encodes the canvas, so camera EXIF is not copied.
+  - ONNX weights (MODNet, MiDaS, LaMa) sit on disk under
+    public/models/ (dev) or process.resourcesPath/models (packaged).
+    They are not fetched at edit time (CSP forbids it).
+  - Media bin blobs persist in IndexedDB on this device
+    (vista-media-library). They are not a cloud library.
+  - Command chat (when used) stores text only in localStorage key
+    vista-chat-history — no pixels, no file paths.
+
+1.5 What this product is NOT
+----------------------------
+  - There is no remote application backend, no REST photo API, no
+    S3 bucket, no auth server, no LLM endpoint.
+  - docs/index.html (marketing site) may call the GitHub API. That
+    page is not shipped inside the desktop app (docs/PRIVACY.md).
+  - Cloud sync is explicitly out of scope unless it is opt-in later
+    and never the default (docs/ROADMAP.md).
+
+1.6 License / distribution posture
+----------------------------------
+LICENSE is a proprietary beta agreement. Source may be visible in a
+public repo for feedback; that does not make the product open
+source. package.json license is UNLICENSED. electron-builder
+publish is null (no auto-update channel).
+
+
+================================================================
+2. HIGH-LEVEL ARCHITECTURE
+================================================================
+
+2.1 Stack (verified)
+--------------------
+  Electron 33        desktop shell (main + preload)
+  Next.js 16.3.3     App Router renderer; static export for packaged
+                     and Pages builds (next.config.mjs)
+  React 19           UI
+  Zustand 5          single editor store
+  TypeScript 5.7     renderer (bundler resolution) + electron tsconfig
+  Tailwind CSS 4     app/globals.css
+  onnxruntime-web    on-device inference (WASM)
+  Playwright / Vitest tests
+
+This is not a Next.js server app in production. There are no
+app/api routes. Packaged Electron loads a static export as a file:
+  dist-electron compiled main loads  out/index.html
+Dev Electron loads  http://localhost:3000  (next dev).
+
+2.2 Why Electron + Next static export
+-------------------------------------
+The renderer is a React SPA. Next is used for the App Router, the
+dev server (HMR), and `output: 'export'` so the desktop app does
+not need a Node HTTP server at runtime.
+
+next.config.mjs (verified):
+  ELECTRON_BUILD=1  -> output export, distDir "out"
+  WEB_EXPORT=1      -> output export, distDir "out-web", trailingSlash
+  otherwise         -> default Next distDir ".next" (dev / CI build)
+  images.unoptimized true  (required for static export)
+  turbopack: {}     Next 16 defaults to Turbopack; empty object opts in
+  typescript.ignoreBuildErrors true  (build still typechecked in CI
+                    via pnpm typecheck)
+
+2.3 Process model
+-----------------
+
+  +--------------------------------------------------------------+
+  | ELECTRON MAIN  (Node, privileged)                            |
+  | electron/main/index.ts                                       |
+  |  BrowserWindow, native Menu, dialogs, atomic .lumen write,   |
+  |  autosave under userData, CSP header, single-instance lock,  |
+  |  splash, quit confirmation                                   |
+  |  Does NOT touch image pixels.                                |
+  +------------------------------+-------------------------------+
+                                 | IPC (allowlisted channels)
+  +------------------------------v-------------------------------+
+  | PRELOAD  (isolated world)                                    |
+  | electron/preload/index.ts                                    |
+  |  contextBridge.exposeInMainWorld('lumen', ...)               |
+  |  contextIsolation true, nodeIntegration false, sandbox true  |
+  +------------------------------+-------------------------------+
+                                 | window.lumen
+  +------------------------------v-------------------------------+
+  | RENDERER  (Chromium, no Node)                                |
+  | Next.js static HTML/JS  OR  next dev on :3000                |
+  |  lib/platform/bridge.ts   host abstraction                   |
+  |  features/editor/         engine + Zustand store             |
+  |  features/ai/             worker + ONNX algorithms           |
+  |  components/editor/       UI                                 |
+  |  IndexedDB media library, localStorage prefs                 |
+  +--------------------------------------------------------------+
+
+2.4 Host abstraction
+--------------------
+Nothing in features/ or components/ should branch on Electron vs
+browser except the bridge itself and a few chrome bits (custom
+Windows title bar, native file dialogs).
+
+  lib/platform/bridge.ts
+    getBridge(): LumenBridge
+    isElectron(): boolean   // true iff window.lumen exists
+
+  Electron path: makeElectronBridge() wraps window.lumen.
+    openImage returns { name, blob } after converting ArrayBuffer.
+  Web path: webBridge uses <input type=file>, <a download>,
+    showDirectoryPicker when present, localStorage for autosave.
+
+2.5 Why this split
+------------------
+Main owns the OS. File dialogs, menus, and window chrome live in
+electron/main. Keeping pixels out of main keeps the privileged
+process small.
+
+Preload is the only bridge. Unrecognised IPC channel names are
+rejected with a console warning (preload/index.ts).
+
+The renderer does not know the host. getBridge() is the seam that
+lets the same EditorShell run in next dev, GitHub Pages, and a
+packaged .exe.
+
+2.6 Next.js 16 specifics in THIS repo
+-------------------------------------
+App Router files (only these under app/):
+  app/layout.tsx    root HTML, metadata, viewport
+  app/page.tsx      default export: <EditorShell />
+  app/globals.css   Tailwind + editor chrome tokens
+
+There is no middleware.ts, no route handlers, no server actions
+for editing. The editor is a client-side tree ('use client' on
+EditorShell and store).
+
+Static export means:
+  - no Node server in the packaged app
+  - public files (models, ort wasm, icons) must be on disk
+  - GitHub Pages uses BASE_PATH / NEXT_PUBLIC_BASE_PATH so assets
+    work under https://user.github.io/repo-name/
+    (lib/public-url.ts prefixes publicUrl() with that base)
+
+
+================================================================
+3. FRONTEND
+================================================================
+
+3.1 Boot path
+-------------
+app/layout.tsx sets title "Vista Image Studio - Local AI Photo
+Editor", dark themeColor #2a2d33, icons from /icon-*.png.
+
+app/page.tsx mounts EditorShell, the only page.
+
+EditorShell (components/editor/EditorShell.tsx) is the application
+shell: chrome, import/export, menu IPC subscriptions, drag/drop,
+keyboard shortcuts, dialogs.
+
+On mount it:
+  - marks the UI ready (data-ready) and calls
+    getBridge().notifyUiReady()  -> IPC app:ui-ready (closes splash)
+  - hydrates the media library (IndexedDB -> recentImports)
+  - shows FirstRunDialog unless localStorage vista-onboarded === "1"
+  - Electron skips the in-renderer LaunchSplash (native splash
+    already ran). Web may skip via shouldSkipLaunchSplash().
+
+3.2 Layout (left to right)
+--------------------------
+  TitleBar          Windows Electron only (frameless window)
+  TopBar            File menu, Tools, Open/Save/Export, theme,
+                    compare, Privacy, recents
+  Toolbar           tool ids + zoom + undo
+  ImportedImagesBin left "Media" rail
+  EditorStage       canvas (or CompareView)
+  RightPanel        AI | Filters | Adjust | Layers | Text | Transform
+
+Overlays (not a column):
+  StatusToast, AiProgressOverlay, ImportProgressOverlay,
+  LaunchSplash (web), ExportDialog, PrivacyCentre, RecipesDialog,
+  BatchDialog, FirstRunDialog, unsaved ConfirmDialog, drop overlay.
+
+3.3 Chrome components
+---------------------
+TitleBar  components/editor/chrome/TitleBar.tsx
+  Shown only when isElectron() AND not macOS. Drag region plus
+  win:minimize / win:maximize / win:close via getBridge().
+  Title text uses dirty flag from the store.
+
+TopBar  components/editor/chrome/TopBar.tsx
+  AppMenu (File / Edit) because Windows frameless windows hide the
+  native menu bar. Tools menu opens NewDesignDialog (templates),
+  Recipes, Batch, Privacy. Recents from lib/platform/recents.ts
+  (localStorage vista-recents, max 8, Electron re-open via
+  openProjectPath). Theme toggle (store.theme). Compare hold/click.
+
+AppMenu  components/editor/chrome/AppMenu.tsx
+  Visible File/Edit. Handlers come from EditorShell (new, open
+  image, open project, save, save as, close, print, exit, undo,
+  redo).
+
+ImportedImagesBin  components/editor/chrome/ImportedImagesBin.tsx
+  Left rail labelled "Media". Photos persist whether a project is
+  open or not. Import photos / import folder. Search. Drag uses
+  MIME application/x-vista-media (features/editor/media-drag.ts).
+  Double-click / place: on collage documents, placeMediaOnCanvas;
+  otherwise loadImage opens the photo as the document.
+  Cap: RECENT_IMPORTS_CAP = 200.
+
+RightPanel  components/editor/chrome/RightPanel.tsx
+  Tabs (default "ai"):
+    ai         AiPanel
+    filters    FiltersPanel
+    adjust     AdjustmentsPanel
+    layers     LayersPanel
+    text       TextPanel
+    transform  TransformPanel
+
+ThemeProvider  components/editor/chrome/ThemeProvider.tsx
+  Applies dark/light class from the Zustand theme.
+
+LaunchSplash / ImportProgressOverlay / AiProgressOverlay /
+StatusToast  progress and toasts. Import can be cancelled
+(generation counters in EditorShell).
+
+3.4 Canvas / stage
+------------------
+EditorStage  components/editor/canvas/EditorStage.tsx
+  Subscribes to renderVersion (dirty flag) and doc. Calls
+  compositor.render() onto a stage canvas. Viewport zoom/pan from
+  features/editor/viewport.ts.
+
+  Tools (features/editor/types.ts ToolId):
+    move         V  drag photo layer
+    crop         C  live crop handles; presets in Transform
+    select-rect  M  box select for Magic Eraser
+    select-wand  W  flood fill by colour (wandTolerance)
+    hand         H  pan zoomed canvas; middle-mouse also pans
+
+  Also: drop files, drop media-bin items onto collage cells,
+  rearrange cells (application/x-vista-collage-cell), text box
+  overlay, checkerboard for transparency (CheckerPattern.tsx).
+
+CollageCellOverlays
+  components/editor/canvas/CollageCellOverlays.tsx
+  Hit boxes per collage cell: select, drop photo, rearrange,
+  pan/zoom via collageFit (scale, panX, panY). Edge/corner
+  handles. Alt-drag moves a filled frame (Transform / arrows too).
+
+TextBoxOverlay  in-canvas text session handles.
+
+CompareView  components/editor/compare/CompareView.tsx
+  Hold Compare for original peek; click for split. compareStepsBack
+  chooses how many undo steps the "before" pane uses.
+
+3.5 Panels (right rail)
+-----------------------
+AiPanel  components/editor/panels/AiPanel.tsx
+  One-click: Optimize Image (look id pro-phone), Natural Color
+  (natural-mobile), Auto Color Correct, Portrait Bokeh, Remove
+  Background, Magic Eraser (needs selection), Instagram 4:5 crop
+  (setLiveCrop), Low Light, Dehaze, Clarity, Vibrance, Upscale 2x,
+  Denoise (slider then apply), Face Enhance (sliders then apply).
+  Runs via aiClient + replaceLayerPixels / resizeDocumentToLayer.
+  Photo target is selectPhotoLayer() so text layers are not mutated.
+
+FiltersPanel
+  Optimize Image pinned at top, then looks Original / B&W / Warm /
+  Cool with intensity 0-100 (applyLook).
+
+AdjustmentsPanel
+  Sliders for exposure, brightness, contrast, saturation,
+  temperature, tint, highlights, shadows, whites, blacks, vibrance,
+  sharpness. CurvesEditor (RGB and per-channel).
+  updateAdjustments(id, patch, commit?) — commit=false while dragging.
+
+TransformPanel
+  Resize with lock-aspect, rotate 90 CW/CCW, flip H/V.
+  Crop chips: Free, 1:1 Post, 4:5 Portrait, 9:16 Story, 16:9 Thumb,
+  custom ratio. Apply = live crop (setLiveCrop); Bake writes pixels
+  (bakeCrop). Watermark/logo layer (corners TL/TR/BL/BR/Center,
+  opacity, scale). Collage frame Left/Top and nudge when a cell is
+  active.
+
+LayersPanel
+  Visibility, lock, opacity, blend modes (normal, multiply, screen,
+  overlay, darken, lighten, soft-light, difference, luminosity),
+  duplicate, reorder, delete. Collage cells can be filled from here.
+
+TextPanel
+  Templates: Bold Headline, Elegant Subtitle, Pull Quote, Highlight
+  Caption, Story Sticker, Minimal Caption (text-templates.ts).
+  Font family from FONT_FAMILIES, weight, size, align, colour,
+  uppercase, highlight background, outline. OK/Cancel text session
+  (startTextSession / applyTextSession / cancelTextSession).
+  Brand kit colours + default font on the store.
+
+3.6 Dialogs
+-----------
+NewDesignDialog     Tools -> templates. Quick-start social sizes
+                    with text already placed; blank sizes; collage
+                    categories from template-registry.ts.
+ExportDialog        Ctrl+E. Presets, creator pack, format, quality,
+                    fit/fill, optional handle stamp, carousel split.
+FirstRunDialog      localStorage vista-onboarded.
+PrivacyCentre       getBridge().getPrivacyInfo() — host, CSP paths,
+                    autosave, models folder, analytics=off.
+RecipesDialog       localStorage vista-recipes (kind lumen-recipe).
+BatchDialog         apply a recipe to a folder (features/editor/batch/run.ts).
+ConfirmDialog       unsaved .lumen prompt (Save / Don't Save / Cancel).
+
+3.7 Command chat (implemented, not mounted)
+-------------------------------------------
+components/editor/chat/CommandChat.tsx plus
+  features/editor/command-parser.ts
+  features/editor/commands/from-text.ts
+  features/editor/commands/schema.ts  ALLOWED_OPS
+
+This is a local keyword parser, not an LLM. docs/FEATURES.txt and
+docs/ROADMAP.md still describe it. Current EditorShell does not
+import CommandChat. tests/e2e/editor-shell.spec.ts asserts
+"Command Chat" has count 0. The module remains the allowlisted
+command path if re-mounted. History would use localStorage
+vista-chat-history (text only).
+
+3.8 Keyboard shortcuts (EditorShell)
+------------------------------------
+Electron: File/Image/View accelerators are native menu -> IPC
+menu:* channels (see section 6). Renderer still handles tools and
+Ctrl+E.
+
+Web (and tools always):
+  Ctrl+O open image     Ctrl+Shift+O open project
+  Ctrl+S save           Ctrl+Shift+S save as
+  Ctrl+N new            Ctrl+W close project
+  Ctrl+E export         Ctrl+P print
+  Ctrl+Z undo           Ctrl+Shift+Z / Ctrl+Y redo
+  V move  C crop  M select  W wand  H hand
+  Esc clear selection
+  Delete/Backspace delete collage frame (not mat, not during text)
+  Arrows nudge selected collage frame (Shift = 10px)
+
+3.9 Drag and drop
+-----------------
+Window-level listeners in EditorShell. Native file:// navigation on
+drop is blocked in main (will-navigate) so Chromium does not replace
+the editor with the OS image viewer.
+
+  OS files / folders -> filesFromDataTransfer (lib/image/canvas.ts)
+    including webkitGetAsEntry for folders.
+  Internal media drag MIME  application/x-vista-media
+  Internal cell drag MIME   application/x-vista-collage-cell
+
+importOpensDocument (features/editor/media-import.ts):
+  intent "open" always replaces the canvas.
+  drop/folder keep an already-open collage and add to Media instead.
+
+
+================================================================
+4. EDITOR ENGINE
+================================================================
+
+4.1 Document model
+------------------
+features/editor/types.ts
+
+  DocumentState
+    id, createdAt, modifiedAt, width, height
+    layers: Layer[]
+    activeLayerId
+    selection: Selection | null   // { width, height, mask 0..255 }
+    fileName
+    projectPath: string | null    // on-disk .lumen in Electron
+    crop: CropRect | null         // live, non-destructive
+    lookId, lookIntensity
+    lastExport
+
+  Layer
+    id, name, visible, locked, opacity, blendMode
+    kind?: 'raster' | 'text' | 'watermark'
+    source: HTMLCanvasElement     // compositor always reads this
+    x, y, adjustments
+    textData?, watermark?
+    collageCell?, collageFilled?, collageOriginal?
+    collageFit?  { scale, panX, panY }  // scale 1 = cover
+    collageMat?  // locked full-canvas coloured page behind cells
+    collageSlot? { shape: rect|rounded|circle|polaroid, rotation? }
+
+Pixels never leave the renderer as a live workspace. Helpers in
+lib/image/canvas.ts (createCanvas, canvasFromBlob, HEIC via heic-to,
+workingCanvasFromSource max edge 2048 for collage drops).
+
+4.2 Zustand store
+-----------------
+features/editor/store/editor-store.ts
+  useEditorStore  — single source of truth
+
+History:
+  HISTORY_LIMIT = 30
+  commit(next) pushes previous DocumentState onto past, clears future
+  Layers share canvas references until mutated, so snapshots are cheap
+  beginTransaction / endTransaction for crop drags and similar
+  Slider drags: commit=false on input, commit=true on mouseup
+
+renderVersion increments when pixels may have changed. EditorStage
+subscribes to it rather than object identity.
+
+Important actions (not exhaustive):
+  Document: openImage, newDocument, closeDocument,
+            loadProjectDocument, markSaved, undo, redo
+  Tools:    setTool, setViewport, fitToScreen, zoomBy,
+            setCropDraft, setLiveCrop, bakeCrop, applyLook
+  Layers:   setActiveLayer, addLayerFromCanvas, duplicateLayer,
+            removeLayer, moveLayer, toggleLayerVisibility/Lock,
+            setLayerOpacity, setLayerBlendMode, mergeDown,
+            flattenImage, replaceLayerPixels, offsetLayer,
+            resizeDocumentToLayer
+  Adjust:   updateAdjustments, resetAdjustments
+  Text:     addTextLayer, updateTextLayer, start/apply/cancelTextSession
+  Collage:  createCollage, fillCollageCell, placeMediaOnCanvas,
+            rearrangeCollageCells, setCollageFit, deleteCollageFrame,
+            clearCollageCell, setCollageFramePosition
+  Media:    addRecentImport, hydrateMediaLibrary, setActiveImportId
+  Xform:    applyCrop, resize, rotate90, flip, rotateActiveLayer
+  Select:   setSelection, invertSelection, clearSelection
+  AI UI:    setAiJob
+  Other:    setTheme, toggleCompareMode, notify, brand kit setters
+
+Selectors:
+  selectActiveLayer, selectPhotoLayer, selectWatermarkLayer
+  selectPhotoLayer skips text so filters/AI hit the photo.
+
+4.3 Compositor
+--------------
+features/editor/engine/compositor.ts
+  class Compositor, singleton export `compositor`
+
+  Per-layer cache of the adjusted bitmap keyed by adjustments hash
+  + size. Dragging one slider does not reprocess other layers.
+  Identity adjustments blit the source (or a scaled copy).
+
+  render(doc)            full document, watermarks last
+  renderOutput(doc)      clipped to live crop (export/print)
+  flattenLayer           one layer in document space
+
+  Collage slots: drawDocumentLayer clips circle/rounded/polaroid,
+  paints polaroid chrome, applies slot rotation.
+
+Blend modes map to CanvasRenderingContext2D composite operations.
+
+4.4 Adjustments and looks
+-------------------------
+engine/curves.ts     monotone cubic (Fritsch–Carlson) -> 256 LUT
+engine/adjustments.ts
+  buildAdjustmentLuts: exposure, brightness, contrast, temperature,
+  tint, highlights/shadows/whites/blacks, curves.
+  Saturation and vibrance per-pixel; sharpness is a light unsharp.
+
+looks.ts             mixAdjustments / adjustmentsFromLook
+filter-presets.ts    original, bw, warm, cool
+camera-profiles.ts   Optimize Image (id pro-phone), Natural Color
+                     (natural-mobile), Vivid Mobile, Clean Portrait
+                     (keyword matchers for command parser)
+
+Optimize Image is a descriptive local grade inspired by flagship
+phone colour science — not an Apple product (FEATURES.txt).
+
+4.5 Selection
+-------------
+engine/selection.ts
+  rectSelection, floodSelect (magic wand), combine replace/add/
+  subtract, invert, dilate, bounds, selectionMaskForLayer.
+  Mask is 0..255 coverage (soft), not boolean.
+
+4.6 Transforms
+--------------
+engine/transforms.ts
+  cropDocument, resizeDocument, rotateDocument90, flipDocument,
+  rotateLayer — operate on the whole document so offsets stay
+  consistent.
+
+crop-presets.ts  Free, 1:1, 4:5, 9:16, 16:9 plus story safe-zone
+fractions for Story/Reel/TikTok chrome overlay.
+
+4.7 Collage templates and frames
+--------------------------------
+JSON templates:
+  features/editor/collage/templates/layouts.json
+    split-2h, split-2v, grid-3-classic, grid-4, grid-5-featured,
+    grid-6
+  features/editor/collage/templates/occasions.json
+    family-polaroid-6, birthday-hero-3, plus anniversary / wedding /
+    Raksha Bandhan / best wishes (category tags)
+
+template-registry.ts  ALL_TEMPLATES, CATEGORIES
+instantiate.ts        createCollage -> mat + placeholder cells +
+                      decoration text/stickers
+engine/collage.ts     coverDrawRect, clampCollageFit (scale 1..8,
+                      pan 0..1), collageFitFromDrag, placeholders,
+                      mat paint
+geometry.ts           point-in-slot, polaroid chrome, rotation
+decor-draw.ts         background patterns, stickers
+delete-frame.ts       empty filled frame vs remove empty frame
+look-targets.ts       isCollageDocument; Optimize Image grades
+                      filled photos in place (frames stay put)
+collage-frame.ts      per-index frame colours
+media-drag.ts         MIME helpers, fill order, rearrange kind
+                      (move vs swap)
+
+4.8 Import
+----------
+Supported (IMAGE_FILE_ACCEPT / ALLOWED_IMAGE_EXTENSIONS):
+  PNG, JPEG, WebP, HEIC/HEIF/HIF, AVIF, BMP, GIF, TIFF
+
+HEIC: Chromium on Windows cannot decode natively. canvasFromBlob
+uses heic-to/csp (libheif WASM). Safari may decode natively first.
+createImageBitmap is time-capped (2.5s) because some WIC codecs hang.
+
+Folder import walks entries; cap 200 into the media bin.
+
+4.9 Export kit
+--------------
+export-presets.ts  original, ig-post 1080x1080, ig-portrait
+                   1080x1350, ig-story 1080x1920, yt-thumb 1280x720,
+                   pinterest 1000x1500, linkedin-post, x-post, fb-post
+export-kit.ts      CREATOR_PACK_IDS, renderExportCanvas, fit/fill,
+                   stampWatermark, sliceCarousel, size estimate
+                   YouTube fill is forced to stretch so portraits
+                   are not cropped top/bottom.
+
+Export always canvas.toBlob / toDataURL — rebuilt pixels, no EXIF.
+
+Print: features/editor/print.ts printComposite(doc) writes PNG into
+a hidden iframe and calls frame.print() (system dialog, no cloud).
+IPC menu:print from native File menu.
+
+4.10 Project schema (.lumen)
+----------------------------
+features/editor/project/schema.ts
+
+  PROJECT_SCHEMA_VERSION = 1
+  PROJECT_EXTENSION = ".lumen"
+  PROJECT_MIME = "application/x-lumen-project+json"
+  AUTOSAVE_MAX_BYTES = 12 * 1024 * 1024
+
+A project is UTF-8 JSON, not a ZIP. Assets are embedded PNG (or
+JPEG) data URLs so a file copies without a sidecar folder.
+
+Required shape (kind MUST be "lumen-project"):
+
+  {
+    "kind": "lumen-project",
+    "schemaVersion": 1,
+    "id": "doc_…",
+    "createdAt": "ISO-8601",
+    "modifiedAt": "ISO-8601",
+    "fileName": "Shot.png",
+    "canvas": { "width": 1080, "height": 1350 },
+    "activeLayerId": "layer_…",
+    "crop": { "x", "y", "width", "height" } | null,
+    "lookId": "…",
+    "lookIntensity": 80,
+    "lastExport": { ... },
+    "brandKit": { "colors": [...], "font": "Inter" },
+    "layers": [ { assetId, adjustments, collage*, textData, ... } ],
+    "assets": { "asset_…": { "id", "mime", "dataUrl" } }
+  }
+
+validate.ts
+  JSON.parse only (never eval).
+  Assets may only be data:image/png;base64 or data:image/jpeg;base64.
+  http(s):, javascript:, file:, data:text, ".." rejected.
+  Future schemaVersion -> read-only (export still allowed).
+  Max parse size 32 MB. Autosave writer in renderer caps 12 MB.
+
+serialize.ts  canvas -> PNG data URL per layer
+migrate.ts    historical shapes up to v1; docs say there are no
+              on-disk projects from earlier Vista builds to migrate
+
+4.11 Persistence
+----------------
+use-persistence.ts  useProjectPersistence()
+
+  saveProject(saveAs)
+    serializeProject -> stringifyProject -> getBridge().saveProject
+    Electron: existingPath skips the dialog (Save vs Save As)
+    atomic write in main (temp + rename)
+  openProject / openRecent
+  dirty debounce 2s -> writeAutosave if projectFitsAutosave
+  on boot: readAutosave, confirm "Restore the last autosave?"
+    (sessionStorage vista-autosave-prompted once per tab)
+
+Electron autosave path:
+  app.getPath('userData') / autosave / recovery.lumen
+  Windows typically:
+    %APPDATA%\vista-image-studio\autosave\recovery.lumen
+
+Web autosave:
+  localStorage key "vista-autosave"
+
+Recents: lib/platform/recents.ts  key vista-recents (paths; Electron
+can reopen; web tells the user to use Open Project).
+
+Unsaved: project/unsaved.ts + use-unsaved-changes.tsx. Main process
+closePhase confirming sends app:confirm-close; renderer replies
+app:close-decision allow|cancel. Env LUMEN_E2E=1 skips the prompt
+for Playwright electron tests.
+
+4.12 IndexedDB media library
+----------------------------
+lib/platform/media-library.ts
+
+  DB:     vista-media-library  (version 1)
+  Store:  imports  keyPath id
+  Record: { id, name, thumbnailDataUrl, blob, addedAt }
+
+addRecentImport also putMediaItem(); evicted ids deleteMediaItems().
+hydrateMediaLibrary on EditorShell mount. Thumbnails are small JPEGs;
+full pixels stay on the Blob. workingCanvas is an in-memory decode
+cache (not persisted) so collage fill skips a second HEIC decode.
+
+4.13 Recipes
+------------
+features/editor/recipes/schema.ts
+  kind "lumen-recipe", schemaVersion 1
+  cropPresetId, lookId, lookIntensity, watermark, exportPresetId
+  localStorage vista-recipes, max 40, validate against known ids
+
+Batch: features/editor/batch/run.ts applies look + crop + watermark
++ export size to each File, skips failures.
+
+
+================================================================
+5. AI (ON-DEVICE)
+================================================================
+
+5.1 Principle
+-------------
+No cloud inference. No GGUF. No LLM. Pixel ops run in
+features/ai/workers/ai.worker.ts. The assistant (if mounted) is
+features/editor/command-parser.ts plus an allowlisted command
+schema. Unknown phrases never become edits (docs/AI.md).
+
+5.2 Runtime
+-----------
+features/ai/ort-runtime.ts
+  loadOrtWasm() imports onnxruntime-web/wasm
+  env.wasm.wasmPaths = publicUrl('/ort/')  (copied by
+    scripts/sync-ort-wasm.mjs from node_modules)
+  numThreads = 1, proxy = false
+  resolvePublicHref so the worker does not resolve models against
+  a blob: worker URL
+
+CSP must allow:
+  worker-src 'self' blob:
+  connect-src 'self' blob: data:
+  script-src includes 'wasm-unsafe-eval' (and 'unsafe-eval') because
+  ORT WASM needs it. See section 14.
+
+5.3 Client
+----------
+features/ai/ai-client.ts
+  Single module Worker, requests keyed by id (ai_<time>_<n>)
+  ArrayBuffers transferred, not copied
+  Progress { id, progress, detail } for overlays
+  Ops: autoColor, denoise, faceEnhance, removeBackground, upscale,
+       smartSelect, objectRemoval, lowLight, dehaze, clarity,
+       vibrance, backgroundBlur, portraitBlur
+
+5.4 Algorithms (files under features/ai/algorithms/)
+----------------------------------------------------
+background-removal.ts
+  Live path: segmentWithModel MODNet public/models/modnet.onnx
+  (~25 MB, Apache-2.0). Failure THROWS — no silent flood-fill on
+  Remove Background. segmentHeuristic kept for tests / local-enhance.
+
+portrait-blur.ts + bokeh.ts
+  Portrait Bokeh: MODNet subject matte + MiDaS depth
+  (public/models/midas-small.onnx, ~64 MB, MIT) + disc bokeh
+  (WebGL when available, else CPU at working resolution).
+  Highlight orbs, occlusion weights, subject composite.
+
+inpaint.ts
+  Magic Eraser prefers LaMa ONNX public/models/lama.onnx
+  (~208 MB, Apache-2.0, Carve/LaMa-ONNX). Diffusion pyramid
+  fallback if the weight is missing.
+
+upscale.ts
+  upscaleWithModel optional esrgan-lite.onnx (not in sync-models.mjs
+  today). Live UI/menu upscale uses useModel: false -> gated
+  bicubic + unsharp (gatedUpscale). resizeDocumentToLayer after 2x.
+
+auto-color.ts     grey-world WB + histogram stretch + S-curve
+enhance.ts        denoise (bilateral), face enhance (YCbCr skin),
+                  sharpen
+local-enhance.ts  low-light, dehaze, clarity, vibrance, bg blur
+                  helpers
+smart-select.ts   Lab-space flood fill from seed (MobileSAM is
+                  roadmap, not shipped)
+filters.ts        skinMask and related
+scene-gate.ts + gated.ts
+  Skip ops that would make an already-good photo worse; worker
+  returns meta.skipped. UI shows aiSkipMessage().
+
+5.5 Model files on disk
+-----------------------
+Downloaded by scripts/sync-models.mjs (also from npm run dev /
+build). Gitignored (public/models/*.onnx). Runtime CSP cannot
+fetch Hugging Face / GitHub, so files must exist before edit.
+
+  midas-small.onnx   Intel MiDaS v2.1 small    MIT
+  modnet.onnx        MODNet portrait matting   Apache-2.0
+  lama.onnx          LaMa inpaint              Apache-2.0
+
+Packaged: electron-builder extraResources copies public/models
+to resources/models. asarUnpack public/models/**. Privacy Centre
+reports modelsFolder = path.join(process.resourcesPath, 'models').
+
+THIRD_PARTY_NOTICES.md is the license record. Do not add NC-licensed
+ONNX without a product decision.
+
+5.6 Worker ops (ai.worker.ts switch)
+------------------------------------
+  auto-color, denoise, face-enhance          gated CPU
+  bg-remove                                  MODNet required
+  upscale                                    model or gated bicubic
+  smart-select                               flood fill
+  object-removal                             LaMa then diffusion
+  low-light, dehaze, clarity, vibrance       gated CPU
+  bg-blur / portrait-blur                    MODNet + MiDaS + bokeh
+
+5.7 Host info backend field
+---------------------------
+preload HostInfo.backend type includes 'directml' | 'webgpu' |
+'wasm' | 'cpu'. Electron app:host-info currently always returns
+backend: 'wasm'. Web detectWebBackend() may report webgpu if
+navigator.gpu works. DirectML is a ROADMAP item, not live.
+
+
+================================================================
+6. LOCAL "BACKEND" (THERE IS NO REMOTE API SERVER)
+================================================================
+
+Honest statement: Vista Image Studio has no application server, no
+photo upload endpoint, and no inference API. The "backend" is:
+
+  (a) Electron main process on the user's PC
+  (b) Chromium IndexedDB + localStorage in the renderer
+  (c) The local filesystem via OS dialogs (never arbitrary paths
+      from the renderer)
+  (d) Optional static GitHub Pages host for the web build (HTML/JS
+      only; still no photo upload)
+
+6.1 Electron main as local backend
+----------------------------------
+electron/main/index.ts
+
+Window:
+  1440x900, min 900x600, background #0e0f14
+  Windows: frame false, titleBarStyle hidden (custom TitleBar)
+  macOS: titleBarStyle hiddenInset
+  webPreferences: preload, contextIsolation, sandbox, webSecurity,
+    no nodeIntegration, no insecure content
+  Dev: loadURL http://localhost:3000
+  Packaged: loadFile out/index.html
+  Splash: frameless BrowserWindow with electron/splash.ts HTML
+  Single-instance lock; second instance focuses the first
+
+Native menu (buildMenu) sends to renderer:
+  menu:new-project, menu:open, menu:open-project, menu:save,
+  menu:save-as, menu:close-project, menu:print, menu:undo,
+  menu:redo, menu:resize, menu:rotate-cw, menu:rotate-ccw,
+  menu:flip-h, menu:flip-v, menu:auto-enhance, menu:bg-remove,
+  menu:denoise, menu:upscale, menu:fit, menu:zoom-in,
+  menu:zoom-out, menu:zoom-100
+
+Quit/close:
+  app:confirm-close to renderer; app:close-decision / app:allow-quit
+  4s timeout if renderer is dead. LUMEN_E2E=1 skips confirm.
+
+6.2 IPC allowlists (preload)
+----------------------------
+RENDERER_TO_MAIN_CHANNELS:
+  fs:open-image, fs:save-image, fs:save-images,
+  fs:open-project, fs:open-project-path, fs:save-project,
+  fs:read-autosave, fs:write-autosave, fs:clear-autosave,
+  app:host-info, app:privacy-info, app:open-external,
+  app:allow-quit, app:close-decision, app:ui-ready,
+  win:minimize, win:maximize, win:close
+
+MAIN_TO_RENDERER_CHANNELS:
+  menu:* listed above, app:before-quit, app:confirm-close
+
+window.lumen API (contextBridge name is "lumen"):
+  getHostInfo, openImage, saveImage, saveImages,
+  openProject, openProjectPath, saveProject,
+  readAutosave, writeAutosave, clearAutosave,
+  allowQuit, decideClose, notifyUiReady, getPrivacyInfo,
+  openExternal, minimize, maximize, close, on(channel)
+
+6.3 Filesystem rules in main
+----------------------------
+Open image: dialog + extension allowlist, then fs.readFile ->
+ArrayBuffer. Renderer never receives a raw filesystem path for
+images.
+
+Save image / save-images: dialog (file or folder); basename
+sanitised (no path separators) for pack export.
+
+Open/save project: filter *.lumen. open-project-path rejects
+non-.lumen and ".." then path.resolve.
+
+Atomic write: file.<pid>.tmp then rename.
+
+write-autosave rejects non-strings and payloads > 32 MB (renderer
+already caps 12 MB JSON).
+
+app:open-external only http: / https: via shell.openExternal.
+
+6.4 IndexedDB and localStorage (renderer-local)
+-----------------------------------------------
+  vista-media-library / imports     media bin blobs
+  vista-autosave                    web recovery JSON
+  vista-recents                     recent .lumen paths
+  vista-recipes                     recipes
+  vista-onboarded                   first-run
+  vista-streak                      local session streak (privacy UI)
+  vista-chat-history                command chat text (if used)
+  vista-watermark, vista-handle     export dialog prefs
+  vista-autosave-prompted           sessionStorage
+
+6.5 Packaging as distribution, not a server
+-------------------------------------------
+electron-builder.yml
+  productName Vista Image Studio
+  output dist/
+  files: out/**, dist-electron/**, package.json
+  extraResources: public/models -> models (*.onnx)
+  asar true, asarUnpack public/models/**
+  publish: null
+
+Windows: NSIS (x64, arm64) + portable (x64); APPX identity
+  VistaImageStudio.Desktop
+macOS: dmg + zip, hardenedRuntime, entitlements
+  build/entitlements.mac.plist
+Linux: AppImage + deb, category Graphics
+
+Scripts:
+  npm run package        NSIS + portable x64/arm64
+  npm run package:appx   APPX x64
+  npm run package:mac / package:linux / package:dir
+
+
+================================================================
+7. PACKAGES AND SOFTWARE
+================================================================
+
+7.1 Runtime versions (package.json)
+-----------------------------------
+  Node                20.x in CI; run-app.bat can install 20.18.1
+  Electron            ^33.2.0  (main: dist-electron/main/index.js)
+  Next.js             16.3.3
+  React / react-dom   ^19
+  TypeScript          5.7.3
+  Zustand             ^5.0.15   editor store
+  onnxruntime-web     ^1.20.1   WASM inference
+  heic-to             ^1.5.2    iPhone HEIC (csp build)
+  lucide-react        icons
+  @base-ui/react      shadcn / Base UI primitives
+  class-variance-authority, clsx, tailwind-merge, tw-animate-css
+  shadcn              CLI/config (components.json, components/ui/*)
+
+7.2 Dev / test / package
+------------------------
+  vitest ^5 + @vitest/coverage-v8 + jsdom
+  @playwright/test ^1.63
+  electron-builder ^25.1.8
+  concurrently, wait-on, cross-env
+  tailwindcss ^4 + @tailwindcss/postcss, postcss
+  @types/node ^24, @types/react ^19
+
+7.3 What each important dependency is for
+-----------------------------------------
+  electron            OS window, IPC, dialogs, menus, packaging host
+  electron-builder    NSIS, portable, APPX, dmg, AppImage, deb
+  next                App Router, Turbopack dev, static export
+  react / react-dom   UI
+  zustand             useEditorStore
+  onnxruntime-web     MODNet / MiDaS / LaMa / optional ESRGAN
+  heic-to             HEIC decode in Chromium/Electron/Windows
+  lucide-react        toolbar and panel icons
+  clsx + tailwind-merge  lib/utils.ts cn()
+  @base-ui/react + shadcn  components/ui (button, dialog, etc.)
+  playwright          e2e Chromium + Electron project
+  vitest              unit tests on features/**
+  concurrently        next dev + tsc watch + electron
+  wait-on             electron:start waits for :3000 and
+                      dist-electron/main/index.js
+  cross-env           ELECTRON_BUILD / WEB_EXPORT / NODE_ENV
+
+ffmpeg-static is NOT a package.json dependency. scripts/prepare-ffmpeg.mjs
+copies it into resources/ffmpeg if present; missing is a warning,
+not a build failure. No features/ code currently imports ffmpeg.
+
+7.4 Optional sibling assets
+---------------------------
+scripts/sync-music-library.mjs copies Vistora-Music-Library into
+public/music (gitignored tracks). If the sibling repo is absent,
+the copy is skipped. FEATURES.txt does not list a music product
+surface; treat as optional bundle plumbing, not a cloud service.
+
+7.5 OS targets
+--------------
+  Windows 10/11   NSIS installer, portable exe, APPX (Store /
+                  sideload). build-exe.bat / build-appx.bat.
+                  Unsigned; SmartScreen will warn (RELEASE_CHECKLIST).
+  macOS           dmg + zip
+  Linux           AppImage + deb
+  Web             static export, GitHub Pages, or preview-web.bat
+                  on http://127.0.0.1:4173
+
+CI electron-builder --dir is unsigned verification only
+(CSC_IDENTITY_AUTO_DISCOVERY=false).
+
+
+================================================================
+8. LOCAL APP VS WEB
+================================================================
+
+8.1 Three ways to run
+---------------------
+A. Desktop (Electron)
+   run-app.bat
+     Unblocks MOTW, ensures Node 20, npm install if needed,
+     electron binary, stop leftover next/electron,
+     npm run dev:electron
+   dev:electron =
+     sync ORT wasm + models
+     concurrently: next dev  |  tsc -p electron -w  |
+       wait-on tcp:3000 + dist-electron/main then electron .
+
+B. Web dev (browser, HMR)
+   run-web.bat
+     npm run web  -> next dev -p 3100
+     opens http://127.0.0.1:3100
+     "online / GitHub-bound version" in the script text means the
+     same renderer you would ship to Pages, still running locally.
+     Nothing is uploaded.
+
+C. Production web preview (Pages artifact)
+   preview-web.bat
+     npm run build:web  (WEB_EXPORT=1, out-web/)
+     npm run preview:web  scripts/preview-web.mjs
+     serves out-web at http://127.0.0.1:4173
+
+8.2 Build scripts (package.json)
+--------------------------------
+  dev            next dev :3000 (Playwright webServer uses this)
+  web            next dev :3100
+  build          next build (CI job "Build (Next.js)")
+  build:web      WEB_EXPORT=1, also syncs music library
+  build:electron ELECTRON_BUILD=1 next build + tsc -p electron
+                 + prepare-ffmpeg + music sync
+  start          next start (not used by packaged Electron)
+
+8.3 How they differ
+-------------------
+
+                 ELECTRON                     WEB
+  Host           window.lumen                 webBridge
+  Open image     native dialog, ArrayBuffer   <input type=file>
+  Save image     Save dialog                  <a download>
+  Export pack    pick folder                  showDirectoryPicker
+                                              or sequential downloads
+  .lumen path    real disk path, recents      path always null
+  Autosave       userData/autosave/           localStorage
+                 recovery.lumen               vista-autosave
+  Title bar      custom on Windows            none
+  Native menu    File/Edit/Image/View         AppMenu in TopBar
+  Print          same iframe printComposite   same
+  AI models      extraResources/models        public/models via HTTP
+                                              origin (still local or
+                                              Pages static files)
+  CSP            session header in main       whatever Pages/nginx
+                                              sends; app still uses
+                                              only self/blob/data
+  Splash         native splash window         optional LaunchSplash
+  Quit prompt    app:confirm-close            beforeunload if dirty
+
+8.4 GitHub Pages
+----------------
+.github/workflows/pages.yml
+  Push to main or workflow_dispatch
+  npm ci, npm run build:web
+  BASE_PATH auto: empty for owner.github.io, else /repo-name
+  Artifact out-web, actions/deploy-pages
+  START-HERE.txt: Settings -> Pages -> Source GitHub Actions
+
+The Pages site is still local-first in the visitor's browser:
+photos are not uploaded to GitHub. First visit may download ONNX
+wasm/models as static files from the same origin.
+
+8.5 CSP differences
+-------------------
+Electron production:
+  connect-src 'self' blob: data:
+Electron development (HMR + local tooling):
+  connect-src 'self' blob: data: http://localhost:3000
+    ws://localhost:3000 http://127.0.0.1:7255
+
+Web Privacy Centre reports connect-src 'self' blob: data: and
+modelsFolder "(not bundled — local heuristics only)" if the web
+bridge privacy stub is used; actual Pages builds can still include
+/models and /ort as static files after sync-models / sync-ort-wasm.
+
+
+================================================================
+9. GIT, REPO, AND CI
+================================================================
+
+9.1 Naming
+----------
+  Product / window title   Vista Image Studio
+  npm package              vista-image-studio
+  electron-builder         productName Vista Image Studio
+  CI artifact prefix       vista-image-studio-${{ matrix.os }}
+  Git folder (this tree)   lumen-studio
+  Project files            *.lumen , JSON kind lumen-project
+  Preload global           window.lumen
+  E2E skip-confirm env     LUMEN_E2E=1
+
+CI workflows trigger on branch main (push and pull_request).
+
+9.2 Workflows
+-------------
+.github/workflows/ci.yml  name "CI"
+  lint-typecheck   pnpm 9, Node 20, pnpm lint, pnpm typecheck
+  unit-tests       pnpm test:coverage, upload coverage/
+  e2e-tests        Playwright Chromium, upload report on failure
+  build-web        pnpm build
+  build-electron   matrix windows-latest, macos-latest, ubuntu-latest
+                   pnpm run build:electron then electron-builder --dir
+
+.github/workflows/pages.yml  name "Deploy web to GitHub Pages"
+  npm ci (not pnpm) — note the lockfile split: repo has both
+  package-lock.json and pnpm-lock.yaml. CI uses pnpm; Pages uses npm.
+
+9.3 Test strategy
+-----------------
+Vitest (vitest.config.ts)
+  environment jsdom, include tests/unit/**/*.test.ts
+  coverage provider v8 on features/**/*.ts
+  excludes store, workers, *.d.ts
+
+Unit areas (verified file names):
+  adjustments, curves, selection, collage, viewport, looks,
+  export-kit, crop-presets, project-schema, recipes, unsaved,
+  command-parser, commands-schema, media-import, media-drag,
+  heic, auto-color, enhance, local-enhance, background-removal,
+  portrait-blur, bokeh, inpaint, upscale, smart-select, scene-gate,
+  select-photo-layer
+
+Playwright (playwright.config.ts)
+  testDir tests/e2e, baseURL http://localhost:3000
+  webServer: npm run dev
+  projects:
+    chromium  (ignores *.electron.spec.ts)
+    electron  (only *.electron.spec.ts; needs tsc -p electron)
+
+Specs:
+  editor-shell.spec.ts     empty state, tools, tabs, open PNG/HEIC,
+                           media bin, collage, explicitly no Command
+                           Chat in UI
+  editor-actions.spec.ts   drop import + UI actions
+  offline.spec.ts          shell works with context.setOffline(true)
+  electron-drop.electron.spec.ts
+                           real Electron + CDP OS-level drop;
+                           separate user-data dir so single-instance
+                           lock does not collide
+
+9.4 Scripts quality bar
+-----------------------
+  pnpm test / npm test          unit
+  pnpm test:e2e                 Playwright
+  pnpm typecheck                renderer + electron
+  pnpm lint                     next lint
+
+README still shows pnpm; Windows .bat files call npm.cmd. Both
+lockfiles exist. Prefer matching the workflow you are debugging
+(CI vs Pages vs run-app.bat).
+
+9.5 Release posture
+-------------------
+docs/RELEASE_CHECKLIST.md: do not publish GitHub Releases or Pages
+without an explicit go-ahead. ROADMAP: publishing Releases is out
+of scope without go-ahead. Windows builds unsigned.
+
+
+================================================================
+10. WORKFLOWS
+================================================================
+
+10.1 Open / import photos
+-------------------------
+  File -> Open Image / Ctrl+O / Open button / drop a file
+  Electron: fs:open-image dialog
+  Web: hidden file input (IMAGE_FILE_ACCEPT includes HEIC)
+  .lumen dropped: ingestProjectJson (not decoded as a bitmap)
+  Intent open: openImage() replaces document
+  Intent drop/folder with collage open: Media bin only
+  Progress overlay; cancel bumps a generation counter
+
+10.2 Media bin
+--------------
+  Left rail always available. Import photos or a folder.
+  Persisted in IndexedDB across sessions on this device.
+  Drag onto a collage cell (instant from workingCanvas cache).
+  Double-click fills frames in reading order (top-to-bottom,
+  left-to-right) via placeMediaOnCanvas / nextUnfilledCollageCell.
+
+10.3 Collage fill / pan / transform
+-----------------------------------
+  Tools -> Templates -> collages / occasions
+  createCollage(templateId) instantiates mat + slots
+  Click a box to highlight (activeLayerId)
+  Drag photo inside: setCollageFit pan; corners zoom (scale)
+  Drag top bar onto another box: rearrangeCollageCells (move/swap)
+  Transform Left/Top or arrow keys move the frame
+  Alt-drag filled frame (Overlays)
+  Delete/Backspace: deleteCollageFrame
+  Optimize Image grades filled photos; frames stay put
+    (collageLookTargetIds)
+
+10.4 Looks / Optimize
+---------------------
+  AI or Filters -> Optimize Image -> applyLook('pro-phone', 100)
+  Natural Color -> applyLook('natural-mobile', 100)
+  Looks Original/B&W/Warm/Cool with intensity slider
+  Adjust sliders / curves for manual grade
+  Compare hold/click to judge against history
+
+10.5 Export kit
+---------------
+  Ctrl+E / Export
+  Pick sizes or Creator pack (ig-post, ig-portrait, ig-story,
+  yt-thumb, pinterest)
+  PNG / JPEG / WebP + quality; fill or fit
+  Optional watermark handle (localStorage vista-handle)
+  Carousel split for wide images
+  Electron saveImages -> folder dialog; web directory picker
+  LastExport stored on the document for next time
+
+10.6 Save project
+-----------------
+  Ctrl+S / Save As
+  serialize to kind lumen-project JSON, atomic write *.lumen
+  Dirty flag in title (fileName * — Vista Image Studio)
+  Autosave recovery.lumen / localStorage
+  Quit: Save / Don't Save / Cancel
+  Recents (Electron paths)
+
+10.7 Print
+----------
+  File -> Print / Ctrl+P / menu:print
+  compositor.renderOutput -> PNG data URL -> hidden iframe ->
+  system print dialog. No cloud spooler.
+
+10.8 First-run
+--------------
+  If vista-onboarded is not "1", FirstRunDialog: open a photo,
+  crop 4:5 / 9:16, save .lumen, export a pack. Skip allowed.
+  Mentions command chat is not an LLM.
+
+10.9 Privacy Centre
+-------------------
+  TopBar / Tools
+  Rows: Analytics Off, Network (connectSrc), Host, User data,
+  Autosave path, ONNX models folder, local session streak.
+  Copy: no account, no telemetry, no photo upload API.
+
+10.10 Recipes and batch
+-----------------------
+  Tools -> Recipes: save current crop+look+logo locally
+  Tools -> Batch: pick recipe + folder; skip failures;
+  re-encode exports locally.
+
+
+================================================================
+11. KEY FEATURES (ALIGNED WITH docs/FEATURES.txt)
+================================================================
+
+Each item is the user-facing feature plus an architecture note.
+
+Open and projects
+  Import formats, drag/drop, Ctrl+O
+    -> canvasFromBlob, HEIC heic-to, Electron fs:open-image
+  Media bin independent of project
+    -> Zustand recentImports + IndexedDB vista-media-library
+  .lumen Save/Open/Save As, dirty, autosave, recents, quit prompt
+    -> schema kind lumen-project, useProjectPersistence, main atomic
+       write, unsaved hook + app:confirm-close
+  Light/dark UI
+    -> store.theme + ThemeProvider
+
+Canvas tools
+  Move V, Crop C (live + bake), Select M, Wand W, Hand H, zoom,
+  safe zones, Compare, Undo/Redo including AI
+    -> ToolId, EditorStage, crop-presets, selection.ts, CompareView,
+       past/future snapshots, replaceLayerPixels after AI
+
+One-click AI (on-device WASM; photos never upload)
+  Optimize Image / Natural Color
+    -> camera-profiles + applyLook (not the worker)
+  Auto Color Correct, Low Light, Dehaze, Clarity, Vibrance,
+  Denoise, Face Enhance
+    -> ai.worker gated CPU ops
+  Portrait Bokeh, Remove Background
+    -> MODNet required; MiDaS for depth; bokeh.ts
+  Magic Eraser
+    -> selection then object-removal (LaMa)
+  Instagram 4:5
+    -> setLiveCrop(cropRectForPreset(..., '4:5'))
+  Upscale 2x
+    -> resizeDocumentToLayer; live path bicubic unless model present
+
+Looks (Filters)
+  Original, B&W, Warm, Cool, intensity 0-100
+    -> FILTER_PRESETS, mix toward identity
+
+Adjust
+  Full slider set + RGB/per-channel curves
+    -> adjustments.ts, curves.ts, CurvesEditor
+
+Transform
+  Resize, rotate, flip, logo/watermark corners
+    -> transforms.ts, watermark-render.ts, TransformPanel
+  Collage frame nudge
+    -> setCollageFramePosition / offsetLayer
+
+Text
+  Six title templates, brand kit
+    -> text-templates.ts, text-render.ts, TextPanel, brandKit
+
+Layers
+  Stack, blend modes, collage cells
+    -> Layer model, LayersPanel, compositor cache
+
+Templates
+  Quick-start social, blank sizes, collages 2-6 up + occasions
+    -> NewDesignDialog, collage JSON, instantiate.ts
+
+Export
+  Platform sizes, creator pack, PNG/JPEG/WebP, fill/fit, watermark
+  stamp, carousel, no EXIF, Print Ctrl+P
+    -> export-kit.ts, ExportDialog, print.ts
+
+Recipes and batch
+  -> recipes/schema.ts kind lumen-recipe, batch/run.ts
+
+Privacy Centre
+  -> PrivacyCentre.tsx + app:privacy-info
+
+Command chat (docs/FEATURES.txt)
+  Architecture: parser + schema exist; UI not mounted in current
+  EditorShell (see 3.7). Treat as local keyword assistant only —
+  never an LLM.
+
+ROADMAP.md lag (do not implement from stale bullets):
+  MODNet and rectangle/wand selection are already in this tree.
+  DirectML, .cube LUT, RAW, plugin API, default cloud sync are not.
+
+
+================================================================
+12. DATA-FLOW DIAGRAMS (ASCII)
+================================================================
+
+12.1 Import -> store -> compositor -> canvas
+--------------------------------------------
+
+  [OS file / drop / <input> / fs:open-image]
+              |
+              v
+     canvasFromBlob()     HEIC -> heic-to WASM if needed
+              |
+              +--> workingCanvasFromSource (max edge 2048)
+              |         |
+              |         v
+              |   addRecentImport()
+              |         +--> Zustand recentImports
+              |         +--> IndexedDB putMediaItem
+              |
+              v  (if importOpensDocument)
+        openImage(canvas, fileName)
+              |
+              v
+        DocumentState { layers[0].source = canvas }
+        commit() -> past[], dirty, renderVersion++
+              |
+              v
+        EditorStage effect on renderVersion
+              |
+              v
+        compositor.render(doc)  [per-layer adjustment cache]
+              |
+              v
+        <canvas> blit + CollageCellOverlays + crop chrome
+
+
+12.2 AI worker
+--------------
+
+  AiPanel / menu:bg-remove / ...
+              |
+              v
+        imageDataOf(selectPhotoLayer().source)
+        setAiJob({ progress: -1 })
+              |
+              v
+        aiClient.*  copies buffer, postMessage to Worker
+              |                 transfer: [ArrayBuffer]
+              v
+        ai.worker.ts  switch(op)
+              |
+              +--> loadOrtWasm + fetch /models/*.onnx
+              |    (same origin / file; CSP connect-src self)
+              +--> or gated CPU algorithm
+              |
+              v
+        postMessage result (transfer buffer) + progress events
+              |
+              v
+        replaceLayerPixels OR resizeDocumentToLayer
+        renderVersion++ -> compositor -> canvas
+        setAiJob(null)
+
+
+12.3 Save / load .lumen
+-----------------------
+
+  SAVE
+    DocumentState + brandKit
+        -> serializeProject()  (PNG data URLs in assets)
+        -> stringifyProject()  JSON kind "lumen-project"
+        -> getBridge().saveProject(json, name, existingPath)
+              Electron: fs:save-project atomicWrite *.lumen
+              Web: download Untitled.lumen (path null)
+        -> markSaved(path), clearAutosave, addRecent
+
+  LOAD
+    getBridge().openProject() or openProjectPath()
+        -> parseProjectJson (no eval)
+        -> assertSafeProjectShape (data URLs only)
+        -> migrateProject / inspect future -> readOnly
+        -> deserialize: fetch(dataUrl) -> canvasFromBlob
+        -> loadProjectDocument(doc, brandKit)
+
+  AUTOSAVE
+    dirty debounce 2s
+        -> if json.length <= 12MB
+        -> Electron recovery.lumen under userData
+        -> Web localStorage vista-autosave
+
+
+12.4 Collage fill
+-----------------
+
+  Media bin item
+        -> canvasFromRecentImport (workingCanvas cache)
+        -> placeMediaOnCanvas(photo, name, point?)
+              hit collageCellAtPoint or nextUnfilledCollageCell
+        -> fillCollageCell: cover-crop into collageCell size,
+           store collageOriginal + collageFit
+        -> compositor drawDocumentLayer clips slot shape
+
+
+12.5 Print
+----------
+
+  menu:print / Ctrl+P
+        -> printComposite(doc)
+        -> compositor.renderOutput (honours live crop)
+        -> toDataURL PNG -> iframe -> window.print()
+
+
+================================================================
+13. FOLDER MAP
+================================================================
+
+Root (roles, one line each)
+
+  app/                      Next App Router: layout, page, CSS
+  components/editor/        React editor UI (shell, chrome, panels)
+  components/ui/            shadcn/Base UI primitives
+  features/editor/          document engine, store, project, collage
+  features/ai/              ONNX/CPU algorithms + worker + client
+  lib/image/                canvas helpers, HEIC, fit/export blit
+  lib/platform/             bridge, recents, IndexedDB media library
+  lib/public-url.ts         GitHub Pages basePath prefix
+  lib/utils.ts              cn() class merger
+  electron/main/            privileged Node process
+  electron/preload/         window.lumen allowlist
+  electron/splash.ts        native splash HTML
+  public/                   icons, models/, ort/, optional music/
+  scripts/                  sync models/wasm/music, preview-web,
+                            prepare-ffmpeg, stop leftover dev
+  tests/unit/               Vitest
+  tests/e2e/                Playwright
+  docs/                     architecture, privacy, schema, Features,
+                            marketing HTML (index/privacy/terms)
+  build/                    macOS entitlements
+  resources/                builder extra (models, optional ffmpeg)
+  .github/workflows/        ci.yml, pages.yml
+  next.config.mjs           export vs dev distDir
+  electron-builder.yml      NSIS/portable/APPX/mac/linux
+  package.json              name vista-image-studio
+  vitest.config.ts          unit + coverage
+  playwright.config.ts      chromium + electron projects
+  components.json           shadcn aliases
+  AGENTS.md                 Next 16 agent warning
+  LICENSE, THIRD_PARTY_NOTICES.md
+  README.md, START-HERE.txt
+  run-app.bat, run-web.bat, preview-web.bat,
+  build-exe.bat, build-appx.bat
+
+  out/                      Electron static export (gitignored)
+  out-web/                  Pages static export (gitignored)
+  dist/                     electron-builder output (gitignored)
+  dist-electron/            tsc -p electron (gitignored)
+  .next/                    Next dev/build cache (gitignored)
+
+components/editor (UI)
+
+  EditorShell.tsx           application root
+  canvas/EditorStage.tsx    compositing view + tools
+  canvas/CollageCellOverlays.tsx
+  canvas/TextBoxOverlay.tsx
+  canvas/CheckerPattern.tsx
+  chrome/TitleBar.tsx       Windows Electron chrome
+  chrome/TopBar.tsx         menus, export, theme
+  chrome/AppMenu.tsx        File/Edit
+  chrome/ImportedImagesBin.tsx
+  chrome/RightPanel.tsx     tab host
+  chrome/ThemeProvider.tsx
+  chrome/LaunchSplash.tsx
+  chrome/ImportProgressOverlay.tsx
+  chrome/AiProgressOverlay.tsx
+  chrome/StatusToast.tsx
+  toolbar/Toolbar.tsx
+  panels/AiPanel.tsx
+  panels/FiltersPanel.tsx
+  panels/AdjustmentsPanel.tsx
+  panels/LayersPanel.tsx
+  panels/TextPanel.tsx
+  panels/TransformPanel.tsx
+  panels/Slider.tsx, CurvesEditor.tsx
+  dialogs/ExportDialog.tsx
+  dialogs/NewDesignDialog.tsx
+  dialogs/FirstRunDialog.tsx
+  dialogs/PrivacyCentre.tsx
+  dialogs/RecipesDialog.tsx
+  dialogs/BatchDialog.tsx
+  dialogs/ConfirmDialog.tsx
+  compare/CompareView.tsx
+  chat/CommandChat.tsx      not mounted in current shell
+  hooks/use-unsaved-changes.tsx
+
+features/editor (engine)
+
+  types.ts                  DocumentState, Layer, Adjustments
+  store/editor-store.ts     Zustand
+  engine/compositor.ts
+  engine/adjustments.ts
+  engine/curves.ts
+  engine/selection.ts
+  engine/transforms.ts
+  engine/collage.ts
+  engine/text-render.ts
+  engine/watermark-render.ts
+  project/schema.ts         lumen-project
+  project/serialize.ts
+  project/validate.ts
+  project/migrate.ts
+  project/use-persistence.ts
+  project/unsaved.ts
+  collage/                  templates, instantiate, geometry, decor
+  collage-templates.ts      re-export of layout templates
+  collage-frame.ts
+  media-import.ts
+  media-drag.ts
+  looks.ts, filter-presets.ts, camera-profiles.ts
+  crop-presets.ts, text-templates.ts
+  export-kit.ts, export-presets.ts
+  recipes/schema.ts         lumen-recipe
+  batch/run.ts
+  command-parser.ts
+  commands/schema.ts, commands/from-text.ts
+  print.ts, viewport.ts
+
+features/ai
+
+  ai-client.ts
+  ort-runtime.ts
+  workers/ai.worker.ts
+  algorithms/*              listed in section 5
+
+electron
+
+  main/index.ts             local OS backend
+  preload/index.ts          window.lumen
+  tsconfig.json             CommonJS out dist-electron
+  splash.ts
+
+lib/platform
+
+  bridge.ts                 LumenBridge, window.lumen types
+  recents.ts
+  media-library.ts
+
+
+================================================================
+14. SECURITY AND PRIVACY
+================================================================
+
+14.1 Renderer isolation
+-----------------------
+  contextIsolation: true
+  nodeIntegration: false
+  sandbox: true
+  webSecurity: true
+  allowRunningInsecureContent: false
+
+The renderer cannot require('fs'). All OS access is window.lumen.
+
+14.2 IPC allowlist
+------------------
+Unknown channels are not forwarded. This is defence in depth, not
+a substitute for validating payloads (main checks extensions, .lumen
+suffix, ".." , JSON size).
+
+14.3 Navigation
+---------------
+will-navigate: only localhost:3000 in dev or packaged file:// *.html.
+Dropped images must not navigate. Other http(s) -> system browser.
+setWindowOpenHandler denies new windows; http(s) opens externally.
+
+14.4 CSP (electron/main/index.ts)
+---------------------------------
+  default-src 'self'
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'
+    Next static export uses inline boot scripts; ORT WASM needs
+    eval/wasm-eval. All script bytes are still local.
+  style-src 'self' 'unsafe-inline'
+  img-src 'self' data: blob:
+  worker-src 'self' blob:
+  connect-src production: 'self' blob: data:
+  connect-src dev: also localhost:3000 HTTP/WS and 127.0.0.1:7255
+
+There is no wildcard https: in connect-src. The editor cannot call
+arbitrary cloud inference even if a future bug tried fetch().
+
+14.5 No cloud upload
+--------------------
+No photo multipart API, no analytics SDK, no account. Export and
+print stay on-device. Command history is text in localStorage.
+
+docs/index.html (marketing) may use GitHub's API; it is not inside
+the Electron asar.
+
+14.6 Models on disk
+-------------------
+Weights are local files. sync-models.mjs runs at dev/build time
+(developer machine / CI), not while a user is editing under
+production CSP. Packaged extraResources copies *.onnx next to the
+app. Users can inspect Privacy Centre -> ONNX models path.
+
+14.7 Media library local
+------------------------
+IndexedDB vista-media-library lives in the Chromium profile
+(Electron userData or the browser origin). Clearing site data /
+uninstalling removes it. It is not synced. Cap 200 imports.
+
+.lumen files are user documents the user chose a path for. Autosave
+is under userData (AppData), not Program Files (RELEASE_CHECKLIST).
+
+14.8 Project file safety
+------------------------
+Never eval JSON. Only embedded PNG/JPEG data URLs. Future schema
+opens read-only. Writes are atomic. Renderer autosave cap ~12 MB.
+
+14.9 EXIF
+---------
+Canvas re-encode on export. Camera EXIF is not copied.
+
+14.10 Known limitations (honest)
+--------------------------------
+  - Windows builds unsigned (SmartScreen).
+  - HEIC first decode can take seconds (WASM).
+  - Colour is sRGB 8-bit. No RAW, ICC, or wide gamut.
+  - script-src unsafe-inline/unsafe-eval is a real CSP concession
+    for Next inline boot + ORT; isolation still relies on no remote
+    script hosts and connect-src self.
+  - DirectML GPU EP is typed but not enabled (backend wasm).
+  - Command chat UI is currently unmounted; do not advertise it as
+    a visible LLM.
+
+14.11 Privacy Centre as the in-app audit
+----------------------------------------
+The dialog is the user-visible counterpart to this section: host,
+connect-src, userData, autosave, models folder, analytics=off.
+
+
+================================================================
+END OF DOCUMENT
+================================================================
+
+When behaviour changes, update this file together with
+docs/ARCHITECTURE.md, docs/FEATURES.txt, docs/AI.md,
+docs/PRIVACY.md, and docs/PROJECT_SCHEMA.md so product and
+engineering stay aligned. Keep .lumen / lumen-project /
+window.lumen names accurate unless a versioned schema migration
+is explicitly designed.

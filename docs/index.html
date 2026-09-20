@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vista Image Studio — Privacy-first social photo editor</title>
+<meta name="description" content="Local-first photo editor. Optimize Image, Magic Eraser (LaMa), Portrait Bokeh, Remove Background, crop, looks, .lumen projects, Instagram export pack — no cloud, no account, no telemetry.">
+<style>
+  :root {
+    --bg: #14161c;
+    --bg-elev: #1b1e26;
+    --bg-elev-2: #20232d;
+    --border: #2c2f3a;
+    --text: #e7e8ec;
+    --text-dim: #9a9daa;
+    --accent: #7c8cff;
+    --accent-2: #a78bfa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(124,140,255,0.14), transparent 60%),
+      radial-gradient(900px 500px at 100% 10%, rgba(167,139,250,0.10), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
+  .brand .dot { width: 10px; height: 10px; border-radius: 3px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+  nav a.gh { color: var(--text-dim); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  nav a.gh:hover { color: var(--text); }
+
+  header.hero { text-align: center; padding: 72px 0 56px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--accent-2); background: rgba(124,140,255,0.10);
+    border: 1px solid rgba(124,140,255,0.25); padding: 5px 12px; border-radius: 999px;
+    margin-bottom: 22px;
+  }
+  h1 { font-size: 46px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; }
+  h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede { max-width: 580px; margin: 18px auto 0; color: var(--text-dim); font-size: 16px; }
+
+  .cta-row { display: flex; gap: 12px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 22px; border-radius: 10px; font-size: 14px; font-weight: 600;
+    text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: transform .15s ease, opacity .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #14161c; }
+  .btn-primary:hover { opacity: 0.92; }
+  .btn-ghost { background: var(--bg-elev); color: var(--text); border-color: var(--border); }
+  .btn-ghost:hover { background: var(--bg-elev-2); }
+  .btn small { opacity: 0.75; font-weight: 500; }
+
+  .platform-row { display: flex; gap: 18px; justify-content: center; margin-top: 16px; font-size: 12px; color: var(--text-dim); flex-wrap: wrap; }
+  .platform-row a { color: var(--text-dim); text-decoration: none; border-bottom: 1px dashed var(--border); }
+  .platform-row a:hover { color: var(--text); }
+
+  .mockup {
+    margin: 56px auto 0; max-width: 900px; border-radius: 14px; overflow: hidden;
+    background: var(--bg-elev); border: 1px solid var(--border);
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.55);
+  }
+  .mockup-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: var(--bg-elev-2); border-bottom: 1px solid var(--border); }
+  .mockup-bar span { width: 9px; height: 9px; border-radius: 50%; background: #3a3d47; }
+  .mockup-body { display: grid; grid-template-columns: 44px 1fr 220px; height: 320px; }
+  .m-toolbar { background: var(--bg-elev); border-right: 1px solid var(--border); }
+  .m-canvas {
+    background:
+      linear-gradient(45deg, #22252e 25%, transparent 25%), linear-gradient(-45deg, #22252e 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #22252e 75%), linear-gradient(-45deg, transparent 75%, #22252e 75%);
+    background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .m-canvas .ph { width: 60%; height: 70%; border-radius: 8px; background: linear-gradient(135deg, rgba(124,140,255,0.35), rgba(167,139,250,0.25)); border: 1px solid rgba(255,255,255,0.08); }
+  .m-panel { background: var(--bg-elev); border-left: 1px solid var(--border); padding: 14px; }
+  .m-panel .row { height: 8px; border-radius: 4px; background: var(--bg-elev-2); margin-bottom: 10px; }
+  .m-panel .row:nth-child(1) { width: 60%; }
+  .m-panel .row:nth-child(2) { width: 90%; }
+  .m-panel .row:nth-child(3) { width: 75%; }
+  .m-panel .slider { height: 4px; border-radius: 2px; background: var(--border); margin-bottom: 18px; position: relative; }
+  .m-panel .slider::after { content:''; position:absolute; left:0; top:-3px; width:10px; height:10px; border-radius:50%; background: var(--accent); }
+
+  section { padding: 76px 0; }
+  .section-head { text-align: center; margin-bottom: 44px; }
+  .section-head h2 { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; }
+  .section-head p { color: var(--text-dim); margin-top: 10px; font-size: 15px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } .mockup-body { grid-template-columns: 32px 1fr; } .m-panel { display:none; } h1 { font-size: 32px; } }
+
+  .card {
+    background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; padding: 22px;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .card:hover { border-color: rgba(124,140,255,0.4); transform: translateY(-2px); }
+  .card .icon {
+    width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    background: rgba(124,140,255,0.12); color: var(--accent); margin-bottom: 14px;
+  }
+  .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--text-dim); }
+  .card.ai .icon { background: rgba(167,139,250,0.14); color: var(--accent-2); }
+
+  .catalog {
+    margin-top: 36px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 28px 16px;
+  }
+  .catalog h3 { font-size: 16px; margin-bottom: 6px; }
+  .catalog .sub { color: var(--text-dim); font-size: 13px; margin-bottom: 20px; }
+  .catalog-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 28px; }
+  @media (max-width: 760px) { .catalog-grid { grid-template-columns: 1fr; } }
+  .catalog-grid dt { font-size: 13px; font-weight: 600; padding-top: 10px; }
+  .catalog-grid dd { font-size: 13px; color: var(--text-dim); padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .catalog-grid dt:first-child { padding-top: 0; }
+
+  .howto {
+    margin-top: 48px; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; padding: 28px;
+  }
+  .howto h3 { font-size: 16px; margin-bottom: 14px; }
+  .howto ol { padding-left: 20px; color: var(--text-dim); font-size: 14px; }
+  .howto li { margin-bottom: 8px; }
+  .howto code { font-size: 12px; background: var(--bg-elev-2); padding: 1px 6px; border-radius: 4px; color: var(--text); }
+
+  .strip {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center;
+    padding: 40px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .strip .stat b { display: block; font-size: 22px; color: var(--text); }
+  .strip .stat span { font-size: 12px; color: var(--text-dim); }
+  @media (max-width: 700px) { .strip { grid-template-columns: repeat(2, 1fr); } }
+
+  footer { text-align: center; padding: 48px 0 60px; color: var(--text-dim); font-size: 13px; }
+  footer a { color: var(--text-dim); text-decoration: none; border-bottom: 1px dashed var(--border); }
+  footer a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="brand"><span class="dot"></span> Vista Image Studio</div>
+    <a class="gh" href="https://github.com/OWNER/REPO" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      View on GitHub
+    </a>
+  </nav>
+
+  <header class="hero">
+    <span class="eyebrow">● Fully offline · No account · No telemetry</span>
+    <h1>Social photo edits that<br>stay on <span>your PC</span>.</h1>
+    <p class="lede">Open a photo, Optimize Image, crop for Instagram, erase objects, cut the background, add text or a logo, save a <code>.lumen</code> project, export a creator pack — all local. No cloud, no account, no LLM.</p>
+
+    <div class="cta-row">
+      <a id="primary-download" class="btn btn-primary" href="https://github.com/OWNER/REPO/releases/latest" target="_blank" rel="noopener">
+        ⬇ Download for Windows <small id="version-tag"></small>
+      </a>
+      <a class="btn btn-ghost" href="#features">See all features</a>
+      <a class="btn btn-ghost" href="FEATURES.txt">Share sheet (.txt)</a>
+    </div>
+    <div class="platform-row">
+      <span>Also available for:</span>
+      <a id="link-mac" href="https://github.com/OWNER/REPO/releases/latest" target="_blank" rel="noopener">macOS</a>
+      <a id="link-linux" href="https://github.com/OWNER/REPO/releases/latest" target="_blank" rel="noopener">Linux (AppImage / deb)</a>
+      <a id="link-all" href="https://github.com/OWNER/REPO/releases" target="_blank" rel="noopener">All releases →</a>
+    </div>
+
+    <div class="mockup">
+      <div class="mockup-bar"><span></span><span></span><span></span></div>
+      <div class="mockup-body">
+        <div class="m-toolbar"></div>
+        <div class="m-canvas"><div class="ph"></div></div>
+        <div class="m-panel">
+          <div class="row"></div><div class="row"></div><div class="row"></div>
+          <div class="slider"></div><div class="slider"></div><div class="slider"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="strip">
+    <div class="stat"><b>0</b><span>cloud uploads</span></div>
+    <div class="stat"><b>.lumen</b><span>project files</span></div>
+    <div class="stat"><b>On-device</b><span>MODNet · MiDaS · LaMa</span></div>
+    <div class="stat"><b>100%</b><span>offline-capable</span></div>
+  </div>
+
+  <section id="features">
+    <div class="section-head">
+      <h2>Built for creators who keep pixels local</h2>
+      <p>Optimize Image, Magic Eraser, Portrait Bokeh, crop, looks, text, collages, export pack — all on-device.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card ai">
+        <div class="icon">✦</div>
+        <h3>Optimize Image</h3>
+        <p>One-click grade at the top of AI and Filters: brightness, colour, vibrance, clarity, sharpness. Natural Color sits next to it for a true-to-life look.</p>
+      </div>
+      <div class="card ai">
+        <div class="icon">✂</div>
+        <h3>Remove Background</h3>
+        <p>On-device MODNet matting cuts the subject free on a transparent checkerboard. No cloud upload, no silent flood-fill fallback.</p>
+      </div>
+      <div class="card ai">
+        <div class="icon">⌫</div>
+        <h3>Magic Eraser</h3>
+        <p>Box-select (M) or Magic Wand (W), then fill the hole with LaMa inpainting. Progress overlay; first run loads a local ~208MB model.</p>
+      </div>
+      <div class="card ai">
+        <div class="icon">◎</div>
+        <h3>Portrait Bokeh</h3>
+        <p>Depth-based disc bokeh: MiDaS depth + MODNet subject — sharp person, soft falloff, glowing highlight orbs.</p>
+      </div>
+      <div class="card">
+        <div class="icon">▣</div>
+        <h3>Live crop + Instagram 4:5</h3>
+        <p>1:1, 4:5, 9:16, 16:9, custom — move and resize handles. One-click Instagram 4:5 from AI; Story safe-zone overlay.</p>
+      </div>
+      <div class="card">
+        <div class="icon">✨</div>
+        <h3>Looks</h3>
+        <p>Original, B&amp;W, Warm, Cool with 0–100 intensity. Optimize Image is pinned at the top of Filters.</p>
+      </div>
+      <div class="card">
+        <div class="icon">◐</div>
+        <h3>Full adjust stack</h3>
+        <p>Exposure, brightness, contrast, sat, temp, tint, highlights, shadows, whites, blacks, vibrance, sharpness + RGB curves.</p>
+      </div>
+      <div class="card">
+        <div class="icon">▤</div>
+        <h3>Layers, text &amp; collages</h3>
+        <p>Blend modes, opacity, lock, templates (headline, quote, sticker…), brand kit, collage layouts. Move frames; double-click Media to fill boxes in order. File → Print (Ctrl+P).</p>
+      </div>
+      <div class="card">
+        <div class="icon">💾</div>
+        <h3>.lumen projects</h3>
+        <p>Save / Open / Save As with dirty flag, autosave, recents, and a quit prompt so you don’t lose work.</p>
+      </div>
+      <div class="card">
+        <div class="icon">📦</div>
+        <h3>Smart social export</h3>
+        <p>IG / Stories / YouTube / Pinterest / LinkedIn / X / Facebook pack, carousel split, handle stamp, EXIF-free canvas export.</p>
+      </div>
+      <div class="card">
+        <div class="icon">◑</div>
+        <h3>Compare</h3>
+        <p>Hold Compare to peek at the original. Click for a before/after split and pick how many history steps back.</p>
+      </div>
+      <div class="card">
+        <div class="icon">📷</div>
+        <h3>Import anything common</h3>
+        <p>PNG, JPEG, WebP, HEIC (iPhone), AVIF, BMP, GIF, TIFF — drag into the window, Open, or drop a folder into the media bin.</p>
+      </div>
+      <div class="card">
+        <div class="icon">📖</div>
+        <h3>Recipes &amp; batch</h3>
+        <p>Save crop + look + logo as a local recipe. Apply a recipe to a folder of photos; failures are skipped.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🛡</div>
+        <h3>Privacy Centre</h3>
+        <p>In-app audit: analytics off, CSP/paths, first-run walkthrough. Photos and models never leave the device.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🏷</div>
+        <h3>Logo &amp; handle</h3>
+        <p>PNG/JPEG logo or text watermark as a live overlay — corner, opacity, and scale, included in history and recipes.</p>
+      </div>
+    </div>
+
+    <div class="catalog">
+      <h3>Complete feature list</h3>
+      <p class="sub">Same inventory as <a href="FEATURES.txt" style="color:var(--accent-2)">FEATURES.txt</a> — everything in the current build.</p>
+      <dl class="catalog-grid">
+        <dt>Optimize Image</dt>
+        <dd>One-click grade (AI + Filters): brightness, colour, vibrance, clarity, sharpness.</dd>
+        <dt>Natural Color</dt>
+        <dd>True-to-life mobile grade — sun stays white-gold.</dd>
+        <dt>Auto Color Correct</dt>
+        <dd>Local auto white-balance / levels.</dd>
+        <dt>Portrait Bokeh</dt>
+        <dd>MiDaS depth + MODNet subject; disc bokeh with highlight orbs.</dd>
+        <dt>Remove Background</dt>
+        <dd>MODNet portrait matting; transparent checkerboard behind the subject.</dd>
+        <dt>Magic Eraser</dt>
+        <dd>Select with box (M) or wand (W); LaMa fills the hole on-device.</dd>
+        <dt>Instagram 4:5</dt>
+        <dd>Largest centred 4:5 crop from the AI panel; confirm in Transform.</dd>
+        <dt>Low Light / Dehaze / Clarity / Vibrance</dt>
+        <dd>One-click local enhance ops with a progress overlay.</dd>
+        <dt>Upscale 2×</dt>
+        <dd>Enlarge the photo and resize the document.</dd>
+        <dt>Denoise</dt>
+        <dd>Strength slider, then Apply Denoise.</dd>
+        <dt>Face Enhance</dt>
+        <dd>Smoothing + clarity sliders, then Apply Face Enhance.</dd>
+        <dt>Looks</dt>
+        <dd>Original, B&amp;W, Warm, Cool; intensity 0–100.</dd>
+        <dt>Adjust</dt>
+        <dd>Exposure through sharpness, plus RGB / per-channel curves.</dd>
+        <dt>Crop tools</dt>
+        <dd>Move (V), Crop (C) with handles, Free / 1:1 / 4:5 / 9:16 / 16:9 / custom; Apply or Bake.</dd>
+        <dt>Select tools</dt>
+        <dd>Box Select (M) and Magic Wand (W) for Magic Eraser.</dd>
+        <dt>Navigate</dt>
+        <dd>Hand / Pan (H), zoom in/out/fit/actual pixels, scroll-wheel zoom, Story safe zones.</dd>
+        <dt>Compare</dt>
+        <dd>Hold to peek original; click for before/after split and history depth.</dd>
+        <dt>Undo / Redo</dt>
+        <dd>Ctrl+Z / Ctrl+Shift+Z, including AI edits.</dd>
+        <dt>Resize / rotate / flip</dt>
+        <dd>Lock-aspect resize, 90° CW/CCW, flip H/V.</dd>
+        <dt>Logo / watermark</dt>
+        <dd>PNG/JPEG logo or text handle; corners, opacity, scale.</dd>
+        <dt>Text</dt>
+        <dd>Headline, subtitle, quote, highlight caption, story sticker, minimal caption; brand kit.</dd>
+        <dt>Layers</dt>
+        <dd>Visibility, lock, opacity, duplicate, reorder; nine blend modes.</dd>
+        <dt>Templates</dt>
+        <dd>Quick-start social sizes with text placed; blank platform sizes.</dd>
+        <dt>Collages</dt>
+        <dd>2 / 3 / 4 / 5 / 6 photo layouts; drag from Media; click a box to pan/zoom the photo inside; swap cells.</dd>
+        <dt>Media bin</dt>
+        <dd>Recent imports in the left rail; folder drop; drag onto templates.</dd>
+        <dt>.lumen projects</dt>
+        <dd>Save / Open / Save As, dirty flag, autosave, recents, quit prompt.</dd>
+        <dt>Export pack</dt>
+        <dd>9 sizes (Original + IG/Story/YT/Pinterest/LinkedIn/X/Facebook), PNG/JPEG/WebP, carousel split, handle stamp, no EXIF.</dd>
+        <dt>Recipes &amp; batch</dt>
+        <dd>Save crop + look + logo; apply a recipe to a folder; skip failures.</dd>
+        <dt>Import formats</dt>
+        <dd>PNG, JPEG, WebP, HEIC, AVIF, BMP, GIF, TIFF.</dd>
+        <dt>Privacy Centre</dt>
+        <dd>Analytics off, CSP/paths, first-run walkthrough. Models run on-device (MODNet, MiDaS, LaMa).</dd>
+        <dt>Light / dark UI</dt>
+        <dd>Toggle in the title bar.</dd>
+      </dl>
+    </div>
+
+    <div class="howto">
+      <h3>How to use (30 seconds)</h3>
+      <ol>
+        <li><b>Open</b> a photo (or drop it — HEIC from iPhone is fine).</li>
+        <li><b>AI</b> or <b>Filters</b> → Optimize Image.</li>
+        <li>Optional: Portrait Bokeh, Remove Background, or Magic Eraser (Select <code>M</code> / Wand <code>W</code> first).</li>
+        <li><b>Transform</b> → crop 4:5 (or AI → Instagram 4:5, then confirm).</li>
+        <li>Optional: Warm / Cool / B&amp;W, Adjust sliders, text, or logo.</li>
+        <li><b>Save</b> as <code>.lumen</code> (Ctrl+S) → <b>Export</b> (Ctrl+E) Creator pack.</li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Vista Image Studio. All rights reserved. Pixels stay on your device.</p>
+    <p style="margin-top: 8px;">
+      <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a> · <a href="license.html">License</a> · <a href="FEATURES.txt">Features (.txt)</a>
+    </p>
+  </footer>
+</div>
+
+<script>
+  const REPO = "OWNER/REPO";
+
+  fetch(`https://api.github.com/repos/${REPO}/releases/latest`)
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(release => {
+      const assets = release.assets || [];
+      const find = (re) => assets.find(a => re.test(a.name));
+
+      const win = find(/\.exe$/i);
+      const mac = find(/\.dmg$/i);
+      const linux = find(/\.AppImage$/i) || find(/\.deb$/i);
+
+      if (release.tag_name) {
+        document.getElementById('version-tag').textContent = `(${release.tag_name})`;
+      }
+      if (win) document.getElementById('primary-download').href = win.browser_download_url;
+      if (mac) document.getElementById('link-mac').href = mac.browser_download_url;
+      if (linux) document.getElementById('link-linux').href = linux.browser_download_url;
+    })
+    .catch(() => {});
+</script>
+</body>
+</html>

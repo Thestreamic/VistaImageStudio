@@ -1,0 +1,57 @@
+# v0 sandbox internal files
+__v0_runtime_loader.js
+__v0_devtools.tsx
+__v0_jsx-dev-runtime.ts
+.snowflake/
+.v0-trash/
+.vercel/
+
+# Environment variables
+.env*.local
+
+# Dependencies and build output (regenerate with npm install / npm run build)
+node_modules/
+.next/
+out/
+out-web/
+dist/
+dist-electron/
+coverage/
+playwright-report/
+test-results/
+test-results/**
+*.tsbuildinfo
+
+# Local IDE / OS
+.cursor/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+# Packaged copy for GitHub Pages (generated folder)
+Git/
+
+# Installer / zip scratch
+.zip-vista-v2/
+
+# Generated from Vistora-Music-Library (source of truth stays that repo)
+public/music/tracks/
+public/music/manifest.json
+public/music/LICENSES/
+resources/ffmpeg/
+
+# onnxruntime-web WASM copies (scripts/sync-ort-wasm.mjs)
+public/ort/*.mjs
+public/ort/*.wasm
+
+# ONNX weights — too large for git; downloaded by scripts/sync-models.mjs
+public/models/*.onnx
+public/models/*.onnx.part
+resources/models/*.onnx
+resources/models/*.onnx.part
+
+# Not used by the GitHub Pages site
+electron/
+dist-electron/
+

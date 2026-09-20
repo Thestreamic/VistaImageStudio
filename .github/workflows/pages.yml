@@ -1,0 +1,64 @@
+# Manual run, or every push to main.
+name: Deploy web to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      base_path:
+        description: "Override URL prefix. Leave empty to auto-detect (user site vs /repo-name)."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Resolve GitHub Pages base path
+        id: base
+        run: |
+          if [ -n "${{ github.event.inputs.base_path }}" ]; then
+            echo "path=${{ github.event.inputs.base_path }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          OWNER="${{ github.repository_owner }}"
+          NAME="${{ github.event.repository.name }}"
+          if [ "$NAME" = "${OWNER}.github.io" ]; then
+            echo "path=" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=/${NAME}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Export static web
+        run: npm run build:web
+        env:
+          BASE_PATH: ${{ steps.base.outputs.path }}
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.base.outputs.path }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out-web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

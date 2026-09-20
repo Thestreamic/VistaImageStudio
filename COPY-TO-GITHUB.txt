@@ -1,0 +1,18 @@
+Copy EVERYTHING inside this folder into the ROOT of your GitHub repo
+(the same place as .gitignore). Do not put it inside another folder
+named VistaImageStudio.
+
+Then:
+  1. On github.com → your repo → Settings → Pages
+     Build and deployment → Source → GitHub Actions → Save
+  2. GitHub Desktop: Commit → Push to branch "main"
+  3. Repo → Actions → wait until "Deploy web to GitHub Pages" is green
+  4. Settings → Pages shows the URL, for example:
+       https://YOURNAME.github.io/YOUR-REPO/
+
+Open that URL on your phone or another laptop.
+
+Do NOT copy node_modules, .next, dist, or .onnx model files.
+Those are not in this folder. GitHub builds them for you.
+
+Photos never upload. The site runs in the visitor's browser.

@@ -1,0 +1,33 @@
+{
+  "license": "CC0-1.0",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "composer": "Vista Image Studio",
+  "verified_date": "2026-09-20",
+  "note": "Original instrumental beds written for this app and released under CC0 1.0. No third-party samples. Safe for commercial sale of the app and of videos that include these tracks. No attribution required.",
+  "tracks": [
+    { "id": "travel-horizon", "title": "Horizon Road", "category": "Travel", "mood": "Open", "root": 62, "bpm": 92, "kind": "pad-pluck" },
+    { "id": "travel-atlas", "title": "Open Atlas", "category": "Travel", "mood": "Wide", "root": 57, "bpm": 88, "kind": "pad-pluck" },
+    { "id": "cine-overture", "title": "Quiet Overture", "category": "Cinematic", "mood": "Grand", "root": 50, "bpm": 72, "kind": "strings" },
+    { "id": "cine-take", "title": "Long Take", "category": "Cinematic", "mood": "Slow", "root": 53, "bpm": 68, "kind": "strings" },
+    { "id": "chill-windows", "title": "Soft Windows", "category": "Chill", "mood": "Easy", "root": 60, "bpm": 84, "kind": "keys" },
+    { "id": "chill-tea", "title": "Evening Tea", "category": "Chill", "mood": "Warm", "root": 55, "bpm": 80, "kind": "keys" },
+    { "id": "amb-harbour", "title": "Glass Harbour", "category": "Ambient", "mood": "Airy", "root": 64, "bpm": 60, "kind": "drone" },
+    { "id": "amb-drift", "title": "Pale Drift", "category": "Ambient", "mood": "Soft", "root": 52, "bpm": 56, "kind": "drone" },
+    { "id": "happy-market", "title": "Sunday Market", "category": "Happy", "mood": "Bright", "root": 67, "bpm": 108, "kind": "pluck" },
+    { "id": "happy-porch", "title": "Bright Porch", "category": "Happy", "mood": "Sunny", "root": 65, "bpm": 104, "kind": "pluck" },
+    { "id": "up-click", "title": "Click Track", "category": "Upbeat", "mood": "Pulse", "root": 62, "bpm": 118, "kind": "pulse" },
+    { "id": "up-city", "title": "City Step", "category": "Upbeat", "mood": "Move", "root": 59, "bpm": 122, "kind": "pulse" },
+    { "id": "emo-held", "title": "Held Note", "category": "Emotional", "mood": "Tender", "root": 48, "bpm": 70, "kind": "strings" },
+    { "id": "emo-rain", "title": "After Rain", "category": "Emotional", "mood": "Quiet", "root": 51, "bpm": 66, "kind": "keys" },
+    { "id": "rom-lamp", "title": "Low Lamp", "category": "Romantic", "mood": "Close", "root": 54, "bpm": 74, "kind": "keys" },
+    { "id": "rom-chairs", "title": "Two Chairs", "category": "Romantic", "mood": "Gentle", "root": 57, "bpm": 76, "kind": "pad-pluck" },
+    { "id": "life-kitchen", "title": "Kitchen Light", "category": "Lifestyle", "mood": "Home", "root": 60, "bpm": 96, "kind": "pluck" },
+    { "id": "life-walk", "title": "Walk Home", "category": "Lifestyle", "mood": "Calm", "root": 58, "bpm": 90, "kind": "pad-pluck" },
+    { "id": "tech-grid", "title": "Clean Grid", "category": "Technology", "mood": "Focus", "root": 61, "bpm": 112, "kind": "pulse" },
+    { "id": "tech-server", "title": "Quiet Server", "category": "Technology", "mood": "Cool", "root": 49, "bpm": 100, "kind": "drone" },
+    { "id": "insp-first", "title": "First Light", "category": "Inspirational", "mood": "Hope", "root": 64, "bpm": 86, "kind": "strings" },
+    { "id": "insp-rise", "title": "Rise Slow", "category": "Inspirational", "mood": "Lift", "root": 55, "bpm": 82, "kind": "strings" },
+    { "id": "min-line", "title": "One Line", "category": "Minimal", "mood": "Sparse", "root": 62, "bpm": 64, "kind": "drone" },
+    { "id": "min-room", "title": "Still Room", "category": "Minimal", "mood": "Empty", "root": 50, "bpm": 58, "kind": "drone" }
+  ]
+}

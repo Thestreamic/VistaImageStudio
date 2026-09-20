@@ -1,0 +1,216 @@
+[
+  {
+    "id": "family-polaroid-6",
+    "name": "Family",
+    "category": ["family"],
+    "aspectRatio": "portrait",
+    "canvasWidth": 1080,
+    "canvasHeight": 1350,
+    "backgroundColor": "#f3ead8",
+    "backgroundPattern": "speckle",
+    "slots": [
+      { "id": "p1", "x": 0.08, "y": 0.13, "width": 0.38, "height": 0.24, "rotation": -6, "shape": "polaroid", "zIndex": 2 },
+      { "id": "p2", "x": 0.54, "y": 0.12, "width": 0.38, "height": 0.24, "rotation": 5, "shape": "polaroid", "zIndex": 3 },
+      { "id": "p3", "x": 0.07, "y": 0.42, "width": 0.38, "height": 0.24, "rotation": 4, "shape": "polaroid", "zIndex": 4 },
+      { "id": "p4", "x": 0.53, "y": 0.41, "width": 0.4, "height": 0.25, "rotation": -5, "shape": "polaroid", "zIndex": 5 },
+      { "id": "p5", "x": 0.09, "y": 0.71, "width": 0.38, "height": 0.2, "rotation": 3, "shape": "polaroid", "zIndex": 6 },
+      { "id": "p6", "x": 0.54, "y": 0.72, "width": 0.37, "height": 0.2, "rotation": -4, "shape": "polaroid", "zIndex": 7 }
+    ],
+    "decorations": [
+      {
+        "type": "text",
+        "x": 0.5,
+        "y": 0.055,
+        "content": "Family",
+        "fontFamily": "Playfair Display",
+        "fontSize": 92,
+        "fontWeight": 700,
+        "color": "#6b3f2a",
+        "zIndex": 20
+      },
+      { "type": "sticker", "x": 0.03, "y": 0.36, "width": 0.06, "height": 0.05, "shape": "heart", "color": "#c45c6a", "zIndex": 21 },
+      { "type": "sticker", "x": 0.46, "y": 0.34, "width": 0.05, "height": 0.04, "shape": "heart", "color": "#e08a96", "zIndex": 22 },
+      { "type": "sticker", "x": 0.91, "y": 0.38, "width": 0.055, "height": 0.045, "shape": "heart", "color": "#c45c6a", "zIndex": 23 },
+      { "type": "sticker", "x": 0.44, "y": 0.66, "width": 0.05, "height": 0.04, "shape": "heart", "color": "#d46a78", "zIndex": 24 },
+      { "type": "sticker", "x": 0.02, "y": 0.88, "width": 0.07, "height": 0.055, "shape": "heart", "color": "#b84d5c", "zIndex": 25 }
+    ]
+  },
+  {
+    "id": "birthday-hero-3",
+    "name": "Happy Birthday",
+    "category": ["birthday"],
+    "aspectRatio": "square",
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "backgroundColor": "#fde8d8",
+    "backgroundPattern": "speckle",
+    "slots": [
+      { "id": "hero", "x": 0.08, "y": 0.2, "width": 0.84, "height": 0.46, "shape": "rounded", "zIndex": 2 },
+      { "id": "a", "x": 0.08, "y": 0.7, "width": 0.4, "height": 0.22, "shape": "rounded", "zIndex": 3 },
+      { "id": "b", "x": 0.52, "y": 0.7, "width": 0.4, "height": 0.22, "shape": "rounded", "zIndex": 4 }
+    ],
+    "decorations": [
+      {
+        "type": "text",
+        "x": 0.5,
+        "y": 0.08,
+        "content": "Happy Birthday",
+        "fontFamily": "Playfair Display",
+        "fontSize": 64,
+        "fontWeight": 700,
+        "color": "#8a3d2c",
+        "zIndex": 20
+      },
+      { "type": "shape", "x": 0.06, "y": 0.14, "width": 0.035, "height": 0.035, "shape": "dot", "color": "#f08a5a", "zIndex": 21 },
+      { "type": "shape", "x": 0.18, "y": 0.04, "width": 0.028, "height": 0.028, "shape": "dot", "color": "#e85d75", "zIndex": 22 },
+      { "type": "shape", "x": 0.32, "y": 0.15, "width": 0.022, "height": 0.022, "shape": "dot", "color": "#f2c14e", "zIndex": 23 },
+      { "type": "shape", "x": 0.72, "y": 0.03, "width": 0.03, "height": 0.03, "shape": "dot", "color": "#e85d75", "zIndex": 24 },
+      { "type": "shape", "x": 0.86, "y": 0.12, "width": 0.025, "height": 0.025, "shape": "dot", "color": "#f08a5a", "zIndex": 25 },
+      { "type": "shape", "x": 0.94, "y": 0.05, "width": 0.02, "height": 0.02, "shape": "dot", "color": "#7ec8a3", "zIndex": 26 },
+      { "type": "shape", "x": 0.04, "y": 0.66, "width": 0.03, "height": 0.03, "shape": "dot", "color": "#f2c14e", "zIndex": 27 },
+      { "type": "shape", "x": 0.48, "y": 0.67, "width": 0.024, "height": 0.024, "shape": "dot", "color": "#e85d75", "zIndex": 28 },
+      { "type": "shape", "x": 0.93, "y": 0.66, "width": 0.028, "height": 0.028, "shape": "dot", "color": "#7ec8a3", "zIndex": 29 },
+      { "type": "shape", "x": 0.02, "y": 0.94, "width": 0.032, "height": 0.032, "shape": "dot", "color": "#f08a5a", "zIndex": 30 },
+      { "type": "shape", "x": 0.9, "y": 0.94, "width": 0.026, "height": 0.026, "shape": "dot", "color": "#f2c14e", "zIndex": 31 }
+    ]
+  },
+  {
+    "id": "anniversary-4",
+    "name": "Together",
+    "category": ["anniversary"],
+    "aspectRatio": "portrait",
+    "canvasWidth": 1080,
+    "canvasHeight": 1350,
+    "backgroundColor": "#f7f1e6",
+    "backgroundPattern": "linen",
+    "slots": [
+      { "id": "a", "x": 0.08, "y": 0.18, "width": 0.42, "height": 0.3, "rotation": -4, "shape": "rounded", "zIndex": 2 },
+      { "id": "b", "x": 0.52, "y": 0.16, "width": 0.4, "height": 0.28, "rotation": 6, "shape": "rounded", "zIndex": 3 },
+      { "id": "c", "x": 0.1, "y": 0.52, "width": 0.38, "height": 0.28, "shape": "rounded", "zIndex": 4 },
+      { "id": "d", "x": 0.52, "y": 0.5, "width": 0.4, "height": 0.3, "rotation": -3, "shape": "rounded", "zIndex": 5 }
+    ],
+    "decorations": [
+      {
+        "type": "text",
+        "x": 0.5,
+        "y": 0.055,
+        "content": "Together",
+        "fontFamily": "Playfair Display",
+        "fontSize": 72,
+        "fontWeight": 700,
+        "color": "#6a3a32",
+        "zIndex": 20
+      },
+      {
+        "type": "text",
+        "x": 0.5,
+        "y": 0.115,
+        "content": "anniversary",
+        "fontFamily": "Georgia",
+        "fontSize": 28,
+        "fontWeight": 400,
+        "color": "#a06b62",
+        "zIndex": 21
+      },
+      { "type": "sticker", "x": 0.04, "y": 0.84, "width": 0.16, "height": 0.12, "shape": "sprig", "color": "#7a8f62", "zIndex": 22 },
+      { "type": "sticker", "x": 0.8, "y": 0.84, "width": 0.16, "height": 0.12, "shape": "sprig", "color": "#7a8f62", "zIndex": 23 },
+      { "type": "sticker", "x": 0.46, "y": 0.86, "width": 0.08, "height": 0.06, "shape": "heart", "color": "#c45c6a", "zIndex": 24 }
+    ]
+  },
+  {
+    "id": "wedding-grid-4",
+    "name": "Our Wedding",
+    "category": ["wedding"],
+    "aspectRatio": "square",
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "backgroundColor": "#f4efe6",
+    "backgroundPattern": "linen",
+    "slots": [
+      { "id": "a", "x": 0.08, "y": 0.18, "width": 0.4, "height": 0.34, "shape": "rect", "zIndex": 2 },
+      { "id": "b", "x": 0.52, "y": 0.18, "width": 0.4, "height": 0.34, "shape": "rect", "zIndex": 3 },
+      { "id": "c", "x": 0.08, "y": 0.56, "width": 0.4, "height": 0.34, "shape": "rect", "zIndex": 4 },
+      { "id": "d", "x": 0.52, "y": 0.56, "width": 0.4, "height": 0.34, "shape": "rect", "zIndex": 5 }
+    ],
+    "decorations": [
+      {
+        "type": "text",
+        "x": 0.5,
+        "y": 0.07,
+        "content": "Our Wedding",
+        "fontFamily": "Playfair Display",
+        "fontSize": 56,
+        "fontWeight": 700,
+        "color": "#5c4033",
+        "zIndex": 20
+      },
+      { "type": "sticker", "x": -0.02, "y": -0.02, "width": 0.2, "height": 0.18, "shape": "flower", "color": "#c9a27a", "zIndex": 21 },
+      { "type": "sticker", "x": 0.82, "y": -0.02, "width": 0.2, "height": 0.18, "shape": "flower", "color": "#d4b896", "zIndex": 22 },
+      { "type": "sticker", "x": -0.02, "y": 0.84, "width": 0.2, "height": 0.18, "shape": "flower", "color": "#c9a27a", "zIndex": 23 },
+      { "type": "sticker", "x": 0.82, "y": 0.84, "width": 0.2, "height": 0.18, "shape": "flower", "color": "#d4b896", "zIndex": 24 }
+    ]
+  },
+  {
+    "id": "raksha-3",
+    "name": "Happy Raksha Bandhan",
+    "category": ["raksha-bandhan"],
+    "aspectRatio": "portrait",
+    "canvasWidth": 1080,
+    "canvasHeight": 1350,
+    "backgroundColor": "#f6e4d4",
+    "backgroundPattern": "speckle",
+    "slots": [
+      { "id": "hero", "x": 0.12, "y": 0.18, "width": 0.76, "height": 0.38, "shape": "rounded", "zIndex": 2 },
+      { "id": "a", "x": 0.1, "y": 0.62, "width": 0.36, "height": 0.26, "shape": "circle", "zIndex": 3 },
+      { "id": "b", "x": 0.52, "y": 0.6, "width": 0.38, "height": 0.28, "shape": "rounded", "zIndex": 4 }
+    ],
+    "decorations": [
+      {
+        "type": "text",
+        "x": 0.5,
+        "y": 0.06,
+        "content": "Happy Raksha Bandhan",
+        "fontFamily": "Playfair Display",
+        "fontSize": 42,
+        "fontWeight": 700,
+        "color": "#8a3b22",
+        "zIndex": 20
+      },
+      { "type": "shape", "x": 0.04, "y": 0.14, "width": 0.07, "height": 0.056, "shape": "dot", "color": "#d4784a", "zIndex": 21 },
+      { "type": "shape", "x": 0.89, "y": 0.14, "width": 0.07, "height": 0.056, "shape": "dot", "color": "#e8c07a", "zIndex": 22 },
+      { "type": "sticker", "x": 0.42, "y": 0.56, "width": 0.14, "height": 0.05, "shape": "tape", "color": "#e8c9a0", "zIndex": 23 },
+      { "type": "shape", "x": 0.03, "y": 0.9, "width": 0.08, "height": 0.064, "shape": "dot", "color": "#c45c3a", "zIndex": 24 },
+      { "type": "shape", "x": 0.9, "y": 0.9, "width": 0.07, "height": 0.056, "shape": "dot", "color": "#e8c07a", "zIndex": 25 }
+    ]
+  },
+  {
+    "id": "wishes-3",
+    "name": "Best Wishes",
+    "category": ["best-wishes"],
+    "aspectRatio": "square",
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "backgroundColor": "#eef3ea",
+    "backgroundPattern": "linen",
+    "slots": [
+      { "id": "a", "x": 0.12, "y": 0.18, "width": 0.76, "height": 0.26, "shape": "rounded", "zIndex": 2 },
+      { "id": "b", "x": 0.12, "y": 0.48, "width": 0.76, "height": 0.2, "shape": "rounded", "zIndex": 3 },
+      { "id": "c", "x": 0.12, "y": 0.72, "width": 0.76, "height": 0.18, "shape": "rounded", "zIndex": 4 }
+    ],
+    "decorations": [
+      {
+        "type": "text",
+        "x": 0.5,
+        "y": 0.07,
+        "content": "Best Wishes",
+        "fontFamily": "Playfair Display",
+        "fontSize": 58,
+        "fontWeight": 700,
+        "color": "#3f5c45",
+        "zIndex": 20
+      },
+      { "type": "sticker", "x": 0.02, "y": 0.04, "width": 0.16, "height": 0.12, "shape": "sprig", "color": "#6f8f73", "zIndex": 21 },
+      { "type": "sticker", "x": 0.82, "y": 0.04, "width": 0.16, "height": 0.12, "shape": "sprig", "color": "#6f8f73", "zIndex": 22 }
+    ]
+  }
+]

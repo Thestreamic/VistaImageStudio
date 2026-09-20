@@ -1,0 +1,58 @@
+Vista Image Studio — Beta License Agreement
+Copyright (c) 2026 Vista Image Studio. All rights reserved.
+
+This software is proprietary and is currently distributed as a public BETA
+for evaluation and feedback purposes only. It is NOT open source software,
+notwithstanding its availability in a public source code repository.
+
+1. GRANT OF LICENSE
+   Subject to the terms below, you are granted a limited, non-exclusive,
+   non-transferable, revocable license to install and use this software
+   ("the Software") on devices you own or control, for personal or internal
+   evaluation purposes, during the beta period.
+
+2. NO REDISTRIBUTION
+   You may not sell, sublicense, rent, lease, or otherwise redistribute the
+   Software, in source or compiled form, without prior written permission
+   from Vista Image Studio.
+
+3. NO REVERSE ENGINEERING
+   You may not reverse-engineer, decompile, or disassemble the Software,
+   except to the extent such restriction is prohibited by applicable law.
+
+4. SOURCE AVAILABILITY DOES NOT IMPLY AN OPEN SOURCE LICENSE
+   The source code for this repository may be visible publicly during the
+   beta period for transparency and community feedback. This visibility
+   does not grant any license to copy, modify, distribute, or create
+   derivative works beyond what is explicitly stated in this agreement.
+
+5. FUTURE COMMERCIAL RELEASE
+   A paid, commercially licensed version of the Software is planned
+   following the beta period. This beta license does not entitle the
+   licensee to a free copy of, or discount on, the commercial release
+   unless separately offered in writing by Vista Image Studio.
+
+6. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+7. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL VISTA IMAGE STUDIO OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+   CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+   TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
+   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE, INCLUDING ANY
+   LOSS OF DATA OR IMAGE FILES.
+
+8. THIRD-PARTY COMPONENTS
+   This Software incorporates third-party open source packages (see
+   package.json for the full dependency list), each of which remains
+   subject to its own license terms. Use of those components under their
+   respective licenses is not restricted by this agreement.
+
+9. TERMINATION
+   This license terminates automatically if you fail to comply with any of
+   its terms, or at the end of the beta period, or at Vista Image Studio's
+   discretion. Upon termination you must cease use of the Software.
+
+For questions regarding this license, contact: [CONTACT_EMAIL]
