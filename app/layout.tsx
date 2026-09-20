@@ -34,6 +34,8 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
+const STRIP_PROJECT_PAGES_PREFIX = `(function(){try{var p=location.pathname||"/";document.querySelectorAll("link[href],script[src]").forEach(function(el){var a=el.tagName==="LINK"?"href":"src";var v=el.getAttribute(a);if(!v||v.charAt(0)!=="/")return;var i=v.indexOf("/_next/");if(i<=0)return;var pre=v.slice(0,i);if(p===pre||p.indexOf(pre+"/")===0)return;el.setAttribute(a,v.slice(i));});}catch(e){}})();`
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -41,6 +43,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-background">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: STRIP_PROJECT_PAGES_PREFIX }} />
+      </head>
       <body className="antialiased">{children}</body>
     </html>
   )

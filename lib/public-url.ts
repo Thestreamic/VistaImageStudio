@@ -60,12 +60,25 @@ export function inferPublicBasePath(loc: LocationLike): string {
   return ''
 }
 
+function locationIgnoresEnvPrefix(loc: LocationLike, fromEnv: string): boolean {
+  if (!fromEnv) return false
+  const protocol = loc.protocol ?? ''
+  if (protocol !== 'http:' && protocol !== 'https:') return false
+  const hostname = loc.hostname ?? ''
+  if (isLocalHost(hostname)) return false
+  const pathname = loc.pathname ?? '/'
+  if (pathname === fromEnv || pathname.startsWith(`${fromEnv}/`)) return false
+  if (pathname.includes(`${fromEnv}/_next/`)) return false
+  return true
+}
+
 export function publicBasePath(loc?: LocationLike): string {
   if (runtimePrefix != null) return runtimePrefix
-  const fromEnv = envPrefix()
-  if (fromEnv) return fromEnv
   const here =
     loc ?? (typeof self !== 'undefined' ? (self as { location?: LocationLike }).location : undefined)
+  const fromEnv = envPrefix()
+  if (here && locationIgnoresEnvPrefix(here, fromEnv)) return inferPublicBasePath(here)
+  if (fromEnv) return fromEnv
   return here ? inferPublicBasePath(here) : ''
 }
 
@@ -81,7 +94,7 @@ function documentOrigin(loc: LocationLike): string {
   const protocol = loc.protocol ?? ''
   const origin = loc.origin ?? ''
   const href = loc.href ?? ''
-  if (protocol === 'http:' || protocol === 'https:') {
+  if (protocol === 'http:' || protocol === 'https:' || protocol === 'lumen:') {
     if (origin) return origin
     try {
       return href ? new URL(href).origin : ''
@@ -93,9 +106,9 @@ function documentOrigin(loc: LocationLike): string {
     const inner = href.startsWith('blob:') ? href.slice('blob:'.length) : origin
     try {
       const u = new URL(inner)
-      if (u.protocol === 'http:' || u.protocol === 'https:') return u.origin
+      if (u.protocol === 'http:' || u.protocol === 'https:' || u.protocol === 'lumen:') return u.origin
     } catch {
-      return origin.startsWith('http') ? origin : ''
+      return origin.startsWith('http') || origin.startsWith('lumen:') ? origin : ''
     }
   }
   return ''

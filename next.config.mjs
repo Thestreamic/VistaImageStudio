@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const isElectron = !!process.env.ELECTRON_BUILD
 const isWebExport = !!process.env.WEB_EXPORT
-const basePath = (process.env.BASE_PATH || '').replace(/\/$/, '')
+// Desktop and the custom-domain site both live at /. A leftover /RepoName
+// prefix 404s every CSS file on vistaimagestudio.thestreamic.in.
+const basePath = isElectron || isWebExport ? '' : (process.env.BASE_PATH || '').replace(/\/$/, '')
 
 const nextConfig = {
   // Electron loads the built app as static files (file://). The browser /
@@ -20,7 +22,7 @@ const nextConfig = {
   },
   // Inlined into the AI worker so /models/*.onnx resolve under GitHub project Pages.
   env: {
-    NEXT_PUBLIC_BASE_PATH: process.env.NEXT_PUBLIC_BASE_PATH || basePath || '',
+    NEXT_PUBLIC_BASE_PATH: isElectron || isWebExport ? '' : process.env.NEXT_PUBLIC_BASE_PATH || basePath || '',
   },
   // Next.js 16 defaults to Turbopack; declaring this (even empty) opts in
   // explicitly instead of erroring on the absence of Turbopack-specific
