@@ -8,7 +8,9 @@ Version:          0.1.0 (beta)
 License:          UNLICENSED / proprietary beta (LICENSE)
 Repo folder:      lumen-studio  (legacy directory name on disk)
 Internal IDs:     window.lumen, kind "lumen-project", files "*.lumen"
-Document date:    20 September 2026
+Document date:    24 September 2026
+Handover:         read docs/ARCHITECTURE.md first (current facts),
+                  then this file. Live Bokeh is not MiDaS.
 Audience:         product, engineering, packaging, privacy review
 
 This file describes THIS repository. It is not generic Next.js advice.
@@ -770,11 +772,17 @@ background-removal.ts
   (~25 MB, Apache-2.0). Failure THROWS — no silent flood-fill on
   Remove Background. segmentHeuristic kept for tests / local-enhance.
 
-portrait-blur.ts + bokeh.ts
-  Portrait Bokeh: MODNet subject matte + MiDaS depth
-  (public/models/midas-small.onnx, ~64 MB, MIT) + disc bokeh
-  (WebGL when available, else CPU at working resolution).
-  Highlight orbs, occlusion weights, subject composite.
+portrait-blur.ts + bokeh.ts + object-focus.ts
+  Live Portrait Bokeh (24 Sep 2026):
+    1. usable selection mask (user marked the object)
+    2. else MODNet person matte, only if isUsableSubjectMatte
+    3. else estimatePortraitSubject / objectFocusKeep
+  Then depthFromAlphaMatte + applyBokehFit. Subject pixels pasted
+  back sharp. phoneBlurRadius is a fraction of the short side.
+  WebGL disc when available, else CPU at a working resolution.
+  Highlight orbs and occlusion weights stay in bokeh.ts.
+  estimateDepthWithModel (MiDaS) is still in portrait-blur.ts.
+  The Bokeh button does not call it.
 
 inpaint.ts
   Magic Eraser prefers LaMa ONNX public/models/lama.onnx
@@ -823,7 +831,9 @@ ONNX without a product decision.
   smart-select                               flood fill
   object-removal                             LaMa then diffusion
   low-light, dehaze, clarity, vibrance       gated CPU
-  bg-blur / portrait-blur                    MODNet + MiDaS + bokeh
+  bg-blur / portrait-blur                    focus mask + disc bokeh
+                                             (MODNet if usable, else
+                                             object-focus; not MiDaS)
 
 5.7 Host info backend field
 ---------------------------
@@ -1209,7 +1219,10 @@ of scope without go-ahead. Windows builds unsigned.
 10.2 Media bin
 --------------
   Left rail always available. Import photos or a folder.
-  Persisted in IndexedDB across sessions on this device.
+  Persisted in IndexedDB (vista-media-library) as a JPEG copy so
+  refresh can decode. Click calls openImportedOnCanvas
+  (canvasToOpenFromImport clones the cache; no import overlay).
+  After EULA accept, if doc is null, the last Media item opens.
   Drag onto a collage cell (instant from workingCanvas cache).
   Double-click fills frames in reading order (top-to-bottom,
   left-to-right) via placeMediaOnCanvas / nextUnfilledCollageCell.
@@ -1310,10 +1323,12 @@ One-click AI (on-device WASM; photos never upload)
   Auto Color Correct, Low Light, Dehaze, Clarity, Vibrance,
   Denoise, Face Enhance
     -> ai.worker gated CPU ops
-  Portrait Bokeh, Remove Background
-    -> MODNet required; MiDaS for depth; bokeh.ts
+  Portrait Bokeh
+    -> resolveFocusMatte then bokeh.ts (not MiDaS on the button)
+  Remove Background
+    -> MODNet required
   Magic Eraser
-    -> selection then object-removal (LaMa)
+    -> no selection arms select-wand; then object-removal (LaMa)
   Instagram 4:5
     -> setLiveCrop(cropRectForPreset(..., '4:5'))
   Upscale 2x

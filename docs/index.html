@@ -195,7 +195,7 @@
   <div class="strip">
     <div class="stat"><b>0</b><span>cloud uploads</span></div>
     <div class="stat"><b>.lumen</b><span>project files</span></div>
-    <div class="stat"><b>On-device</b><span>MODNet · MiDaS · LaMa</span></div>
+    <div class="stat"><b>On-device</b><span>MODNet · focus · LaMa</span></div>
     <div class="stat"><b>100%</b><span>offline-capable</span></div>
   </div>
 
@@ -219,12 +219,12 @@
       <div class="card ai">
         <div class="icon">⌫</div>
         <h3>Magic Eraser</h3>
-        <p>Box-select (M) or Magic Wand (W), then fill the hole with LaMa inpainting. Progress overlay; first run loads a local ~208MB model.</p>
+        <p>Click the object, or drag a box (M). LaMa fills the hole on-device. A click with nothing selected arms the wand. First run loads a local ~208MB model.</p>
       </div>
       <div class="card ai">
         <div class="icon">◎</div>
         <h3>Portrait Bokeh</h3>
-        <p>Depth-based disc bokeh: MiDaS depth + MODNet subject — sharp person, soft falloff, glowing highlight orbs.</p>
+        <p>Phone-style focus lock: the person, or the object you selected, stays sharp. The background gets a strong disc blur and highlight orbs. Nothing is uploaded.</p>
       </div>
       <div class="card">
         <div class="icon">▣</div>
@@ -294,11 +294,11 @@
         <dt>Auto Color Correct</dt>
         <dd>Local auto white-balance / levels.</dd>
         <dt>Portrait Bokeh</dt>
-        <dd>MiDaS depth + MODNet subject; disc bokeh with highlight orbs.</dd>
+        <dd>Locks the person or the selected object, then disc-blurs the background. Select a product or pet first when it is not a person.</dd>
         <dt>Remove Background</dt>
         <dd>MODNet portrait matting; transparent checkerboard behind the subject.</dd>
         <dt>Magic Eraser</dt>
-        <dd>Select with box (M) or wand (W); LaMa fills the hole on-device.</dd>
+        <dd>Click the object or drag a box (M); LaMa fills the hole on-device.</dd>
         <dt>Instagram 4:5</dt>
         <dd>Largest centred 4:5 crop from the AI panel; confirm in Transform.</dd>
         <dt>Low Light / Dehaze / Clarity / Vibrance</dt>
@@ -336,7 +336,7 @@
         <dt>Collages</dt>
         <dd>2 / 3 / 4 / 5 / 6 photo layouts; drag from Media; click a box to pan/zoom the photo inside; swap cells.</dd>
         <dt>Media bin</dt>
-        <dd>Recent imports in the left rail; folder drop; drag onto templates.</dd>
+        <dd>Recent imports in the left rail (saved on this PC). Click a thumbnail to open it. Refresh reopens the last photo. Drag onto collage templates.</dd>
         <dt>.lumen projects</dt>
         <dd>Save / Open / Save As, dirty flag, autosave, recents, quit prompt.</dd>
         <dt>Export pack</dt>
@@ -346,7 +346,7 @@
         <dt>Import formats</dt>
         <dd>PNG, JPEG, WebP, HEIC, AVIF, BMP, GIF, TIFF.</dd>
         <dt>Privacy Centre</dt>
-        <dd>Analytics off, CSP/paths, first-run walkthrough. Models run on-device (MODNet, MiDaS, LaMa).</dd>
+        <dd>Analytics off, CSP/paths, first-run walkthrough. Models run on-device (MODNet, LaMa). Portrait focus is local.</dd>
         <dt>Light / dark UI</dt>
         <dd>Toggle in the title bar.</dd>
       </dl>
@@ -357,7 +357,7 @@
       <ol>
         <li><b>Open</b> a photo (or drop it — HEIC from iPhone is fine).</li>
         <li><b>AI</b> or <b>Filters</b> → Optimize Image.</li>
-        <li>Optional: Portrait Bokeh, Remove Background, or Magic Eraser (Select <code>M</code> / Wand <code>W</code> first).</li>
+        <li>Optional: Portrait Bokeh (select an object first if it is not a person), Remove Background, or Magic Eraser (click the object, or Select <code>M</code>).</li>
         <li><b>Transform</b> → crop 4:5 (or AI → Instagram 4:5, then confirm).</li>
         <li>Optional: Warm / Cool / B&amp;W, Adjust sliders, text, or logo.</li>
         <li><b>Save</b> as <code>.lumen</code> (Ctrl+S) → <b>Export</b> (Ctrl+E) Creator pack.</li>

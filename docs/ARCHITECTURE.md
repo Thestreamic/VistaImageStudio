@@ -4,6 +4,36 @@ Local-first AI photo editor. Electron shell + Next.js/React renderer. No
 network calls are required for any editing or AI operation — everything
 runs on-device.
 
+Handover date: 24 September 2026. Read this file, then `docs/FEATURES.txt`
+and `docs/AI.md`. Do not rename `.lumen`, `lumen-project`, or `window.lumen`.
+
+## Handover (current facts)
+
+- Product: Vista Image Studio 0.1.0. Working copy:
+  `C:\Users\AFF Computers\Downloads\lumen-studio` (no git remote).
+  Live Pages source: `C:\Users\AFF Computers\Documents\GitHub\VistaImageStudio\VistaImageStudio`
+  → `https://github.com/Thestreamic/VistaImageStudio` `main`.
+- Live site: `https://vistaimagestudio.thestreamic.in` at `/`.
+  `BASE_PATH` must stay empty. A `/VistaImageStudio` base path 404s CSS.
+- No cloud photo upload, no account, no LLM. CSP `connect-src 'self' blob: data:`.
+- EULA gate before the editor (`vista-eula-accepted`, version `2026-09-20`).
+  Ireland law. Help → About, Privacy, Notices.
+- Media bin: Zustand `recentImports` + IndexedDB `vista-media-library`.
+  Click opens `canvasToOpenFromImport` (cached canvas, cloned). A JPEG copy
+  is stored so refresh can decode. After EULA accept, if there is no
+  document, the last Media item is opened automatically.
+- Portrait Bokeh live path is **not** MiDaS. Focus order: selection mask,
+  else usable MODNet person matte, else `object-focus.ts`. Then
+  `depthFromAlphaMatte` + `applyBokehFit`. Subject pixels are pasted back
+  sharp. Blur radius is a fraction of the short side (`phoneBlurRadius`).
+- Magic Eraser: no selection arms `select-wand` (click the object). A drag
+  under 4px is a wand click. LaMa fills the mask. Progress overlay.
+- Music: in-app CC0 catalogue (Export / File → Make video). Web can preview.
+  MP4 with audio is the Windows app (FFmpeg). No extra music repo.
+- Mobile chrome at 767px (`useMobileLayout`). Desktop title bar otherwise.
+- `replaceLayerPixels` clones the canvas so an AI result does not share
+  pixels with the Media cache.
+
 ## Process model
 
 ```
@@ -110,18 +140,20 @@ choices:
 ## AI feature layer
 
 **Design principle:** most CPU ops have a heuristic fallback. **Remove Background
-and Portrait Bokeh require bundled MODNet** — `segmentWithModel` throws if the
-ONNX cannot run (no silent flood-fill). Upscale / smart-select still fall back.
+requires bundled MODNet** — `segmentWithModel` throws if the ONNX cannot run
+(no silent flood-fill). Portrait Bokeh tries MODNet, then a local object mask.
+Upscale / smart-select still fall back.
 
 | Feature | Model-backed path | Fallback (always available) |
 |---|---|---|
 | Auto color | — | grey-world white balance + histogram stretch + S-curve (`auto-color.ts`) |
 | Background removal | MODNet photographic portrait matting (`public/models/modnet.onnx`) | None on the live path (heuristic kept for tests / `local-enhance` only) |
+| Portrait Bokeh | MODNet person matte when it isolates a subject | Selection mask, else `object-focus.ts`. Disc blur in `bokeh.ts`. MiDaS is not the live button. |
 | Denoise | — | bilateral filter + light re-sharpen (`enhance.ts`) |
 | Upscale | ESRGAN-lite, tiled inference | bicubic resample + unsharp mask (`upscale.ts`) |
 | Face enhance | — | YCbCr skin mask + selective bilateral smooth (`enhance.ts`) |
 | Smart select | MobileSAM (planned, see roadmap) | Lab-space flood fill from seed (`smart-select.ts`) |
-| Object removal | — | multi-scale diffusion inpainting (`inpaint.ts`) |
+| Object removal | LaMa ONNX when `public/models/lama.onnx` is present | multi-scale diffusion inpainting (`inpaint.ts`) |
 
 **Everything expensive runs in a Web Worker.** `features/ai/workers/ai.worker.ts`
 hosts every algorithm; `ai-client.ts` is the main-thread promise wrapper

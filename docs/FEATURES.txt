@@ -6,15 +6,15 @@ FEATURES (1 line each)
 
 Open & projects
 Import — PNG, JPEG, WebP, HEIC (iPhone), AVIF, BMP, GIF, TIFF; drag & drop or Open (Ctrl+O).
-Media bin — photos stay in the left rail (saved on this PC) whether a project is open or not; import photos or a folder; drag onto templates. Double-click fills collage frames in order.
+Media bin — photos stay in the left rail (saved on this PC) whether a project is open or not; import photos or a folder; drag onto templates. Click a thumbnail to put that photo on the canvas (no second import). Refresh reopens the last photo. Double-click fills collage frames in order.
 .lumen projects — Save / Open / Save As, dirty flag, autosave, recents, quit prompt.
 Light / dark UI — switch in the title bar; layout stays the same.
 
 Canvas tools
 Move (V) — drag the photo layer on the canvas.
 Crop (C) — live crop with move/resize handles; Free, 1:1 Post, 4:5 Portrait, 9:16 Story, 16:9 Thumb, or custom ratio. Apply keeps it editable; Bake writes pixels.
-Select (M) — box-select a region for Magic Eraser.
-Magic Wand (W) — click a colour to select it (tolerance-based flood fill).
+Select (M) — drag a box for Magic Eraser. A tiny drag clicks the object instead (wand).
+Magic Wand (W) — click a colour or object to select it (tolerance-based flood fill). Magic Eraser with nothing selected arms the wand.
 Hand / Pan (H) — pan a zoomed canvas (middle-mouse also pans).
 Zoom — in / out / fit / actual pixels; scroll-wheel zoom.
 Safe zones — Story / Reel / TikTok chrome overlay so titles stay visible.
@@ -25,9 +25,9 @@ One-click AI (on-device, WASM — photos never upload)
 Optimize Image — one-click grade: brightness, colour, vibrance, clarity, sharpness (top of AI and Filters).
 Natural Color — true-to-life mobile grade (sun stays white-gold).
 Auto Color Correct — local auto white-balance / levels.
-Portrait Bokeh — depth-based disc bokeh (MiDaS depth + MODNet subject): sharp subject, soft falloff, highlight orbs.
+Portrait Bokeh — phone-style focus lock (person, or the object you selected): subject stays sharp, background gets a strong disc blur and highlight orbs. Select the object first when it is not a person.
 Remove Background — MODNet portrait matting; subject on a transparent checkerboard.
-Magic Eraser — select with box or wand, then fill the hole with LaMa inpainting (on-device ONNX). Progress overlay; slower than filters because the model is large.
+Magic Eraser — click the object (or drag a box), then fill the hole with LaMa inpainting (on-device ONNX). Progress overlay; slower than filters because the model is large.
 Instagram 4:5 — largest centred 4:5 crop, confirm in Transform.
 Low Light — open shadows on dark photos.
 Dehaze — cut atmospheric haze.
@@ -86,7 +86,7 @@ In-app audit — analytics off, CSP/paths, offline claim, first-run walkthrough.
 HOW TO USE (very simple)
 1. Open or drop a photo (HEIC from iPhone is fine).
 2. AI or Filters → Optimize Image.
-3. Optional: Portrait Bokeh, Remove Background, or Magic Eraser (Select M / Wand W first).
+3. Optional: Portrait Bokeh (select an object first if it is not a person), Remove Background, or Magic Eraser (click the object, or Select M).
 4. Transform → crop 4:5 (or AI → Instagram 4:5, then confirm).
 5. Optional: Filters (Warm/Cool/B&W) or Adjust sliders.
 6. Text / logo if you need them.
@@ -97,6 +97,6 @@ HOW TO USE (very simple)
 
 Shortcuts: Ctrl+O open · Ctrl+S save · Ctrl+Shift+S Save As · Ctrl+Shift+O project · Ctrl+E export · Ctrl+P print · Ctrl+Z undo · Ctrl+Shift+Z redo · V move · C crop · M select · W wand · H hand.
 
-Privacy: photos never upload. Export rebuilds pixels (no camera EXIF). AI models (MODNet, MiDaS, LaMa) run on-device via onnxruntime-web.
+Privacy: photos never upload. Export rebuilds pixels (no camera EXIF). AI models (MODNet, LaMa) run on-device via onnxruntime-web. Portrait Bokeh locks focus with MODNet or a local object mask, then blurs the background on the CPU/WebGL — it does not upload the photo.
 Optimize Image is a descriptive local grade inspired by flagship phone colour science — not an Apple product.
 Magic Eraser uses LaMa (Apache-2.0); first run is slower while the ~208MB model loads.
