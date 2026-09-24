@@ -78,7 +78,7 @@ test('Remove Background one-click completes and edits the image', async ({ page 
 test('Magic Eraser asks for a selection before filling', async ({ page }) => {
   await importPhoto(page)
   await page.getByTestId('magic-eraser').click()
-  await expect(page.getByText(/Select the object \(box or wand\)/i)).toBeVisible()
+  await expect(page.getByText(/Click the object to select it/i)).toBeVisible()
 })
 
 function paneSample(page: Page, testId: string) {

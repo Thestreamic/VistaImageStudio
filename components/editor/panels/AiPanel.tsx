@@ -223,8 +223,8 @@ function MagicEraserButton({ disabled, className }: { disabled: boolean; classNa
   const run = async () => {
     if (!layer || !doc) return
     if (!doc.selection) {
-      setTool('select-rect')
-      notify('info', 'Select the object (box or wand), then click Magic Eraser.')
+      setTool('select-wand')
+      notify('info', 'Click the object to select it, then click Magic Eraser again. Or press M and drag a box.')
       return
     }
     const mask = selectionMaskForLayer(doc.selection, layer)

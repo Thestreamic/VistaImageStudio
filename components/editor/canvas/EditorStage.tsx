@@ -71,25 +71,61 @@ export function EditorStage({
   const setActiveLayer = useEditorStore((s) => s.setActiveLayer)
   const selection = doc?.selection ?? null
   const [liveMarquee, setLiveMarquee] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
-  const marquee = useRef<{ x0: number; y0: number } | null>(null)
+  const marquee = useRef<{ x0: number; y0: number; clientX: number; clientY: number } | null>(null)
   const liveMarqueeRef = useRef(liveMarquee)
   liveMarqueeRef.current = liveMarquee
 
-  useEffect(() => {
-    const onUp = () => {
-      const start = marquee.current
-      const box = liveMarqueeRef.current
-      const current = useEditorStore.getState().doc
-      if (!start) return
-      if (current && box && box.width >= 4 && box.height >= 4) {
-        useEditorStore.getState().setSelection(rectSelection(current.width, current.height, box))
+  const applyWandAtClient = useCallback((clientX: number, clientY: number) => {
+    const current = useEditorStore.getState().doc
+    const stage = containerRef.current
+    const photo = selectPhotoLayer(useEditorStore.getState())
+    if (!current || !stage || !photo) return false
+    const view = useEditorStore.getState().viewport
+    const pt = clientToDocument(clientX, clientY, stage.getBoundingClientRect(), current.width, current.height, view)
+    const lx = pt.x - photo.x
+    const ly = pt.y - photo.y
+    const img = imageDataOf(photo.source)
+    const layerSel = floodSelect(img.data, img.width, img.height, lx, ly, wandTolerance)
+    const mask = new Uint8ClampedArray(current.width * current.height)
+    const ox = Math.round(photo.x)
+    const oy = Math.round(photo.y)
+    for (let y = 0; y < img.height; y++) {
+      const dy = y + oy
+      if (dy < 0 || dy >= current.height) continue
+      for (let x = 0; x < img.width; x++) {
+        const dx = x + ox
+        if (dx < 0 || dx >= current.width) continue
+        mask[dy * current.width + dx] = layerSel.mask[y * img.width + x]
       }
-      marquee.current = null
-      setLiveMarquee(null)
     }
+    if (!mask.some((v) => v > 8)) return false
+    setSelection({ width: current.width, height: current.height, mask })
+    return true
+  }, [setSelection, wandTolerance])
+
+  const finishMarquee = useCallback(() => {
+    const start = marquee.current
+    const box = liveMarqueeRef.current
+    const current = useEditorStore.getState().doc
+    marquee.current = null
+    setLiveMarquee(null)
+    if (!start || !current) return
+    if (box && box.width >= 4 && box.height >= 4) {
+      useEditorStore.getState().setSelection(rectSelection(current.width, current.height, box))
+      return
+    }
+    applyWandAtClient(start.clientX, start.clientY)
+  }, [applyWandAtClient])
+
+  useEffect(() => {
+    const onUp = () => finishMarquee()
+    window.addEventListener('pointerup', onUp)
     window.addEventListener('mouseup', onUp)
-    return () => window.removeEventListener('mouseup', onUp)
-  }, [])
+    return () => {
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [finishMarquee])
 
   // Keep rendered canvas updated whenever doc or adjustments change
   const [showSafeZones, setShowSafeZones] = useState(false)
@@ -175,13 +211,14 @@ export function EditorStage({
   const isDraggingLayer = useRef(false)
   const dragLast = useRef({ x: 0, y: 0 })
 
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
+  const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     const isMiddle = e.button === 1
     const isSpacePan = tool === 'hand'
     if (isMiddle || isSpacePan) {
       isPanning.current = true
       userView.current = true
       panStart.current = { x: e.clientX, y: e.clientY, panX: viewport.panX, panY: viewport.panY }
+      e.currentTarget.setPointerCapture(e.pointerId)
       e.preventDefault()
       return
     }
@@ -196,40 +233,15 @@ export function EditorStage({
         doc.height,
         viewport,
       )
-      marquee.current = { x0: pt.x, y0: pt.y }
+      marquee.current = { x0: pt.x, y0: pt.y, clientX: e.clientX, clientY: e.clientY }
       setLiveMarquee({ x: pt.x, y: pt.y, width: 0, height: 0 })
+      e.currentTarget.setPointerCapture(e.pointerId)
       e.preventDefault()
       return
     }
 
     if (tool === 'select-wand') {
-      const photo = selectPhotoLayer(useEditorStore.getState())
-      if (!photo) return
-      const pt = clientToDocument(
-        e.clientX,
-        e.clientY,
-        containerRef.current.getBoundingClientRect(),
-        doc.width,
-        doc.height,
-        viewport,
-      )
-      const lx = pt.x - photo.x
-      const ly = pt.y - photo.y
-      const img = imageDataOf(photo.source)
-      const layerSel = floodSelect(img.data, img.width, img.height, lx, ly, wandTolerance)
-      const mask = new Uint8ClampedArray(doc.width * doc.height)
-      const ox = Math.round(photo.x)
-      const oy = Math.round(photo.y)
-      for (let y = 0; y < img.height; y++) {
-        const dy = y + oy
-        if (dy < 0 || dy >= doc.height) continue
-        for (let x = 0; x < img.width; x++) {
-          const dx = x + ox
-          if (dx < 0 || dx >= doc.width) continue
-          mask[dy * doc.width + dx] = layerSel.mask[y * img.width + x]
-        }
-      }
-      setSelection({ width: doc.width, height: doc.height, mask })
+      applyWandAtClient(e.clientX, e.clientY)
       e.preventDefault()
       return
     }
@@ -244,11 +256,12 @@ export function EditorStage({
       isDraggingLayer.current = true
       dragLast.current = { x: e.clientX, y: e.clientY }
       beginTransaction()
+      e.currentTarget.setPointerCapture(e.pointerId)
       e.preventDefault()
     }
-  }, [tool, viewport, activeLayer, beginTransaction, doc, wandTolerance, setSelection])
+  }, [tool, viewport, activeLayer, beginTransaction, doc, applyWandAtClient])
 
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (isPanning.current) {
       const dx = e.clientX - panStart.current.x
       const dy = e.clientY - panStart.current.y
@@ -282,13 +295,14 @@ export function EditorStage({
     }
   }, [setViewport, activeLayer, viewport, offsetLayer, doc])
 
-  const onMouseUp = useCallback(() => {
+  const onPointerUp = useCallback(() => {
+    finishMarquee()
     isPanning.current = false
     if (isDraggingLayer.current) {
       isDraggingLayer.current = false
       endTransaction()
     }
-  }, [endTransaction])
+  }, [endTransaction, finishMarquee])
 
   // ─── Scroll-to-zoom ──────────────────────────────────────────────────────
   const onWheel = useCallback((e: React.WheelEvent) => {
@@ -333,10 +347,13 @@ export function EditorStage({
     <div
       ref={containerRef}
       className="flex-1 relative overflow-hidden bg-[var(--canvas)] cursor-crosshair select-none min-h-0"
-      style={{ cursor: tool === 'hand' ? 'grab' : tool === 'crop' || tool === 'select-rect' ? 'crosshair' : tool === 'select-wand' ? 'cell' : tool === 'move' ? 'move' : 'default' }}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
+      style={{
+        cursor: tool === 'hand' ? 'grab' : tool === 'crop' || tool === 'select-rect' ? 'crosshair' : tool === 'select-wand' ? 'cell' : tool === 'move' ? 'move' : 'default',
+        touchAction: tool === 'select-rect' || tool === 'select-wand' || tool === 'crop' ? 'none' : undefined,
+      }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
       onWheel={onWheel}
       onDragOver={(e) => {
         if (isCellDrag(e.dataTransfer)) {
