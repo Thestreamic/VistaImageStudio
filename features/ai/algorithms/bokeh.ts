@@ -22,12 +22,12 @@ export interface BokehParams {
 }
 
 export const DEFAULT_BOKEH: BokehParams = {
-  maxBlurRadius: 28,
+  maxBlurRadius: 16,
   subjectThreshold: 0.58,
-  depthGamma: 1.05,
-  highlightThreshold: 0.7,
-  highlightGain: 3.2,
-  samples: 36,
+  depthGamma: 1.45,
+  highlightThreshold: 0.78,
+  highlightGain: 1.35,
+  samples: 28,
 }
 
 const GOLDEN_ANGLE = 2.399963229728653
@@ -37,10 +37,20 @@ const GPU_MIN_PIXELS = 96 * 96
 
 let gpuAvailable: boolean | null = null
 
-/** Samsung Live Focus / iPhone Portrait strength: 5–9% of the short side. */
+/** Soft portrait disc. Hard-capped so a large photo cannot smear the
+ *  background into a flat wash. */
 export function phoneBlurRadius(minEdge: number, strength = 0.84): number {
   const s = Math.max(0, Math.min(1, strength))
-  return Math.max(18, Math.round(Math.max(64, minEdge) * (0.054 + 0.036 * s)))
+  const edge = Math.max(64, minEdge)
+  return clampBokehRadius(edge * (0.006 + 0.005 * s), edge, edge)
+}
+
+/** Largest disc that still reads as focus falloff, not a removed background. */
+export function clampBokehRadius(radius: number, width: number, height: number): number {
+  const edge = Math.max(1, Math.min(width, height))
+  const cap = Math.min(14, Math.max(4, Math.round(edge * 0.007)))
+  const asked = Number.isFinite(radius) ? radius : cap
+  return Math.max(2, Math.min(Math.round(asked), cap))
 }
 
 export function blurRadiusForDepth(depth: number, params: BokehParams): number {
@@ -131,11 +141,11 @@ export function backgroundDepthMap(keep: Float32Array, width: number, height: nu
     const yFar = smoothstep(0.12, 0.88, 1 - y * ih)
     for (let x = 0; x < width; x++) {
       const i = y * width + x
-      const bgFar = smoothstep(0.008, 0.38, dist[i])
-      // Phone Live Focus / Portrait: the plane just behind the subject is
-      // already well below the in-focus threshold; far field goes to 0.
-      const far = 0.74 + 0.2 * bgFar + 0.06 * yFar
-      depth[i] = 1 - Math.pow(Math.max(0, Math.min(1, far)), 0.68)
+      const bgFar = smoothstep(0.04, 0.75, dist[i])
+      // Just behind the subject is only slightly soft. The far field reaches
+      // a modest disc — shapes stay visible, they are not wiped out.
+      const far = 0.64 + 0.26 * bgFar + 0.06 * yFar
+      depth[i] = 1 - Math.min(0.9, far)
     }
   }
   return depth
@@ -256,13 +266,14 @@ export function applyBokeh(
   params: BokehParams = DEFAULT_BOKEH,
   subjectAlpha?: Float32Array,
 ): Uint8ClampedArray {
+  const fitted = { ...params, maxBlurRadius: clampBokehRadius(params.maxBlurRadius, width, height) }
   const gpu =
     width * height >= GPU_MIN_PIXELS && canCreateWebgl()
-      ? applyBokehWebgl(data, width, height, depthMap, params)
+      ? applyBokehWebgl(data, width, height, depthMap, fitted)
       : null
-  if (gpu) return compositeSubject(data, gpu, depthMap, width, height, params.subjectThreshold, subjectAlpha)
-  const cpu = applyDiscBokehCpu(data, width, height, depthMap, params)
-  return compositeSubject(data, cpu, depthMap, width, height, params.subjectThreshold, subjectAlpha)
+  if (gpu) return compositeSubject(data, gpu, depthMap, width, height, fitted.subjectThreshold, subjectAlpha)
+  const cpu = applyDiscBokehCpu(data, width, height, depthMap, fitted)
+  return compositeSubject(data, cpu, depthMap, width, height, fitted.subjectThreshold, subjectAlpha)
 }
 
 export function applyBokehFit(
@@ -284,7 +295,7 @@ export function applyBokehFit(
   const smallDepth = downsampleDepth(depthMap, width, height, dw, dh)
   const scaled: BokehParams = {
     ...params,
-    maxBlurRadius: Math.max(14, Math.round(params.maxBlurRadius * scale)),
+    maxBlurRadius: clampBokehRadius(Math.round(params.maxBlurRadius * scale), dw, dh),
   }
   const blurredSmall = preferGpu
     ? applyBokehWebgl(small, dw, dh, smallDepth, scaled) ?? applyDiscBokehCpu(small, dw, dh, smallDepth, scaled)
@@ -345,7 +356,7 @@ export function applyDiscBokehCpu(
             params.highlightThreshold,
             params.highlightGain,
           )
-          let weight = (1 + smoothstep(0.7, 1, luma) * 3) * ringScale * boost
+          let weight = (1 + smoothstep(0.82, 1, luma) * 0.85) * ringScale * boost
           if (sampleDepth > depth + 0.14) weight *= 0.08
           sr += data[sp] * weight
           sg += data[sp + 1] * weight
@@ -430,7 +441,7 @@ void main() {
     float tBoost = clamp((luma - u_highlightThreshold) / max(0.0001, 1.0 - u_highlightThreshold), 0.0, 1.0);
     float edgeAtten = 1.0 - smoothstep(0.12, 0.48, edge);
     float boost = 1.0 + tBoost * tBoost * u_highlightGain * edgeAtten;
-    float weight = (1.0 + smoothstep(0.7, 1.0, luma) * 3.0) * inside * ringScale * boost;
+    float weight = (1.0 + smoothstep(0.82, 1.0, luma) * 0.85) * inside * ringScale * boost;
     if (sampleDepth > depth + 0.14) weight *= 0.08;
     colorSum += sampleColor * weight;
     weightSum += weight;
