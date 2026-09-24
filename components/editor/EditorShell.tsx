@@ -29,11 +29,11 @@ import { LegalViewerDialog, type LegalDocId } from './dialogs/LegalViewerDialog'
 import { RecipesDialog } from './dialogs/RecipesDialog'
 import { BatchDialog } from './dialogs/BatchDialog'
 import { bumpLocalStreak } from './dialogs/PrivacyCentre'
-import { useEditorStore, selectPhotoLayer, RECENT_IMPORTS_CAP } from '@/features/editor/store/editor-store'
+import { useEditorStore, selectPhotoLayer, RECENT_IMPORTS_CAP, type RecentImport } from '@/features/editor/store/editor-store'
 import { getBridge, isElectron } from '@/lib/platform/bridge'
 import { hasAcceptedCurrentEula } from '@/lib/legal/acceptance'
 import { declineEulaAndExit, hydrateEulaAcceptance } from '@/lib/legal/persist-eula'
-import { canvasFromBlob, canvasFromRecentImport, filesFromDataTransfer, isImageFile, looksLikeHeic, IMAGE_FILE_ACCEPT, thumbnailDataUrl, workingCanvasFromSource } from '@/lib/image/canvas'
+import { canvasFromBlob, canvasFromRecentImport, canvasToOpenFromImport, filesFromDataTransfer, isImageFile, looksLikeHeic, IMAGE_FILE_ACCEPT, thumbnailDataUrl, workingCanvasFromSource } from '@/lib/image/canvas'
 import { isCellDrag, isVistaInternalDrag } from '@/features/editor/media-drag'
 import { isCollageDocument } from '@/features/editor/collage/look-targets'
 import { printComposite } from '@/features/editor/print'
@@ -138,9 +138,7 @@ export function EditorShell() {
     if (eulaGate === 'accepted' && !isOnboarded()) setShowFirstRun(true)
   }, [eulaGate])
 
-  useEffect(() => {
-    void hydrateMediaLibrary()
-  }, [hydrateMediaLibrary])
+  const mediaRestoreOnce = useRef(false)
 
   const importGen = useRef(0)
   const ingestGen = useRef(0)
@@ -333,16 +331,48 @@ export function EditorShell() {
     if (!printComposite(current)) notify('error', 'Print failed.')
   }, [notify])
 
-  const handlePlaceImport = useCallback(async (item: { name: string; blob: Blob; workingCanvas?: HTMLCanvasElement; id: string }) => {
+  const openImportedOnCanvas = useCallback(async (item: RecentImport) => {
+    setActiveImportId(item.id)
+    try {
+      const canvas = await canvasToOpenFromImport(item)
+      openImage(canvas, item.name)
+    } catch (error) {
+      console.error('Failed to open imported photo', error)
+      notify('error', `Could not open ${item.name}. Import that file again.`)
+    }
+  }, [notify, openImage, setActiveImportId])
+
+  useEffect(() => {
+    let cancelled = false
+    void hydrateMediaLibrary().then(() => {
+      if (cancelled || mediaRestoreOnce.current) return
+      const state = useEditorStore.getState()
+      if (state.doc) return
+      const last = state.recentImports.find((row) => row.id === state.activeImportId) ?? state.recentImports[0]
+      if (!last) return
+      mediaRestoreOnce.current = true
+      void openImportedOnCanvas(last)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [hydrateMediaLibrary, openImportedOnCanvas])
+
+  const handlePlaceImport = useCallback(async (item: RecentImport) => {
     setActiveImportId(item.id)
     const layers = useEditorStore.getState().doc?.layers ?? []
     if (!isCollageDocument(layers)) {
-      await loadImage(item.blob, item.name, item.id)
+      await openImportedOnCanvas(item)
       return
     }
-    const photo = await canvasFromRecentImport(item)
-    placeMediaOnCanvas(photo, item.name)
-  }, [loadImage, placeMediaOnCanvas, setActiveImportId])
+    try {
+      const photo = await canvasFromRecentImport(item)
+      placeMediaOnCanvas(photo, item.name)
+    } catch (error) {
+      console.error('Failed to place imported photo', error)
+      notify('error', `Could not place ${item.name}. Import that file again.`)
+    }
+  }, [notify, openImportedOnCanvas, placeMediaOnCanvas, setActiveImportId])
 
   const startNewProject = useCallback(async () => {
     await runGuarded(async () => {
@@ -522,6 +552,7 @@ export function EditorShell() {
       bridge.on('menu:close-project', () => void closeProject()),
       bridge.on('menu:print', () => handlePrint()),
       bridge.on('menu:export', () => setShowExportDialog(true)),
+      bridge.on('menu:make-video', () => setShowVideoDialog(true)),
       bridge.on('menu:undo', () => undo()),
       bridge.on('menu:redo', () => redo()),
       bridge.on('menu:rotate-cw', () => rotate90(1)),
@@ -669,6 +700,8 @@ export function EditorShell() {
             onSave: () => void handleSave(false),
             onSaveAs: () => void handleSave(true),
             onCloseProject: () => void closeProject(),
+            onExport: () => setShowExportDialog(true),
+            onMakeVideo: () => setShowVideoDialog(true),
             onExit: () => void requestQuit(),
             onUndo: undo,
             onRedo: redo,
@@ -690,7 +723,7 @@ export function EditorShell() {
         <Toolbar variant={mobile ? 'overlay' : 'dock'} />
         {!mobile && (
           <ImportedImagesBin
-            onOpenImport={(item) => void loadImage(item.blob, item.name, item.id)}
+            onOpenImport={(item) => void openImportedOnCanvas(item)}
             onPlaceImport={(item) => void handlePlaceImport(item)}
             onImportFolder={(files) => void ingestFiles(files)}
             progress={binImport}
@@ -723,7 +756,7 @@ export function EditorShell() {
           {mobileSheet === 'media' ? (
             <ImportedImagesBin
               className="w-full h-full min-h-[16rem] border-0 bg-transparent"
-              onOpenImport={(item) => void loadImage(item.blob, item.name, item.id)}
+              onOpenImport={(item) => void openImportedOnCanvas(item)}
               onPlaceImport={(item) => void handlePlaceImport(item)}
               onImportFolder={(files) => void ingestFiles(files)}
               progress={binImport}
@@ -748,6 +781,8 @@ export function EditorShell() {
             onSave: () => void handleSave(false),
             onSaveAs: () => void handleSave(true),
             onCloseProject: () => void closeProject(),
+            onExport: () => setShowExportDialog(true),
+            onMakeVideo: () => setShowVideoDialog(true),
             onExit: () => void requestQuit(),
             onUndo: undo,
             onRedo: redo,
@@ -756,6 +791,7 @@ export function EditorShell() {
           }}
           onOpenClick={handleOpen}
           onExportClick={() => setShowExportDialog(true)}
+          onMakeVideoClick={() => setShowVideoDialog(true)}
           onSaveClick={() => void handleSave(false)}
           onSaveAsClick={() => void handleSave(true)}
           onOpenProjectClick={() => void handleOpenProject()}

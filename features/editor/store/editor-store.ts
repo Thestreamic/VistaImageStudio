@@ -1,7 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
-import { cloneCanvas, createCanvas, ctx2d, uid, workingCanvasFromSource } from '@/lib/image/canvas'
+import { canvasToBlob, cloneCanvas, createCanvas, ctx2d, uid, workingCanvasFromSource } from '@/lib/image/canvas'
 import type {
   Adjustments,
   BlendMode,
@@ -557,7 +557,7 @@ export const useEditorStore = create<EditorState>()((set, get) => {
         if (next) get().commit(next)
         return
       }
-      const next = updateLayer(id, { source: canvas })
+      const next = updateLayer(id, { source: cloneCanvas(canvas) })
       if (next) get().commit(next)
     },
 
@@ -1113,13 +1113,25 @@ export const useEditorStore = create<EditorState>()((set, get) => {
         recentImports,
         activeImportId: opts?.activate === false ? get().activeImportId : nextId,
       })
-      void putMediaItem({
-        id: nextId,
-        name,
-        thumbnailDataUrl,
-        blob,
-        addedAt: Date.now(),
-      })
+      void (async () => {
+        let stored = blob
+        try {
+          if (workingCanvas && workingCanvas.width > 1) {
+            stored = await canvasToBlob(workingCanvas, 'image/jpeg', 0.92)
+          } else {
+            stored = new Blob([await blob.arrayBuffer()], { type: blob.type || 'image/jpeg' })
+          }
+        } catch {
+          stored = blob
+        }
+        await putMediaItem({
+          id: nextId,
+          name,
+          thumbnailDataUrl,
+          blob: stored,
+          addedAt: Date.now(),
+        })
+      })()
       if (evicted.length) void deleteMediaItems(evicted)
     },
 

@@ -153,8 +153,12 @@ async function blobLooksLikeHeic(blob: Blob, fileName = ''): Promise<boolean> {
   const name = fileName || (blob instanceof File ? blob.name : '')
   const type = blob instanceof File ? blob.type : ''
   if (looksLikeHeic({ name, type })) return true
-  const header = await blob.slice(0, 16).arrayBuffer()
-  return looksLikeHeic({}, header)
+  try {
+    const header = await blob.slice(0, 16).arrayBuffer()
+    return looksLikeHeic({}, header)
+  } catch {
+    return false
+  }
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
@@ -244,6 +248,9 @@ function assertDecodedCanvas(canvas: HTMLCanvasElement, label: string) {
 }
 
 export async function canvasFromBlob(blob: Blob, fileName = ''): Promise<HTMLCanvasElement> {
+  if (!blob || blob.size === 0) {
+    throw new Error(`${fileName || 'image'} is empty`)
+  }
   const heic = await blobLooksLikeHeic(blob, fileName)
   let canvas: HTMLCanvasElement
   if (heic) {
@@ -366,16 +373,33 @@ export function workingCanvasFromSource(
   )
 }
 
+export function hasWorkingCanvas(item: { workingCanvas?: HTMLCanvasElement | null }): boolean {
+  const canvas = item.workingCanvas
+  return !!canvas && canvas.width > 1 && canvas.height > 1
+}
+
 export async function canvasFromRecentImport(item: {
   name: string
   blob: Blob
   workingCanvas?: HTMLCanvasElement
 }): Promise<HTMLCanvasElement> {
-  if (item.workingCanvas && item.workingCanvas.width > 1) return item.workingCanvas
+  if (hasWorkingCanvas(item)) return item.workingCanvas as HTMLCanvasElement
+  if (!item.blob || item.blob.size === 0) {
+    throw new Error(`Imported photo "${item.name}" is no longer available`)
+  }
   const decoded = await canvasFromBlob(item.blob, item.name)
   const working = workingCanvasFromSource(decoded)
   item.workingCanvas = working
   return working
+}
+
+/** Open a Media-bin photo on the canvas without re-running the file import. */
+export async function canvasToOpenFromImport(item: {
+  name: string
+  blob: Blob
+  workingCanvas?: HTMLCanvasElement
+}): Promise<HTMLCanvasElement> {
+  return cloneCanvas(await canvasFromRecentImport(item))
 }
 
 /** Small JPEG data-URL for the imported-images strip. Full pixels stay on `blob`. */

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useCallback, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useCallback, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { ZoomIn, ZoomOut, Maximize2, X } from 'lucide-react'
 import { useEditorStore, selectPhotoLayer } from '@/features/editor/store/editor-store'
 import { compositor } from '@/features/editor/engine/compositor'
@@ -157,24 +157,31 @@ export function EditorStage({
     [placeMediaOnCanvas],
   )
 
-  useEffect(() => {
-    if (!doc || !canvasRef.current) return
-    const source = holdPreview ? (getCompareBeforeDoc() ?? doc) : doc
-    const scale = displayPreviewScale(source.width, source.height)
-    const out = compositor.render(source, renderTarget.current ?? undefined, { scale })
-    renderTarget.current = out
-
-    const display = canvasRef.current
-    const ctx = display.getContext('2d', { alpha: true })
-    if (!ctx) return
-    if (display.width !== out.width || display.height !== out.height) {
-      display.width = out.width
-      display.height = out.height
+  useLayoutEffect(() => {
+    const paint = () => {
+      if (!doc || !canvasRef.current) return false
+      const source = holdPreview ? (getCompareBeforeDoc() ?? doc) : doc
+      const scale = displayPreviewScale(source.width, source.height)
+      const out = compositor.render(source, renderTarget.current ?? undefined, { scale })
+      renderTarget.current = out
+      const display = canvasRef.current
+      const ctx = display.getContext('2d', { alpha: true })
+      if (!ctx) return false
+      if (display.width !== out.width || display.height !== out.height) {
+        display.width = out.width
+        display.height = out.height
+      }
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
+      ctx.clearRect(0, 0, display.width, display.height)
+      ctx.drawImage(out, 0, 0)
+      return true
     }
-    ctx.imageSmoothingEnabled = true
-    ctx.imageSmoothingQuality = 'high'
-    ctx.clearRect(0, 0, display.width, display.height)
-    ctx.drawImage(out, 0, 0)
+    if (paint()) return
+    const id = requestAnimationFrame(() => {
+      paint()
+    })
+    return () => cancelAnimationFrame(id)
   }, [doc, renderVersion, holdPreview, getCompareBeforeDoc])
 
   const fitNow = useCallback(() => {
