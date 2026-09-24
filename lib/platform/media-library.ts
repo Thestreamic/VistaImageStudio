@@ -66,7 +66,16 @@ export async function loadMediaLibrary(): Promise<StoredMedia[]> {
     const req = tx.objectStore(MEDIA_LIBRARY_STORE).getAll()
     req.onsuccess = () => {
       const rows = Array.isArray(req.result) ? (req.result as StoredMedia[]) : []
-      resolve(rows.filter((row) => row && typeof row.id === 'string' && row.blob && row.thumbnailDataUrl))
+      resolve(
+        rows.filter(
+          (row) =>
+            row &&
+            typeof row.id === 'string' &&
+            row.blob instanceof Blob &&
+            row.blob.size > 0 &&
+            typeof row.thumbnailDataUrl === 'string',
+        ),
+      )
     }
     req.onerror = () => resolve([])
   })

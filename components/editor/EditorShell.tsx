@@ -33,7 +33,8 @@ import { useEditorStore, selectPhotoLayer, RECENT_IMPORTS_CAP, type RecentImport
 import { getBridge, isElectron } from '@/lib/platform/bridge'
 import { hasAcceptedCurrentEula } from '@/lib/legal/acceptance'
 import { declineEulaAndExit, hydrateEulaAcceptance } from '@/lib/legal/persist-eula'
-import { canvasFromBlob, canvasFromRecentImport, canvasToOpenFromImport, filesFromDataTransfer, isImageFile, looksLikeHeic, IMAGE_FILE_ACCEPT, thumbnailDataUrl, workingCanvasFromSource } from '@/lib/image/canvas'
+import { canvasFromBlob, canvasFromRecentImport, canvasToBlob, canvasToOpenFromImport, filesFromDataTransfer, isImageFile, looksLikeHeic, IMAGE_FILE_ACCEPT, thumbnailDataUrl, workingCanvasFromSource } from '@/lib/image/canvas'
+import { putMediaItem } from '@/lib/platform/media-library'
 import { isCellDrag, isVistaInternalDrag } from '@/features/editor/media-drag'
 import { isCollageDocument } from '@/features/editor/collage/look-targets'
 import { printComposite } from '@/features/editor/print'
@@ -336,6 +337,20 @@ export function EditorShell() {
     try {
       const canvas = await canvasToOpenFromImport(item)
       openImage(canvas, item.name)
+      const durable = item.workingCanvas ?? canvas
+      if (durable.width > 1) {
+        void canvasToBlob(durable, 'image/jpeg', 0.92)
+          .then((jpeg) =>
+            putMediaItem({
+              id: item.id,
+              name: item.name,
+              thumbnailDataUrl: item.thumbnailDataUrl || thumbnailDataUrl(durable),
+              blob: jpeg,
+              addedAt: Date.now(),
+            }),
+          )
+          .catch(() => undefined)
+      }
     } catch (error) {
       console.error('Failed to open imported photo', error)
       notify('error', `Could not open ${item.name}. Import that file again.`)
@@ -343,6 +358,7 @@ export function EditorShell() {
   }, [notify, openImage, setActiveImportId])
 
   useEffect(() => {
+    if (eulaGate !== 'accepted') return
     let cancelled = false
     void hydrateMediaLibrary().then(() => {
       if (cancelled || mediaRestoreOnce.current) return
@@ -356,7 +372,7 @@ export function EditorShell() {
     return () => {
       cancelled = true
     }
-  }, [hydrateMediaLibrary, openImportedOnCanvas])
+  }, [eulaGate, hydrateMediaLibrary, openImportedOnCanvas])
 
   const handlePlaceImport = useCallback(async (item: RecentImport) => {
     setActiveImportId(item.id)
