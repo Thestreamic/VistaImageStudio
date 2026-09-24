@@ -28,7 +28,7 @@ describe('bokeh', () => {
     expect(out[5]).toBeGreaterThan(220)
   })
 
-  it('blurs far pixels more than mid-ground so architecture can stay readable', () => {
+  it('blurs far pixels more than mid-ground', () => {
     expect(blurRadiusForDepth(1, DEFAULT_BOKEH)).toBe(0)
     expect(blurRadiusForDepth(0.7, DEFAULT_BOKEH)).toBe(0)
     const mid = blurRadiusForDepth(0.35, DEFAULT_BOKEH)

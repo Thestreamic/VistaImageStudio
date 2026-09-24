@@ -3,8 +3,12 @@ import {
   applyDepthBlur,
   depthFromAlphaMatte,
   matteToDepthMap,
+  phoneBlurRadius,
+  runPortraitBlur,
 } from '@/features/ai/algorithms/portrait-blur'
+import { isUsableSubjectMatte, objectFocusKeep } from '@/features/ai/algorithms/object-focus'
 import { segmentHeuristic } from '@/features/ai/algorithms/background-removal'
+import { DEFAULT_BOKEH } from '@/features/ai/algorithms/bokeh'
 
 function fillSubject(
   data: Uint8ClampedArray,
@@ -85,6 +89,63 @@ describe('depthFromAlphaMatte', () => {
     expect(depth[18 * w + 28]).toBeGreaterThanOrEqual(0.94)
     expect(depth[18 * w + 17]).toBeGreaterThanOrEqual(0.94)
     expect(depth[2 * w + 2]).toBeLessThan(0.55)
+    expect(depth[2 * w + 2]).toBeLessThan(DEFAULT_BOKEH.subjectThreshold)
+  })
+})
+
+describe('phone-style object focus', () => {
+  it('rejects empty and full-frame mattes', () => {
+    const w = 24
+    const h = 24
+    expect(isUsableSubjectMatte(new Uint8ClampedArray(w * h), w, h)).toBe(false)
+    expect(isUsableSubjectMatte(new Uint8ClampedArray(w * h).fill(255), w, h)).toBe(false)
+    const island = new Uint8ClampedArray(w * h)
+    for (let y = 6; y < 18; y++) for (let x = 6; x < 18; x++) island[y * w + x] = 255
+    expect(isUsableSubjectMatte(island, w, h)).toBe(true)
+  })
+
+  it('locks a contrasting object in the frame', () => {
+    const w = 48
+    const h = 48
+    const data = new Uint8ClampedArray(w * h * 4)
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = (y * w + x) * 4
+        const object = x > 14 && x < 34 && y > 12 && y < 36
+        data[i] = object ? 220 : 36
+        data[i + 1] = object ? 40 : 150
+        data[i + 2] = object ? 28 : 48
+        data[i + 3] = 255
+      }
+    }
+    const keep = objectFocusKeep(data, w, h)
+    expect(keep).toBeTruthy()
+    expect(keep![24 * w + 24]).toBeGreaterThan(0.5)
+    expect(keep![2 * w + 2]).toBeLessThan(0.5)
+  })
+
+  it('scales blur with the short side the way phone portrait does', () => {
+    expect(phoneBlurRadius(1600)).toBeGreaterThan(phoneBlurRadius(800))
+    expect(phoneBlurRadius(1600)).toBeGreaterThan(70)
+  })
+
+  it('keeps the object sharp and blurs the field without a person model', async () => {
+    const w = 56
+    const h = 56
+    const data = new Uint8ClampedArray(w * h * 4)
+    fillSubject(data, w, h, (x, y) => [(x * 13 + y * 7) % 200, 150, 50])
+    const out = await runPortraitBlur(data, w, h, false, {
+      maxBlurRadius: 10,
+      subjectThreshold: 0.58,
+      samples: 16,
+    })
+    const center = (Math.floor(h / 2) * w + Math.floor(w / 2)) * 4
+    expect(out.data[center]).toBe(data[center])
+    expect(out.data[center + 1]).toBe(data[center + 1])
+    const corner = 2 * 4
+    expect(
+      Math.abs(out.data[corner] - data[corner]) + Math.abs(out.data[corner + 1] - data[corner + 1]),
+    ).toBeGreaterThan(0)
   })
 })
 

@@ -8,6 +8,7 @@
 import { publicBasePath } from '@/lib/public-url'
 import type { AiRequest, AiResponse } from './workers/ai.worker'
 import type { UpscaleFactor } from './algorithms/upscale'
+import { phoneBlurRadius } from './algorithms/bokeh'
 
 /** Extract cleanly narrows the discriminated union on `ok`, unlike `AiResponse & { ok: true }`
  *  which doesn't simplify across a union and left every consumer seeing the full union. */
@@ -134,6 +135,7 @@ export const aiClient = {
 
   backgroundBlur: (img: PixelBuffer, opts?: RunOptions & { strength?: number; mask?: Uint8ClampedArray }) => {
     const data = copyBuffer(img.data)
+    const mask = opts?.mask ? copyBuffer(opts.mask) : undefined
     return run(
       {
         op: 'portrait-blur',
@@ -141,15 +143,21 @@ export const aiClient = {
         width: img.width,
         height: img.height,
         useModel: true,
-        maxBlurRadius: Math.round(10 + Math.max(0, Math.min(1, opts?.strength ?? 0.78)) * 26),
+        maxBlurRadius: phoneBlurRadius(Math.min(img.width, img.height), opts?.strength ?? 0.84),
+        mask,
       },
-      [data],
+      mask ? [data, mask] : [data],
       opts,
     )
   },
 
-  portraitBlur: (img: PixelBuffer, useModel: boolean, opts?: RunOptions & { maxBlurRadius?: number }) => {
+  portraitBlur: (
+    img: PixelBuffer,
+    useModel: boolean,
+    opts?: RunOptions & { maxBlurRadius?: number; mask?: Uint8ClampedArray },
+  ) => {
     const data = copyBuffer(img.data)
+    const mask = opts?.mask ? copyBuffer(opts.mask) : undefined
     return run(
       {
         op: 'portrait-blur',
@@ -157,9 +165,10 @@ export const aiClient = {
         width: img.width,
         height: img.height,
         useModel,
-        maxBlurRadius: opts?.maxBlurRadius,
+        maxBlurRadius: opts?.maxBlurRadius ?? phoneBlurRadius(Math.min(img.width, img.height)),
+        mask,
       },
-      [data],
+      mask ? [data, mask] : [data],
       opts,
     )
   },

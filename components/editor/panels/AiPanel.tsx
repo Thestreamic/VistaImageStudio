@@ -111,9 +111,17 @@ export function AiPanel() {
           <button
             disabled={!hasLayer || busy}
             data-testid="portrait-bokeh"
-            onClick={() => runOp('Portrait Bokeh', (img, onP) => aiClient.portraitBlur(img, true, { onProgress: onP }))}
+            onClick={() => {
+              const state = useEditorStore.getState()
+              const photo = state.doc ? selectPhotoLayer(state) : null
+              const mask =
+                state.doc?.selection && photo ? selectionMaskForLayer(state.doc.selection, photo) : undefined
+              void runOp('Portrait Bokeh', (img, onP) =>
+                aiClient.portraitBlur(img, true, { onProgress: onP, mask }),
+              )
+            }}
             className={btnBase}
-            title="Depth-based disc bokeh: sharp subject, soft falloff, glowing highlight orbs"
+            title="Phone-style portrait: lock the subject or selected object, throw the background out of focus"
           >
             <Focus size={13} /> Portrait Bokeh
           </button>

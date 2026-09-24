@@ -48,6 +48,7 @@ export type AiRequest =
       height: number
       useModel: boolean
       maxBlurRadius?: number
+      mask?: ArrayBuffer
     }
 
 export type AiResponse =
@@ -165,20 +166,28 @@ ctx.onmessage = async (e: MessageEvent<AiRequest & { publicBasePath?: string }>)
           req.width,
           req.height,
           true,
-          paramsFromStrength(req.strength ?? 0.78),
+          paramsFromStrength(req.strength ?? 0.84, Math.min(req.width, req.height)),
+          req.mask ? new Uint8ClampedArray(req.mask) : undefined,
         )
         respond(req.id, out.data.buffer as ArrayBuffer, req.width, req.height, { source: out.source })
         break
       }
       case 'portrait-blur': {
-        reportProgress(req.id, -1, 'Loading portrait model…')
+        reportProgress(req.id, -1, 'Locking focus…')
         const data = new Uint8ClampedArray(req.data)
         const params = {
           ...DEFAULT_PORTRAIT_BLUR,
           ...(typeof req.maxBlurRadius === 'number' ? { maxBlurRadius: req.maxBlurRadius } : {}),
         }
         reportProgress(req.id, 0.45, 'Rendering disc bokeh…')
-        const out = await runPortraitBlur(data, req.width, req.height, req.useModel, params)
+        const out = await runPortraitBlur(
+          data,
+          req.width,
+          req.height,
+          req.useModel,
+          params,
+          req.mask ? new Uint8ClampedArray(req.mask) : undefined,
+        )
         respond(req.id, out.data.buffer as ArrayBuffer, req.width, req.height, { source: out.source, bokeh: true })
         break
       }

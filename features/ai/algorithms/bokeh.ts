@@ -22,12 +22,12 @@ export interface BokehParams {
 }
 
 export const DEFAULT_BOKEH: BokehParams = {
-  maxBlurRadius: 22,
-  subjectThreshold: 0.5,
-  depthGamma: 1.55,
-  highlightThreshold: 0.72,
-  highlightGain: 2.6,
-  samples: 32,
+  maxBlurRadius: 28,
+  subjectThreshold: 0.58,
+  depthGamma: 1.05,
+  highlightThreshold: 0.7,
+  highlightGain: 3.2,
+  samples: 36,
 }
 
 const GOLDEN_ANGLE = 2.399963229728653
@@ -36,6 +36,12 @@ const CPU_WORK_EDGE = 800
 const GPU_MIN_PIXELS = 96 * 96
 
 let gpuAvailable: boolean | null = null
+
+/** Samsung Live Focus / iPhone Portrait strength: 5–9% of the short side. */
+export function phoneBlurRadius(minEdge: number, strength = 0.84): number {
+  const s = Math.max(0, Math.min(1, strength))
+  return Math.max(18, Math.round(Math.max(64, minEdge) * (0.054 + 0.036 * s)))
+}
 
 export function blurRadiusForDepth(depth: number, params: BokehParams): number {
   if (depth >= params.subjectThreshold) return 0
@@ -125,11 +131,11 @@ export function backgroundDepthMap(keep: Float32Array, width: number, height: nu
     const yFar = smoothstep(0.12, 0.88, 1 - y * ih)
     for (let x = 0; x < width; x++) {
       const i = y * width + x
-      const bgFar = smoothstep(0.03, 0.72, dist[i])
-      // Adjacent background must sit below subjectThreshold (~0.5) so the disc
-      // kernel actually runs on the matte fringe; far hills still go to 0.
-      const far = 0.62 + 0.26 * bgFar + 0.12 * yFar
-      depth[i] = 1 - Math.pow(Math.max(0, Math.min(1, far)), 0.85)
+      const bgFar = smoothstep(0.008, 0.38, dist[i])
+      // Phone Live Focus / Portrait: the plane just behind the subject is
+      // already well below the in-focus threshold; far field goes to 0.
+      const far = 0.74 + 0.2 * bgFar + 0.06 * yFar
+      depth[i] = 1 - Math.pow(Math.max(0, Math.min(1, far)), 0.68)
     }
   }
   return depth
@@ -174,6 +180,28 @@ export function distanceToKeep(keep: Float32Array, width: number, height: number
 }
 
 /** Min-filter; eats a 1–2px matte fringe so sky-tinted edge pixels are not treated as subject. */
+export function dilateMap(src: Float32Array, width: number, height: number, radius: number): Float32Array {
+  const r = Math.max(0, Math.round(radius))
+  if (r <= 0) return src.slice()
+  const tmp = new Float32Array(src.length)
+  const out = new Float32Array(src.length)
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let m = 0
+      for (let dx = -r; dx <= r; dx++) m = Math.max(m, src[y * width + clampi(x + dx, 0, width - 1)])
+      tmp[y * width + x] = m
+    }
+  }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let m = 0
+      for (let dy = -r; dy <= r; dy++) m = Math.max(m, tmp[clampi(y + dy, 0, height - 1) * width + x])
+      out[y * width + x] = m
+    }
+  }
+  return out
+}
+
 export function erodeMap(src: Float32Array, width: number, height: number, radius: number): Float32Array {
   const r = Math.max(0, Math.round(radius))
   if (r <= 0) return src.slice()
@@ -256,7 +284,7 @@ export function applyBokehFit(
   const smallDepth = downsampleDepth(depthMap, width, height, dw, dh)
   const scaled: BokehParams = {
     ...params,
-    maxBlurRadius: Math.max(6, Math.round(params.maxBlurRadius * scale)),
+    maxBlurRadius: Math.max(14, Math.round(params.maxBlurRadius * scale)),
   }
   const blurredSmall = preferGpu
     ? applyBokehWebgl(small, dw, dh, smallDepth, scaled) ?? applyDiscBokehCpu(small, dw, dh, smallDepth, scaled)

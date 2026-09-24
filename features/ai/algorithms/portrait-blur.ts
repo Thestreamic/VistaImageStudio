@@ -1,10 +1,14 @@
 /**
- * Depth-based portrait bokeh. Subject keep comes from MODNet’s alpha matte
- * (same model as Remove Background). Skin-ellipse / flood-fill is not the
- * live path.
+ * Depth-based portrait bokeh. Focus lock is phone-style:
+ *   1. Optional tap/selection (object the user marked)
+ *   2. MODNet person matte when it actually isolates a subject
+ *   3. Single-camera object focus (iPhone 16e / Samsung / Xiaomi family)
+ * Background gets a strong disc CoC; the in-focus plane is pasted back sharp.
  */
 import { loadOrtWasm } from '@/features/ai/ort-runtime'
 import { segmentWithModel } from './background-removal'
+import { estimatePortraitSubject } from './local-enhance'
+import { isUsableSubjectMatte, keepToMatte, objectFocusKeep } from './object-focus'
 import { publicUrl } from '@/lib/public-url'
 import {
   DEFAULT_BOKEH,
@@ -12,6 +16,7 @@ import {
   backgroundDepthMap,
   erodeMap,
   featherDepth,
+  phoneBlurRadius,
   type BokehParams,
 } from './bokeh'
 
@@ -30,12 +35,14 @@ export interface PortraitBlurParams {
 
 export const DEFAULT_PORTRAIT_BLUR: PortraitBlurParams = {
   maxBlurRadius: DEFAULT_BOKEH.maxBlurRadius,
-  subjectThreshold: 0.5,
-  depthGamma: 1.55,
+  subjectThreshold: DEFAULT_BOKEH.subjectThreshold,
+  depthGamma: DEFAULT_BOKEH.depthGamma,
   highlightThreshold: DEFAULT_BOKEH.highlightThreshold,
   highlightGain: DEFAULT_BOKEH.highlightGain,
   samples: DEFAULT_BOKEH.samples,
 }
+
+export { phoneBlurRadius } from './bokeh'
 
 export const MIDAS_SMALL_URL = publicUrl('/models/midas-small.onnx')
 const MIDAS_NET = 256
@@ -90,11 +97,11 @@ export function depthFromAlphaMatte(
   const keep = new Float32Array(matte.length)
   for (let i = 0; i < matte.length; i++) keep[i] = matte[i] / 255
   const edge = Math.min(width, height)
-  const erodeR = Math.max(1, Math.min(8, Math.round(edge * 0.0028)))
-  const featherR = Math.max(4, Math.min(18, Math.round(edge * 0.007)))
+  const erodeR = Math.max(1, Math.min(4, Math.round(edge * 0.0022)))
+  const featherR = Math.max(2, Math.min(7, Math.round(edge * 0.0036)))
   const core = erodeMap(keep, width, height, erodeR)
   const subjectAlpha = featherDepth(core, width, height, featherR)
-  let depth = featherDepth(backgroundDepthMap(core, width, height), width, height, Math.max(6, featherR))
+  let depth = featherDepth(backgroundDepthMap(core, width, height), width, height, Math.max(4, featherR))
   for (let i = 0; i < keep.length; i++) {
     if (core[i] > 0.5) depth[i] = 1
   }
@@ -155,14 +162,53 @@ export async function runPortraitBlur(
   height: number,
   useModel: boolean,
   params: PortraitBlurParams = DEFAULT_PORTRAIT_BLUR,
+  mask?: Uint8ClampedArray,
 ): Promise<{ data: Uint8ClampedArray; source: 'midas' | 'matte' }> {
-  void useModel
-  const matte = await segmentWithModel(data, width, height)
+  const matte = await resolveFocusMatte(data, width, height, useModel, mask)
   const estimate = depthFromAlphaMatte(matte, width, height)
+  const sized: PortraitBlurParams = {
+    ...params,
+    maxBlurRadius:
+      params.maxBlurRadius && params.maxBlurRadius > 8
+        ? params.maxBlurRadius
+        : phoneBlurRadius(Math.min(width, height)),
+  }
   return {
-    data: applyBokehFit(data, width, height, estimate.depth, toBokehParams(params), estimate.subjectAlpha),
+    data: applyBokehFit(data, width, height, estimate.depth, toBokehParams(sized), estimate.subjectAlpha),
     source: estimate.source,
   }
+}
+
+async function resolveFocusMatte(
+  data: Uint8ClampedArray,
+  width: number,
+  height: number,
+  useModel: boolean,
+  mask?: Uint8ClampedArray,
+): Promise<Uint8ClampedArray> {
+  if (mask && mask.length === width * height && isUsableSubjectMatte(mask, width, height)) {
+    return mask
+  }
+  if (useModel) {
+    try {
+      const person = await segmentWithModel(data, width, height)
+      if (isUsableSubjectMatte(person, width, height)) return person
+    } catch {
+      // Object photos and missing weights fall through to single-camera focus.
+    }
+  }
+  const portrait = estimatePortraitSubject(data, width, height, mask)
+  if (portrait) {
+    const fromPortrait = keepToMatte(portrait)
+    if (isUsableSubjectMatte(fromPortrait, width, height)) return fromPortrait
+  }
+  const object = objectFocusKeep(data, width, height)
+  if (object) {
+    const fromObject = keepToMatte(object)
+    if (isUsableSubjectMatte(fromObject, width, height)) return fromObject
+  }
+  if (mask && mask.length === width * height) return mask
+  throw new Error('Could not lock focus on a subject. Select the object, then try Portrait Bokeh again.')
 }
 
 function toBokehParams(params: PortraitBlurParams): BokehParams {
@@ -250,14 +296,14 @@ function upsampleDepth(
   return out
 }
 
-export function paramsFromStrength(strength: number): PortraitBlurParams {
+export function paramsFromStrength(strength: number, minEdge = 1200): PortraitBlurParams {
   const s = Math.max(0, Math.min(1, strength))
   return {
-    maxBlurRadius: Math.round(14 + s * 22),
-    subjectThreshold: 0.5,
-    depthGamma: 1.55,
-    highlightThreshold: 0.72,
-    highlightGain: 2.6,
-    samples: 32,
+    maxBlurRadius: phoneBlurRadius(minEdge, s),
+    subjectThreshold: DEFAULT_BOKEH.subjectThreshold,
+    depthGamma: DEFAULT_BOKEH.depthGamma,
+    highlightThreshold: DEFAULT_BOKEH.highlightThreshold,
+    highlightGain: DEFAULT_BOKEH.highlightGain,
+    samples: DEFAULT_BOKEH.samples,
   }
 }
