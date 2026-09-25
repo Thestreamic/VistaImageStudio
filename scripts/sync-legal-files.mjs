@@ -79,7 +79,7 @@ fs.writeFileSync(
   path.join(root, 'docs', 'eula.html'),
   legalHtml({
     title: 'End-User License Agreement',
-    updated: 'September 20, 2026',
+    updated: 'September 25, 2026',
     preId: 'eula-canonical',
     body: eula,
     extraNav: '<a class="link" href="privacy.html">Privacy Policy</a> · <a class="link" href="notices.html">Third-party notices</a>',

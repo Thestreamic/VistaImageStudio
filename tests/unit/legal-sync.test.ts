@@ -28,7 +28,7 @@ describe('canonical legal files stay in sync', () => {
       'This Agreement shall be governed by the laws of Ireland, without regard to its conflict of laws principles.',
     )
     expect(compact).toContain('The courts of Ireland shall have exclusive jurisdiction')
-    expect(EULA_VERSION).toBe('2026-09-20')
+    expect(EULA_VERSION).toBe('2026-09-25')
   })
 
   it('ships THIRD-PARTY-LICENSES.txt from the notices module', () => {

@@ -2,8 +2,8 @@
 
 export const EULA_TITLE = 'End-User License Agreement (EULA)'
 export const EULA_PRODUCT = 'Vista Image Studio'
-export const EULA_VERSION = '2026-09-20'
-export const EULA_LAST_UPDATED = 'September 20, 2026'
+export const EULA_VERSION = '2026-09-25'
+export const EULA_LAST_UPDATED = 'September 25, 2026'
 export const EULA_LICENSOR = 'The Streamic'
 export const EULA_CONTACT = 'thestreamic@gmail.com'
 export const EULA_CONTACT_MAILTO = `mailto:${EULA_CONTACT}`
@@ -20,7 +20,7 @@ export const NOTICES_FILE_PATH = '/THIRD-PARTY-LICENSES.txt'
 export const EULA_TEXT = `END-USER LICENSE AGREEMENT (EULA)
 VISTA IMAGE STUDIO
 
-Last Updated: September 20, 2026
+Last Updated: September 25, 2026
 
 PLEASE READ THIS END-USER LICENSE AGREEMENT ("AGREEMENT") CAREFULLY BEFORE
 INSTALLING, ACCESSING, OR USING VISTA IMAGE STUDIO (THE "SOFTWARE"). BY
@@ -135,6 +135,49 @@ alter User Content ("AI Features"). You acknowledge that:
   (d) Licensor makes no representation that AI Feature output will be
       accurate, suitable, or fit for any particular purpose.
 
+3.5 Local Storage of User Content. Imported images, thumbnails, processed
+pixels, and project autosave ("Local Copies") are written only to the
+device on which you use the Software. Licensor does not receive, host,
+or retain Local Copies, and has no server from which they can be
+recovered after you delete them.
+
+  (a) Web application. Imported photographs and thumbnails are stored in
+      the browser's IndexedDB database named "vista-media-library,"
+      object store "imports." On Microsoft Windows, Google Chrome stores
+      that database in the browser profile then in use at:
+      %LOCALAPPDATA%\\Google\\Chrome\\User Data\\<Profile>\\IndexedDB\\https_vistaimagestudio.thestreamic.in_0.indexeddb.leveldb
+      together with the accompanying ".indexeddb.blob" folder. Microsoft
+      Edge stores the same database under
+      %LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\<Profile>\\IndexedDB\\
+      using the same site folder name. "<Profile>" means that browser
+      profile, commonly named "Default," or "Profile 1" where another
+      profile is in use. The edited project, including processed image
+      data, is stored in that same profile's localStorage under the key
+      "vista-autosave." Pixels in an open editing session are held in
+      memory. A file outside those locations is created only when you
+      export to a folder you select.
+
+  (b) Desktop application. Local Copies are stored in the operating-system
+      application-data folder for "Vista Image Studio." On Microsoft
+      Windows that folder is %APPDATA%\\Vista Image Studio\\, which
+      resolves to C:\\Users\\<you>\\AppData\\Roaming\\Vista Image Studio\\,
+      where "<you>" is the Windows account name of the person using the
+      Software. The most recent project autosave is the file
+      "autosave\\recovery.lumen" inside that folder. Imported photographs
+      are stored in the IndexedDB directory inside that folder for the
+      origin "lumen://app."
+
+  (c) The paths in this Section 3.5 are generic locations on the end
+      user's own device. They are stated so that you may inspect or
+      delete Local Copies. They are not accounts, cloud buckets, or
+      storage facilities of Licensor. You may remove Local Copies by
+      clearing this site's data in the browser, uninstalling the desktop
+      application, or deleting the folders named above.
+
+  (d) The Privacy Policy published for the Software describes these
+      storage locations in further detail and applies together with this
+      Section 3.5.
+
 --------------------------------------------------------------------------
 4. PRIVACY
 --------------------------------------------------------------------------
@@ -142,9 +185,10 @@ alter User Content ("AI Features"). You acknowledge that:
 4.1 No Account, No Cloud, No Analytics by Default. The Software does not
 require account creation and does not send User Content to Licensor's
 servers or any third party as part of its core editing functionality.
+Local Copies remain on your device in the locations stated in Section 3.5.
 The Software's Privacy Centre panel is provided to give you visibility
-into file paths accessed by the Software and the current state of any
-data-related settings.
+into the host, the desktop user-data and autosave paths on that computer,
+and the current state of any data-related settings.
 
 4.2 Limited Data We May Receive. If you contact Licensor (e.g., via
 thestreamic@gmail.com) for support or feedback, or if the Software
