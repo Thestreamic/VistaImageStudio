@@ -56,7 +56,7 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
         notify('error', 'Add a photo first.')
         return
       }
-      let musicId = track?.id ?? null
+      let musicId = desktop ? track?.id ?? null : null
       if (musicId) {
         const lib = await loadMusicLibrary()
         if (!lib.some((t) => t.id === musicId)) {
@@ -73,7 +73,7 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
         height: main.height,
       })
       if (!result) {
-        notify('info', 'MP4 with music is desktop-only.')
+        notify('info', 'Saving an MP4 needs the Windows app.')
         return
       }
       if (result.canceled) return
@@ -105,7 +105,7 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
         </div>
         <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed">
           Turns the current photo (and optional Media bin stills) into an MP4. Apply Portrait Bokeh on stills first if
-          you want it in the video. Music is CC0 and stays on this device.
+          you want it in the video.
         </p>
         <p className="text-xs mb-3">
           {stillCount} still{stillCount === 1 ? '' : 's'} · about {slideshowDuration(stillCount, hold).toFixed(1)}s
@@ -126,35 +126,32 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
             onChange={(e) => setHold(Number(e.target.value))}
           />
         </label>
-        <div className="mb-4">
-          <span className="panel-label">Music</span>
-          <p className="text-[10px] text-muted-foreground mt-1 mb-2">
-            {track ? `${track.title} · ${track.license}` : 'Optional — silent if none'}
-          </p>
-          <div className="flex gap-1.5">
-            <button
-              type="button"
-              data-testid="music-choose"
-              onClick={() => setPicker(true)}
-              className="flex-1 py-1.5 text-xs rounded-md bg-secondary hover:bg-secondary/80"
-            >
-              {track ? 'Change track' : 'Choose music'}
-            </button>
-            {track && (
+        {desktop && (
+          <div className="mb-4">
+            <span className="panel-label">Music</span>
+            <p className="text-[10px] text-muted-foreground mt-1 mb-2">
+              {track ? `${track.title} · ${track.license}` : 'Optional — silent if none'}
+            </p>
+            <div className="flex gap-1.5">
               <button
                 type="button"
-                onClick={() => setTrack(null)}
-                className="px-3 py-1.5 text-xs rounded-md bg-secondary hover:bg-secondary/80"
+                data-testid="music-choose"
+                onClick={() => setPicker(true)}
+                className="flex-1 py-1.5 text-xs rounded-md bg-secondary hover:bg-secondary/80"
               >
-                None
+                {track ? 'Change track' : 'Choose music'}
               </button>
-            )}
+              {track && (
+                <button
+                  type="button"
+                  onClick={() => setTrack(null)}
+                  className="px-3 py-1.5 text-xs rounded-md bg-secondary hover:bg-secondary/80"
+                >
+                  None
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-        {!desktop && (
-          <p className="text-[10px] text-muted-foreground mb-3">
-            You can preview tracks in the browser. Saving an MP4 with audio needs the desktop app.
-          </p>
         )}
         <button
           type="button"
@@ -164,10 +161,10 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-md brand-gradient-bg text-white text-sm font-medium disabled:opacity-60"
         >
           <Film size={14} />
-          {busy ? 'Exporting…' : desktop ? 'Export MP4' : 'Preview music / desktop MP4'}
+          {busy ? 'Exporting…' : 'Export MP4'}
         </button>
       </div>
-      {picker && (
+      {desktop && picker && (
         <MusicPickerDialog
           selectedId={track?.id}
           onSelect={(next) => {
