@@ -1,3 +1,5 @@
+import { unsharpMask } from './filters'
+
 /**
  * Depth-based disc bokeh (not a flat Gaussian).
  *
@@ -5,7 +7,7 @@
  *   1. Optional highlight boost (bright points become orbs after the blur)
  *   2. Variable-radius disc sampling from a depth map (1 = near / subject)
  *   3. Occlusion weights so the sharp subject does not smear into the background
- *   4. Composite the original subject back with a soft depth falloff
+ *   4. Paste the subject back in focus, with a light 10% unsharp on those pixels only
  *
  * WebGL is used when a context is available; otherwise a CPU disc kernel
  * runs at a working resolution so 12MP stills stay interactive.
@@ -30,6 +32,11 @@ export const DEFAULT_BOKEH: BokehParams = {
   samples: 28,
 }
 
+/** Background circle of confusion is 24% wider than the soft cap. */
+const BACKGROUND_DISC = 1.24
+/** Camera-style sharpness on the in-focus subject only. */
+const SUBJECT_SHARPNESS = 0.1
+
 const GOLDEN_ANGLE = 2.399963229728653
 const GPU_WORK_EDGE = 1440
 const CPU_WORK_EDGE = 800
@@ -37,18 +44,20 @@ const GPU_MIN_PIXELS = 96 * 96
 
 let gpuAvailable: boolean | null = null
 
-/** Soft portrait disc. Hard-capped so a large photo cannot smear the
- *  background into a flat wash. */
+/** Soft portrait disc, then opened 24% so the background is less in focus. */
 export function phoneBlurRadius(minEdge: number, strength = 0.84): number {
   const s = Math.max(0, Math.min(1, strength))
   const edge = Math.max(64, minEdge)
-  return clampBokehRadius(edge * (0.006 + 0.005 * s), edge, edge)
+  return clampBokehRadius(edge * (0.006 + 0.005 * s) * BACKGROUND_DISC, edge, edge)
 }
 
 /** Largest disc that still reads as focus falloff, not a removed background. */
 export function clampBokehRadius(radius: number, width: number, height: number): number {
   const edge = Math.max(1, Math.min(width, height))
-  const cap = Math.min(14, Math.max(4, Math.round(edge * 0.007)))
+  const cap = Math.min(
+    Math.round(14 * BACKGROUND_DISC),
+    Math.max(4, Math.round(edge * 0.007 * BACKGROUND_DISC)),
+  )
   const asked = Number.isFinite(radius) ? radius : cap
   return Math.max(2, Math.min(Math.round(asked), cap))
 }
@@ -625,6 +634,7 @@ function compositeSubject(
   subjectAlpha?: Float32Array,
 ): Uint8ClampedArray {
   const out = new Uint8ClampedArray(blurred)
+  const crisp = unsharpMask(original, width, height, 1, SUBJECT_SHARPNESS, 2)
   const n = width * height
   // Depth-only fallback (tests / callers without a matte): a wide symmetric
   // band. A crisp MODNet matte needs that width — a narrow hi-side (old
@@ -638,15 +648,15 @@ function compositeSubject(
     if (s <= 0.001) continue
     const px = i * 4
     if (s >= 0.999) {
-      out[px] = original[px]
-      out[px + 1] = original[px + 1]
-      out[px + 2] = original[px + 2]
+      out[px] = crisp[px]
+      out[px + 1] = crisp[px + 1]
+      out[px + 2] = crisp[px + 2]
       continue
     }
     const inv = 1 - s
-    out[px] = blurred[px] * inv + original[px] * s
-    out[px + 1] = blurred[px + 1] * inv + original[px + 1] * s
-    out[px + 2] = blurred[px + 2] * inv + original[px + 2] * s
+    out[px] = blurred[px] * inv + crisp[px] * s
+    out[px + 1] = blurred[px + 1] * inv + crisp[px + 1] * s
+    out[px + 2] = blurred[px + 2] * inv + crisp[px + 2] * s
   }
   return out
 }

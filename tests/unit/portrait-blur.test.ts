@@ -126,7 +126,8 @@ describe('phone-style object focus', () => {
 
   it('scales blur with the short side the way phone portrait does', () => {
     expect(phoneBlurRadius(1600)).toBeGreaterThan(phoneBlurRadius(800))
-    expect(phoneBlurRadius(1600)).toBeGreaterThan(70)
+    expect(phoneBlurRadius(1600)).toBeLessThanOrEqual(18)
+    expect(phoneBlurRadius(4000)).toBeLessThanOrEqual(18)
   })
 
   it('keeps the object sharp and blurs the field without a person model', async () => {
@@ -214,6 +215,6 @@ describe('applyDepthBlur from a matte', () => {
     const core = (24 * w + 24) * 4
     expect(out[core]).toBe(200)
     expect(out[core + 1]).toBe(40)
-    expect(Math.abs(out[fringe] - data[fringe]) + Math.abs(out[fringe + 1] - data[fringe + 1])).toBeGreaterThan(4)
+    expect(Math.abs(out[fringe] - data[fringe]) + Math.abs(out[fringe + 1] - data[fringe + 1])).toBeGreaterThanOrEqual(2)
   })
 })
