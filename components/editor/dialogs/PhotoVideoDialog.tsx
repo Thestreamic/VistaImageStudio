@@ -39,7 +39,7 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
     stopPreview()
     try {
       if (!desktop) {
-        notify('info', 'MP4 with music is desktop-only. Preview tracks here; export video from the Windows app.')
+        notify('info', 'Saving an MP4 needs the Windows app.')
         return
       }
       const frames: { name: string; buffer: ArrayBuffer }[] = []
