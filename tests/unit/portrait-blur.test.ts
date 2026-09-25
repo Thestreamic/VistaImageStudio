@@ -126,8 +126,12 @@ describe('phone-style object focus', () => {
 
   it('scales blur with the short side the way phone portrait does', () => {
     expect(phoneBlurRadius(1600)).toBeGreaterThan(phoneBlurRadius(800))
-    expect(phoneBlurRadius(1600)).toBeLessThanOrEqual(18)
-    expect(phoneBlurRadius(4000)).toBeLessThanOrEqual(18)
+    expect(phoneBlurRadius(1600)).toBeGreaterThanOrEqual(36)
+    expect(phoneBlurRadius(1600)).toBeLessThanOrEqual(50)
+    expect(phoneBlurRadius(4000)).toBeGreaterThan(90)
+    expect(phoneBlurRadius(4000)).toBeLessThanOrEqual(120)
+    expect(phoneBlurRadius(800)).toBeGreaterThan(16)
+    expect(phoneBlurRadius(800)).toBeLessThan(28)
   })
 
   it('keeps the object sharp and blurs the field without a person model', async () => {

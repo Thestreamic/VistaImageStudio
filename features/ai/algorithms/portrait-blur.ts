@@ -214,7 +214,7 @@ async function resolveFocusMatte(
 function toBokehParams(params: PortraitBlurParams): BokehParams {
   return {
     maxBlurRadius: params.maxBlurRadius,
-    subjectThreshold: params.subjectThreshold,
+    subjectThreshold: params.subjectThreshold ?? DEFAULT_BOKEH.subjectThreshold,
     depthGamma: params.depthGamma ?? DEFAULT_BOKEH.depthGamma,
     highlightThreshold: params.highlightThreshold ?? DEFAULT_BOKEH.highlightThreshold,
     highlightGain: params.highlightGain ?? DEFAULT_BOKEH.highlightGain,

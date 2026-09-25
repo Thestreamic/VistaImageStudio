@@ -32,8 +32,12 @@ export const DEFAULT_BOKEH: BokehParams = {
   samples: 28,
 }
 
-/** Background circle of confusion is 24% wider than the soft cap. */
-const BACKGROUND_DISC = 1.24
+/**
+ * Circle of confusion as a fraction of the short side, then opened 24%,
+ * another 20%, and another 5%. The old absolute cap (~15px) stayed sharp on a real photo.
+ */
+const BACKGROUND_DISC = 1.24 * 1.2 * 1.05
+const PORTRAIT_DISC = 0.018 * BACKGROUND_DISC
 /** Camera-style sharpness on the in-focus subject only. */
 const SUBJECT_SHARPNESS = 0.1
 
@@ -44,28 +48,28 @@ const GPU_MIN_PIXELS = 96 * 96
 
 let gpuAvailable: boolean | null = null
 
-/** Soft portrait disc, then opened 24% so the background is less in focus. */
+/** Portrait disc opened 24%, then 20%, then another 5%, so the background is less in focus. */
 export function phoneBlurRadius(minEdge: number, strength = 0.84): number {
   const s = Math.max(0, Math.min(1, strength))
   const edge = Math.max(64, minEdge)
-  return clampBokehRadius(edge * (0.006 + 0.005 * s) * BACKGROUND_DISC, edge, edge)
+  return clampBokehRadius(edge * PORTRAIT_DISC * (0.82 + 0.18 * s), edge, edge)
 }
 
 /** Largest disc that still reads as focus falloff, not a removed background. */
 export function clampBokehRadius(radius: number, width: number, height: number): number {
   const edge = Math.max(1, Math.min(width, height))
-  const cap = Math.min(
-    Math.round(14 * BACKGROUND_DISC),
-    Math.max(4, Math.round(edge * 0.007 * BACKGROUND_DISC)),
-  )
+  const cap = Math.max(6, Math.round(edge * PORTRAIT_DISC))
   const asked = Number.isFinite(radius) ? radius : cap
   return Math.max(2, Math.min(Math.round(asked), cap))
 }
 
 export function blurRadiusForDepth(depth: number, params: BokehParams): number {
-  if (depth >= params.subjectThreshold) return 0
-  const t = 1 - depth / Math.max(1e-6, params.subjectThreshold)
-  return Math.pow(Math.max(0, Math.min(1, t)), params.depthGamma) * params.maxBlurRadius
+  const threshold = Number.isFinite(params.subjectThreshold) ? params.subjectThreshold : DEFAULT_BOKEH.subjectThreshold
+  const gamma = Number.isFinite(params.depthGamma) ? params.depthGamma : DEFAULT_BOKEH.depthGamma
+  const maxR = Number.isFinite(params.maxBlurRadius) ? params.maxBlurRadius : DEFAULT_BOKEH.maxBlurRadius
+  if (depth >= threshold) return 0
+  const t = 1 - depth / Math.max(1e-6, threshold)
+  return Math.pow(Math.max(0, Math.min(1, t)), gamma) * maxR
 }
 
 export function boostHighlights(
@@ -354,6 +358,7 @@ export function applyDiscBokehCpu(
           const angle = (s + ring * 0.37) * GOLDEN_ANGLE
           const sx = Math.round(x + Math.cos(angle) * ringR)
           const sy = Math.round(y + Math.sin(angle) * ringR)
+          if (!Number.isFinite(sx) || !Number.isFinite(sy)) continue
           if (sx < 0 || sy < 0 || sx >= width || sy >= height) continue
           const si = sy * width + sx
           const sp = si * 4
@@ -502,11 +507,16 @@ function applyBokehWebgl(
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     const pixels = new Uint8Array(width * height * 4)
     gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
-    let lit = 0
+    let outDark = 0
+    let srcDark = 0
+    let samples = 0
     for (let i = 0; i < pixels.length; i += 16) {
-      if (pixels[i] | pixels[i + 1] | pixels[i + 2]) lit++
+      samples++
+      if (pixels[i] + pixels[i + 1] + pixels[i + 2] < 12) outDark++
+      if (i + 2 < data.length && data[i] + data[i + 1] + data[i + 2] < 12) srcDark++
     }
-    if (lit < 2) return null
+    if (samples === 0 || outDark === samples) return null
+    if (outDark / samples > 0.4 && srcDark / samples < 0.2) return null
     flipY(pixels, width, height)
     return new Uint8ClampedArray(pixels)
   } catch (err) {
