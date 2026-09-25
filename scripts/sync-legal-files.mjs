@@ -15,7 +15,7 @@ function readExport(file, name) {
   const re = new RegExp(`export const ${name} = \`([\\s\\S]*?)\`\\s*(?:\\n|$)`)
   const m = src.match(re)
   if (!m) throw new Error(`Could not extract ${name} from ${file}`)
-  return m[1]
+  return m[1].replace(/\\\\/g, '\\')
 }
 
 function escapeHtml(text) {
