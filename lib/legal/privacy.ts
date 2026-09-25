@@ -1,8 +1,8 @@
 import { EULA_CONTACT, EULA_LICENSOR, EULA_SITE_PRIMARY, EULA_SITE_PUBLISHER } from '@/lib/legal/eula'
 
 export const PRIVACY_TITLE = 'Privacy Policy'
-export const PRIVACY_VERSION = '2026-09-20'
-export const PRIVACY_LAST_UPDATED = 'September 20, 2026'
+export const PRIVACY_VERSION = '2026-09-25'
+export const PRIVACY_LAST_UPDATED = 'September 25, 2026'
 export const PRIVACY_SHORT =
   'Your photos stay on your device. Vista Image Studio does not require an account, does not upload your images, and does not send telemetry by default.'
 
@@ -41,6 +41,8 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
     heading: '4. What stays on your device',
     paragraphs: [
       'Preferences, theme, first-run state, EULA acceptance, command-chat text, and project autosave are stored locally (browser localStorage / IndexedDB on the web; the operating system application-data folder on desktop). Command chat stores text only — never pixels or file paths.',
+      'Local path of cache and image location. Imported photos and thumbnails stay in this browser’s IndexedDB, database vista-media-library, store imports. On Windows that folder is inside the browser profile: %LOCALAPPDATA%\\Google\\Chrome\\User Data\\<Profile>\\IndexedDB\\https_vistaimagestudio.thestreamic.in_0.indexeddb.leveldb, plus the matching .indexeddb.blob folder beside it. Microsoft Edge uses %LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\<Profile>\\IndexedDB\\ with the same site folder name. <Profile> is usually Default, or Profile 1 for another browser profile. The edited project, including processed pixels, is the localStorage key vista-autosave in that same profile under Local Storage. While you edit, the working image is held in memory. A separate file is written only when you export to a folder you choose.',
+      'On the desktop app the same data stays under %APPDATA%\\Vista Image Studio\\ (on Windows, C:\\Users\\<you>\\AppData\\Roaming\\Vista Image Studio\\). The last project is autosave\\recovery.lumen in that folder. Imported photos are in the IndexedDB folder inside it, for the lumen://app origin.',
       'Canvas export rebuilds the bitmap, so camera EXIF is not copied into exported images.',
       'Uninstalling the desktop app or clearing this site’s data in your browser removes that locally stored information. We have no server-side copy to export or delete.',
     ],

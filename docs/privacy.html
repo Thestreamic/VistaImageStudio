@@ -38,7 +38,7 @@
 
   <header>
     <h1>Privacy Policy</h1>
-    <p>Last updated: September 20, 2026 · The Streamic · Vista Image Studio</p>
+    <p>Last updated: September 25, 2026 · The Streamic · Vista Image Studio</p>
   </header>
 
   <div class="highlight">
@@ -64,6 +64,8 @@
 
   <h2>4. What stays on your device</h2>
   <p>Preferences, theme, first-run state, EULA acceptance, command-chat text, and project autosave are stored locally (browser localStorage / IndexedDB on the web; the operating system application-data folder on desktop). Command chat stores text only — never pixels or file paths.</p>
+  <p>Local path of cache and image location. Imported photos and thumbnails stay in this browser’s IndexedDB, database vista-media-library, store imports. On Windows that folder is inside the browser profile: %LOCALAPPDATA%\Google\Chrome\User Data\&lt;Profile&gt;\IndexedDB\https_vistaimagestudio.thestreamic.in_0.indexeddb.leveldb, plus the matching .indexeddb.blob folder beside it. Microsoft Edge uses %LOCALAPPDATA%\Microsoft\Edge\User Data\&lt;Profile&gt;\IndexedDB\ with the same site folder name. &lt;Profile&gt; is usually Default, or Profile 1 for another browser profile. The edited project, including processed pixels, is the localStorage key vista-autosave in that same profile under Local Storage. While you edit, the working image is held in memory. A separate file is written only when you export to a folder you choose.</p>
+  <p>On the desktop app the same data stays under %APPDATA%\Vista Image Studio\ (on Windows, C:\Users\&lt;you&gt;\AppData\Roaming\Vista Image Studio\). The last project is autosave\recovery.lumen in that folder. Imported photos are in the IndexedDB folder inside it, for the lumen://app origin.</p>
   <p>Canvas export rebuilds the bitmap, so camera EXIF is not copied into exported images.</p>
   <p>Uninstalling the desktop app or clearing this site’s data in your browser removes that locally stored information. We have no server-side copy to export or delete.</p>
 
@@ -89,7 +91,7 @@
   <p>If you have contacted us by email, you may ask us to delete that correspondence. If you are in the EEA/UK, you may also have rights of access, rectification, erasure, restriction, and objection, and a right to lodge a complaint with a supervisory authority (in Ireland, the Data Protection Commission).</p>
 
   <h2>11. Changes</h2>
-  <p>We may update this Privacy Policy. Material changes will be indicated by an updated “Last updated” date (September 20, 2026 for this version). Where a new EULA version is published, the app may ask you to accept it again before use.</p>
+  <p>We may update this Privacy Policy. Material changes will be indicated by an updated “Last updated” date (September 25, 2026 for this version). Where a new EULA version is published, the app may ask you to accept it again before use.</p>
 
   <h2>12. Contact</h2>
   <p>Questions about this Privacy Policy: <a class="link" href="mailto:thestreamic@gmail.com">thestreamic@gmail.com</a>.</p>
