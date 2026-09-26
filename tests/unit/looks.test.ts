@@ -80,13 +80,22 @@ describe('looks', () => {
 
   it('Optimize Image keeps color calm and does not jump a near-clipped red hue', () => {
     const pro = CAMERA_PROFILES.find((p) => p.id === 'pro-phone')!
-    expect(pro.adjustments.vibrance ?? 0).toBeLessThanOrEqual(12)
+    expect(pro.adjustments.temperature ?? 0).toBe(0)
+    expect(pro.adjustments.tint ?? 0).toBe(0)
+    expect(pro.adjustments.vibrance ?? 0).toBeLessThanOrEqual(8)
     expect(pro.adjustments.saturation ?? 0).toBe(0)
     const src = new Uint8ClampedArray([250, 40, 30, 255])
     const out = applyAdjustmentsToPixels(src.slice(), adjustmentsFromLook(pro.adjustments, 100), 1, 1)
     expect(out[0]).toBeGreaterThan(out[1])
     expect(out[0]).toBeGreaterThan(out[2])
     expect(hueDelta(hueDeg(src[0], src[1], src[2]), hueDeg(out[0], out[1], out[2]))).toBeLessThan(12)
+  })
+
+  it('Optimize Image does not yellow a neutral white', () => {
+    const pro = CAMERA_PROFILES.find((p) => p.id === 'pro-phone')!
+    const src = new Uint8ClampedArray([238, 234, 234, 255])
+    const out = applyAdjustmentsToPixels(src.slice(), adjustmentsFromLook(pro.adjustments, 100), 1, 1)
+    expect(out[0] - out[2]).toBeLessThanOrEqual(src[0] - src[2] + 2)
   })
 
   it('shrinks vibrance at the gamut edge so a clipped channel does not shift hue', () => {
