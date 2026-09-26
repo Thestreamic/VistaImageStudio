@@ -19,6 +19,10 @@ import {
 import { TextBoxOverlay, TextLayerHits } from './TextBoxOverlay'
 import { CollageCellOverlays } from './CollageCellOverlays'
 import { CanvasContextMenu } from './CanvasContextMenu'
+import { useMobileLayout } from '@/lib/hooks/use-mobile-layout'
+
+const HOLD_COMPARE_MS = 280
+const HOLD_COMPARE_MOVE_PX = 12
 
 function canvasLooksOpaque(source: HTMLCanvasElement): boolean {
   const probe = document.createElement('canvas')
@@ -65,7 +69,9 @@ export function EditorStage({
   const activeLayer = useEditorStore((s) => s.doc?.layers.find((l) => l.id === s.doc?.activeLayerId) ?? null)
   const wandTolerance = useEditorStore((s) => s.wandTolerance)
   const holdPreview = useEditorStore((s) => s.holdPreview)
+  const setHoldPreview = useEditorStore((s) => s.setHoldPreview)
   const getCompareBeforeDoc = useEditorStore((s) => s.getCompareBeforeDoc)
+  const mobile = useMobileLayout()
   const startTextSession = useEditorStore((s) => s.startTextSession)
   const placeMediaOnCanvas = useEditorStore((s) => s.placeMediaOnCanvas)
   const rearrangeCollageCells = useEditorStore((s) => s.rearrangeCollageCells)
@@ -229,6 +235,20 @@ export function EditorStage({
   // ─── Layer drag (move tool) ──────────────────────────────────────────────
   const isDraggingLayer = useRef(false)
   const dragLast = useRef({ x: 0, y: 0 })
+  /** Mobile: defer layer-drag until the finger moves, so a hold can show before/after. */
+  const pendingLayerDrag = useRef(false)
+  const holdCompareTimer = useRef<number | null>(null)
+  const holdCompareOrigin = useRef<{ x: number; y: number } | null>(null)
+
+  const clearHoldCompare = useCallback(() => {
+    if (holdCompareTimer.current != null) {
+      window.clearTimeout(holdCompareTimer.current)
+      holdCompareTimer.current = null
+    }
+    holdCompareOrigin.current = null
+    pendingLayerDrag.current = false
+    if (useEditorStore.getState().holdPreview) setHoldPreview(false)
+  }, [setHoldPreview])
 
   const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     const isMiddle = e.button === 1
@@ -265,20 +285,35 @@ export function EditorStage({
       return
     }
 
-    if (
-      tool === 'move' &&
-      activeLayer &&
-      !activeLayer.locked &&
-      !activeLayer.textData &&
-      !activeLayer.collageCell
-    ) {
-      isDraggingLayer.current = true
-      dragLast.current = { x: e.clientX, y: e.clientY }
-      beginTransaction()
-      e.currentTarget.setPointerCapture(e.pointerId)
-      e.preventDefault()
+    if (tool === 'move') {
+      const canDragLayer =
+        !!activeLayer &&
+        !activeLayer.locked &&
+        !activeLayer.textData &&
+        !activeLayer.collageCell
+
+      if (mobile && !document.documentElement.dataset.mobileSheetPeek) {
+        holdCompareOrigin.current = { x: e.clientX, y: e.clientY }
+        pendingLayerDrag.current = canDragLayer
+        holdCompareTimer.current = window.setTimeout(() => {
+          holdCompareTimer.current = null
+          if (document.documentElement.dataset.mobileSheetPeek) return
+          pendingLayerDrag.current = false
+          setHoldPreview(true)
+        }, HOLD_COMPARE_MS)
+        e.currentTarget.setPointerCapture(e.pointerId)
+        return
+      }
+
+      if (canDragLayer) {
+        isDraggingLayer.current = true
+        dragLast.current = { x: e.clientX, y: e.clientY }
+        beginTransaction()
+        e.currentTarget.setPointerCapture(e.pointerId)
+        e.preventDefault()
+      }
     }
-  }, [tool, viewport, activeLayer, beginTransaction, doc, applyWandAtClient])
+  }, [tool, viewport, activeLayer, beginTransaction, doc, applyWandAtClient, mobile, setHoldPreview])
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (isPanning.current) {
@@ -306,22 +341,56 @@ export function EditorStage({
       })
       return
     }
+    if (pendingLayerDrag.current && holdCompareOrigin.current && activeLayer) {
+      const ox = holdCompareOrigin.current.x
+      const oy = holdCompareOrigin.current.y
+      const dist = Math.hypot(e.clientX - ox, e.clientY - oy)
+      if (dist >= HOLD_COMPARE_MOVE_PX) {
+        if (holdCompareTimer.current != null) {
+          window.clearTimeout(holdCompareTimer.current)
+          holdCompareTimer.current = null
+        }
+        holdCompareOrigin.current = null
+        pendingLayerDrag.current = false
+        if (
+          !activeLayer.locked &&
+          !activeLayer.textData &&
+          !activeLayer.collageCell
+        ) {
+          isDraggingLayer.current = true
+          dragLast.current = { x: e.clientX, y: e.clientY }
+          beginTransaction()
+        }
+      }
+      return
+    }
+    if (holdCompareOrigin.current && holdCompareTimer.current != null) {
+      const ox = holdCompareOrigin.current.x
+      const oy = holdCompareOrigin.current.y
+      if (Math.hypot(e.clientX - ox, e.clientY - oy) >= HOLD_COMPARE_MOVE_PX) {
+        window.clearTimeout(holdCompareTimer.current)
+        holdCompareTimer.current = null
+        holdCompareOrigin.current = null
+      }
+      return
+    }
     if (isDraggingLayer.current && activeLayer) {
       const dx = (e.clientX - dragLast.current.x) / viewport.zoom
       const dy = (e.clientY - dragLast.current.y) / viewport.zoom
       dragLast.current = { x: e.clientX, y: e.clientY }
       offsetLayer(activeLayer.id, dx, dy, false)
     }
-  }, [setViewport, activeLayer, viewport, offsetLayer, doc])
+  }, [setViewport, activeLayer, viewport, offsetLayer, doc, beginTransaction])
 
   const onPointerUp = useCallback(() => {
+    clearHoldCompare()
     finishMarquee()
     isPanning.current = false
     if (isDraggingLayer.current) {
       isDraggingLayer.current = false
       endTransaction()
     }
-  }, [endTransaction, finishMarquee])
+  }, [endTransaction, finishMarquee, clearHoldCompare])
 
   // ─── Scroll-to-zoom ──────────────────────────────────────────────────────
   const onWheel = useCallback((e: React.WheelEvent) => {
@@ -519,6 +588,14 @@ export function EditorStage({
         }}
       />
       <SafeZoneToggle on={showSafeZones} onToggle={() => setShowSafeZones((v) => !v)} />
+      {holdPreview && (
+        <div
+          data-testid="hold-compare-badge"
+          className="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none px-2.5 py-1 rounded-md bg-black/60 text-white text-[11px] font-semibold tracking-wide"
+        >
+          BEFORE
+        </div>
+      )}
 
       {contextMenu && (
         <CanvasContextMenu

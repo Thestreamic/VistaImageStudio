@@ -454,6 +454,7 @@ test.describe('Vista Image Studio shell', () => {
     await expect(page.getByText('Browse photos')).toBeVisible()
     await page.getByTestId('mobile-tab-adjust').click()
     await expect(page.getByTestId('mobile-sheet')).toBeVisible()
+    await expect(page.getByTestId('mobile-sheet')).toHaveAttribute('data-snap', 'compact')
     await expect(page.getByText('No layer selected.')).toBeVisible()
     await page.getByTestId('mobile-overflow-toggle').click()
     await expect(page.getByTestId('mobile-overflow-menu')).toBeVisible()
