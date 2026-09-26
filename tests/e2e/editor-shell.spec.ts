@@ -2,9 +2,18 @@ import { test, expect, type Page } from '@playwright/test'
 import path from 'node:path'
 import { seedLegalAcceptance } from './legal-init'
 
-// 1x1 red PNG
-const PNG_BASE64 =
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+async function solidPng(page: Page, color = '#c04040') {
+  const b64 = await page.evaluate(async (fill) => {
+    const c = document.createElement('canvas')
+    c.width = 16
+    c.height = 16
+    const ctx = c.getContext('2d')!
+    ctx.fillStyle = fill
+    ctx.fillRect(0, 0, 16, 16)
+    return c.toDataURL('image/png').split(',')[1]
+  }, color)
+  return Buffer.from(b64, 'base64')
+}
 
 async function importImage(page: Page) {
   const fileChooserPromise = page.waitForEvent('filechooser')
@@ -13,7 +22,7 @@ async function importImage(page: Page) {
   await chooser.setFiles({
     name: 'test.png',
     mimeType: 'image/png',
-    buffer: Buffer.from(PNG_BASE64, 'base64'),
+    buffer: await solidPng(page),
   })
   await expect(page.locator('canvas').first()).toBeVisible()
 }
@@ -134,7 +143,7 @@ test.describe('Vista Image Studio shell', () => {
 
   test('templates dialog lists Facebook-style collage layouts', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Tools' }).click()
+    await page.getByTestId('tools-menu').click()
     await page.getByRole('button', { name: 'Templates' }).click()
     await expect(page.getByText('Collage — pick a layout, add your photos')).toBeVisible()
     await expect(page.getByTitle('3 Photos — Featured + Stack')).toBeVisible()
@@ -149,7 +158,7 @@ test.describe('Vista Image Studio shell', () => {
     const importId = await tile.getAttribute('data-import-id')
     expect(importId).toBeTruthy()
 
-    await page.getByRole('button', { name: 'Tools' }).click()
+    await page.getByTestId('tools-menu').click()
     await page.getByRole('button', { name: 'Templates' }).click()
     const ig = page.getByTestId('template-ig-post')
     await expect(ig).toBeVisible()
@@ -181,7 +190,7 @@ test.describe('Vista Image Studio shell', () => {
     const importId = await tile.getAttribute('data-import-id')
     expect(importId).toBeTruthy()
 
-    await page.getByRole('button', { name: 'Tools' }).click()
+    await page.getByTestId('tools-menu').click()
     await page.getByRole('button', { name: 'Templates' }).click()
     await page.getByTestId('collage-split-2h').click()
 
@@ -225,7 +234,7 @@ test.describe('Vista Image Studio shell', () => {
     const importId = await tile.getAttribute('data-import-id')
     expect(importId).toBeTruthy()
 
-    await page.getByRole('button', { name: 'Tools' }).click()
+    await page.getByTestId('tools-menu').click()
     await page.getByRole('button', { name: 'Templates' }).click()
     await page.getByTestId('collage-split-2h').click()
 
@@ -250,7 +259,7 @@ test.describe('Vista Image Studio shell', () => {
 
   test('occasion birthday template opens with three photo slots', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Tools' }).click()
+    await page.getByTestId('tools-menu').click()
     await page.getByRole('button', { name: 'Templates' }).click()
     await page.getByTestId('collage-category-birthday').click()
     await page.getByTestId('collage-birthday-hero-3').click()
@@ -260,7 +269,7 @@ test.describe('Vista Image Studio shell', () => {
   test('double-click in Media fills birthday frames in order and Optimize keeps the hero put', async ({ page }) => {
     await page.goto('/')
     await importImage(page)
-    await page.getByRole('button', { name: 'Tools' }).click()
+    await page.getByTestId('tools-menu').click()
     await page.getByRole('button', { name: 'Templates' }).click()
     await page.getByTestId('collage-category-birthday').click()
     await page.getByTestId('collage-birthday-hero-3').click()
@@ -295,16 +304,66 @@ test.describe('Vista Image Studio shell', () => {
     await extra.setInputFiles({
       name: 'keep-thumbs.png',
       mimeType: 'image/png',
-      buffer: Buffer.from(PNG_BASE64, 'base64'),
+      buffer: await solidPng(page, '#2040c0'),
     })
     await expect(page.getByTestId('media-bin-tile')).toHaveCount(2)
     await expect(page.getByTestId('collage-cell')).toHaveCount(3)
     await expect(cells.nth(0)).toHaveAttribute('data-filled', 'true')
   })
 
-  test('File menu offers Print', async ({ page }) => {
+  async function pngFile(page: Page, name: string, color: string) {
+    const b64 = await page.evaluate(async (fill) => {
+      const c = document.createElement('canvas')
+      c.width = 16
+      c.height = 16
+      const ctx = c.getContext('2d')!
+      ctx.fillStyle = fill
+      ctx.fillRect(0, 0, 16, 16)
+      return c.toDataURL('image/png').split(',')[1]
+    }, color)
+    return { name, mimeType: 'image/png', buffer: Buffer.from(b64, 'base64') }
+  }
+
+  function stageRgb(page: Page) {
+    return page.locator('[data-testid="editor-stage"] canvas').evaluate((canvas) => {
+      const c = canvas as HTMLCanvasElement
+      const ctx = c.getContext('2d')
+      if (!ctx || c.width < 2) return '0,0,0'
+      const { data } = ctx.getImageData(Math.floor(c.width / 2), Math.floor(c.height / 2), 1, 1)
+      return `${data[0]},${data[1]},${data[2]}`
+    })
+  }
+
+  test('Media click opens the next photo after Optimize without a stuck import', async ({ page }) => {
+    await page.goto('/')
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByRole('button', { name: 'Open', exact: true }).click()
+    const chooser = await fileChooserPromise
+    await chooser.setFiles(await pngFile(page, 'first.png', '#c04040'))
+    await expect(page.getByTestId('media-bin-tile')).toHaveCount(1)
+    await page.getByTestId('media-bin-tile').first().dblclick()
+    await expect(page.getByTestId('import-progress')).toHaveCount(0)
+    await page.getByTestId('auto-optimize-ai').click()
+    await expect(page.getByText(/Optimize Image applied/i)).toBeVisible()
+
+    await page.getByTestId('photos-import-input').setInputFiles(await pngFile(page, 'second.png', '#2040c0'))
+    await expect(page.getByTestId('media-bin-tile')).toHaveCount(2)
+    await page.getByTestId('media-bin-tile').first().click()
+    await expect(page.getByTestId('import-progress')).toHaveCount(0)
+    await expect.poll(async () => {
+      const [r, , b] = (await stageRgb(page)).split(',').map(Number)
+      return b - r
+    }).toBeGreaterThan(40)
+    await expect(page.getByTestId('media-bin-tile')).toHaveCount(2)
+  })
+
+  test('File menu offers Export, Make video, and Print', async ({ page }) => {
     await page.goto('/')
     await page.getByTestId('app-menu-file').click()
+    await expect(page.getByTestId('menu-export')).toBeVisible()
+    await expect(page.getByTestId('menu-export')).toBeDisabled()
+    await expect(page.getByTestId('menu-make-video')).toBeVisible()
+    await expect(page.getByTestId('menu-make-video')).toBeDisabled()
     await expect(page.getByTestId('menu-print')).toBeVisible()
     await expect(page.getByTestId('menu-print')).toBeDisabled()
   })

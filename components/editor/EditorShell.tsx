@@ -139,6 +139,17 @@ export function EditorShell() {
     if (eulaGate === 'accepted' && !isOnboarded()) setShowFirstRun(true)
   }, [eulaGate])
 
+  const freshSessionCleared = useRef(false)
+  useEffect(() => {
+    if (eulaGate !== 'needed' || freshSessionCleared.current) return
+    freshSessionCleared.current = true
+    // EULA is required, so this is a fresh start. IndexedDB can still hold a
+    // previous import after local agreement data was cleared or the agreement
+    // version changed. Opening that thumbnail fails (the HEIC bytes are gone).
+    useEditorStore.getState().discardImportedSession()
+    void getBridge().clearAutosave()
+  }, [eulaGate])
+
   const mediaRestoreOnce = useRef(false)
 
   const importGen = useRef(0)
@@ -333,18 +344,19 @@ export function EditorShell() {
   }, [notify])
 
   const openImportedOnCanvas = useCallback(async (item: RecentImport) => {
-    setActiveImportId(item.id)
+    const live = useEditorStore.getState().recentImports.find((row) => row.id === item.id) ?? item
+    setActiveImportId(live.id)
     try {
-      const canvas = await canvasToOpenFromImport(item)
-      openImage(canvas, item.name)
-      const durable = item.workingCanvas ?? canvas
+      const canvas = await canvasToOpenFromImport(live)
+      openImage(canvas, live.name)
+      const durable = live.workingCanvas ?? canvas
       if (durable.width > 1) {
         void canvasToBlob(durable, 'image/jpeg', 0.92)
           .then((jpeg) =>
             putMediaItem({
-              id: item.id,
-              name: item.name,
-              thumbnailDataUrl: item.thumbnailDataUrl || thumbnailDataUrl(durable),
+              id: live.id,
+              name: live.name,
+              thumbnailDataUrl: live.thumbnailDataUrl || thumbnailDataUrl(durable),
               blob: jpeg,
               addedAt: Date.now(),
             }),
@@ -353,17 +365,20 @@ export function EditorShell() {
       }
     } catch (error) {
       console.error('Failed to open imported photo', error)
-      notify('error', `Could not open ${item.name}. Import that file again.`)
+      notify('error', `Could not open ${live.name}. Import that file again.`)
     }
   }, [notify, openImage, setActiveImportId])
 
+  const autosaveChoice = useEditorStore((s) => s.autosaveChoice)
+
   useEffect(() => {
     if (eulaGate !== 'accepted') return
+    if (autosaveChoice === 'unset' || autosaveChoice === 'pending' || autosaveChoice === 'discard') return
     let cancelled = false
     void hydrateMediaLibrary().then(() => {
       if (cancelled || mediaRestoreOnce.current) return
       const state = useEditorStore.getState()
-      if (state.doc) return
+      if (state.autosaveChoice === 'discard' || state.doc) return
       const last = state.recentImports.find((row) => row.id === state.activeImportId) ?? state.recentImports[0]
       if (!last) return
       mediaRestoreOnce.current = true
@@ -372,21 +387,22 @@ export function EditorShell() {
     return () => {
       cancelled = true
     }
-  }, [eulaGate, hydrateMediaLibrary, openImportedOnCanvas])
+  }, [autosaveChoice, eulaGate, hydrateMediaLibrary, openImportedOnCanvas])
 
   const handlePlaceImport = useCallback(async (item: RecentImport) => {
-    setActiveImportId(item.id)
+    const live = useEditorStore.getState().recentImports.find((row) => row.id === item.id) ?? item
+    setActiveImportId(live.id)
     const layers = useEditorStore.getState().doc?.layers ?? []
     if (!isCollageDocument(layers)) {
-      await openImportedOnCanvas(item)
+      await openImportedOnCanvas(live)
       return
     }
     try {
-      const photo = await canvasFromRecentImport(item)
-      placeMediaOnCanvas(photo, item.name)
+      const photo = await canvasFromRecentImport(live)
+      placeMediaOnCanvas(photo, live.name)
     } catch (error) {
       console.error('Failed to place imported photo', error)
-      notify('error', `Could not place ${item.name}. Import that file again.`)
+      notify('error', `Could not place ${live.name}. Import that file again.`)
     }
   }, [notify, openImportedOnCanvas, placeMediaOnCanvas, setActiveImportId])
 

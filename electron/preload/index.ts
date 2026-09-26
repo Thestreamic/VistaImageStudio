@@ -52,6 +52,7 @@ const MAIN_TO_RENDERER_CHANNELS = new Set([
   'menu:close-project',
   'menu:print',
   'menu:export',
+  'menu:make-video',
   'menu:undo',
   'menu:redo',
   'menu:resize',

@@ -7,7 +7,8 @@ import { canvasToBlob } from '@/lib/image/canvas'
 import { getBridge, isElectron } from '@/lib/platform/bridge'
 import { useEditorStore } from '@/features/editor/store/editor-store'
 import { DEFAULT_HOLD_SEC, slideshowDuration } from '@/features/music/ffmpeg-args'
-import { loadMusicLibrary, type MusicTrack } from '@/features/music/library'
+import { loadMusicLibrary, trackPublicUrl, type MusicTrack } from '@/features/music/library'
+import { MUSIC_UI_ENABLED } from '@/features/music/offer'
 import { stopPreview } from '@/features/music/preview'
 import { MusicPickerDialog } from './MusicPickerDialog'
 
@@ -38,25 +39,22 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
     setBusy(true)
     stopPreview()
     try {
-      if (!desktop) {
-        notify('info', 'Saving an MP4 needs the Windows app.')
-        return
-      }
-      const frames: { name: string; buffer: ArrayBuffer }[] = []
+      const stills: HTMLCanvasElement[] = []
       const main = compositor.renderOutput(doc)
-      frames.push({ name: 'slide-00.jpg', buffer: await jpegOf(main) })
+      stills.push(main)
       if (includeBin) {
-        for (let i = 0; i < recentImports.length; i++) {
-          const canvas = recentImports[i].workingCanvas
+        for (const item of recentImports) {
+          const canvas = item.workingCanvas
           if (!canvas || canvas.width < 2) continue
-          frames.push({ name: `slide-${String(i + 1).padStart(2, '0')}.jpg`, buffer: await jpegOf(canvas) })
+          stills.push(canvas)
         }
       }
-      if (!frames.length) {
+      if (!stills.length) {
         notify('error', 'Add a photo first.')
         return
       }
-      let musicId = desktop ? track?.id ?? null : null
+      const chosen = MUSIC_UI_ENABLED ? track : null
+      let musicId = chosen?.id ?? null
       if (musicId) {
         const lib = await loadMusicLibrary()
         if (!lib.some((t) => t.id === musicId)) {
@@ -64,22 +62,39 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
           musicId = null
         }
       }
-      const result = await getBridge().exportVideoMp4?.({
-        frames,
-        holdSec: hold,
-        musicId,
-        suggestedName: `${doc.fileName.replace(/\.[^.]+$/, '') || 'slideshow'}.mp4`,
-        width: main.width,
-        height: main.height,
-      })
-      if (!result) {
-        notify('info', 'Saving an MP4 needs the Windows app.')
-        return
-      }
-      if (result.canceled) return
-      if (!result.ok) {
-        notify('error', result.error || 'Video export failed.')
-        return
+      const suggestedName = `${doc.fileName.replace(/\.[^.]+$/, '') || 'slideshow'}.mp4`
+      if (desktop) {
+        const frames: { name: string; buffer: ArrayBuffer }[] = []
+        for (let i = 0; i < stills.length; i++) {
+          frames.push({ name: `slide-${String(i).padStart(2, '0')}.jpg`, buffer: await jpegOf(stills[i]) })
+        }
+        const result = await getBridge().exportVideoMp4?.({
+          frames,
+          holdSec: hold,
+          musicId,
+          suggestedName,
+          width: main.width,
+          height: main.height,
+        })
+        if (!result) {
+          notify('error', 'Video export failed.')
+          return
+        }
+        if (result.canceled) return
+        if (!result.ok) {
+          notify('error', result.error || 'Video export failed.')
+          return
+        }
+      } else {
+        const { exportWebSlideshow } = await import('@/features/music/web-slideshow')
+        const musicTrack = musicId && chosen ? chosen : null
+        const blob = await exportWebSlideshow({
+          frames: stills,
+          holdSec: hold,
+          musicUrl: musicTrack ? trackPublicUrl(musicTrack) : null,
+        })
+        const saved = await getBridge().saveImage(blob, suggestedName)
+        if (!saved) return
       }
       notify('success', 'Exported MP4')
       onClose()
@@ -126,7 +141,7 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
             onChange={(e) => setHold(Number(e.target.value))}
           />
         </label>
-        {desktop && (
+        {MUSIC_UI_ENABLED && (
           <div className="mb-4">
             <span className="panel-label">Music</span>
             <p className="text-[10px] text-muted-foreground mt-1 mb-2">
@@ -164,7 +179,7 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
           {busy ? 'Exporting…' : 'Export MP4'}
         </button>
       </div>
-      {desktop && picker && (
+      {MUSIC_UI_ENABLED && picker && (
         <MusicPickerDialog
           selectedId={track?.id}
           onSelect={(next) => {

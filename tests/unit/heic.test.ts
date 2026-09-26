@@ -25,6 +25,9 @@ describe('HEIC / iPhone import detection', () => {
     expect(looksLikeHeic({}, heicHeader('heic'))).toBe(true)
     expect(looksLikeHeic({}, heicHeader('mif1'))).toBe(true)
     expect(looksLikeHeic({ name: 'shot.jpg', type: 'image/jpeg' }, heicHeader('isom'))).toBe(false)
+    const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    expect(looksLikeHeic({ name: 'IMG_0365.HEIC', type: 'image/jpeg' }, jpeg)).toBe(false)
+    expect(looksLikeHeic({ name: 'IMG_0365.HEIC', type: '' }, heicHeader('heic'))).toBe(true)
   })
 
   it('advertises HEIC on the file picker accept list', () => {

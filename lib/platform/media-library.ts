@@ -58,6 +58,19 @@ export async function deleteMediaItems(ids: string[]): Promise<void> {
   db.close()
 }
 
+export async function clearMediaLibrary(): Promise<void> {
+  const db = await openDb()
+  if (!db) return
+  await new Promise<void>((resolve) => {
+    const tx = db.transaction(MEDIA_LIBRARY_STORE, 'readwrite')
+    tx.objectStore(MEDIA_LIBRARY_STORE).clear()
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => resolve()
+    tx.onabort = () => resolve()
+  })
+  db.close()
+}
+
 export async function loadMediaLibrary(): Promise<StoredMedia[]> {
   const db = await openDb()
   if (!db) return []
@@ -66,16 +79,26 @@ export async function loadMediaLibrary(): Promise<StoredMedia[]> {
     const req = tx.objectStore(MEDIA_LIBRARY_STORE).getAll()
     req.onsuccess = () => {
       const rows = Array.isArray(req.result) ? (req.result as StoredMedia[]) : []
-      resolve(
-        rows.filter(
+      const pending = rows
+        .filter(
           (row) =>
             row &&
             typeof row.id === 'string' &&
             row.blob instanceof Blob &&
             row.blob.size > 0 &&
             typeof row.thumbnailDataUrl === 'string',
-        ),
-      )
+        )
+        // Start the byte copy before the database connection closes. Chrome
+        // invalidates IndexedDB blobs after close, which left thumbnails
+        // visible while double-click could not decode the photo.
+        .map((row) => {
+          const copy = row.blob.arrayBuffer().then(
+            (bytes) => (bytes.byteLength > 0 ? new Blob([bytes], { type: row.blob.type || 'image/jpeg' }) : null),
+            () => null,
+          )
+          return copy.then((blob) => (blob ? { ...row, blob } : null))
+        })
+      void Promise.all(pending).then((copied) => resolve(copied.filter((row): row is StoredMedia => row !== null)))
     }
     req.onerror = () => resolve([])
   })

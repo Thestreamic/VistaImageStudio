@@ -40,7 +40,7 @@ import { CAMERA_PROFILES } from '../camera-profiles'
 import { FILTER_PRESETS } from '../filter-presets'
 import { cropRectForPreset } from '../crop-presets'
 import { clampZoom, computeFitViewport } from '../viewport'
-import { deleteMediaItems, loadMediaLibrary, putMediaItem } from '@/lib/platform/media-library'
+import { clearMediaLibrary, deleteMediaItems, loadMediaLibrary, putMediaItem } from '@/lib/platform/media-library'
 
 const HISTORY_LIMIT = 30
 export const RECENT_IMPORTS_CAP = 200
@@ -103,6 +103,8 @@ interface EditorState {
   textSession: TextSession | null
   recentImports: RecentImport[]
   activeImportId: string | null
+  /** unset until the launch prompt decides; discard means the user chose not to restore. */
+  autosaveChoice: 'unset' | 'pending' | 'restore' | 'discard' | 'none'
 
   // document lifecycle
   openImage: (source: HTMLCanvasElement, fileName: string) => void
@@ -175,6 +177,8 @@ interface EditorState {
   clearCollageCell: (layerId: string) => void
   setCollageFramePosition: (layerId: string, x: number, y: number, commit?: boolean) => void
   setActiveImportId: (id: string | null) => void
+  setAutosaveChoice: (choice: EditorState['autosaveChoice']) => void
+  discardImportedSession: () => void
   hydrateMediaLibrary: () => Promise<void>
 
   // transforms
@@ -293,6 +297,7 @@ export const useEditorStore = create<EditorState>()((set, get) => {
     textSession: null,
     recentImports: [],
     activeImportId: null,
+    autosaveChoice: 'unset',
 
     openImage: (source, fileName) => {
       const layer = makeLayer(source, 'Background')
@@ -1102,6 +1107,12 @@ export const useEditorStore = create<EditorState>()((set, get) => {
     notify: (kind, text) => set({ status: { id: uid('msg'), kind, text } }),
     dismissStatus: () => set({ status: null }),
     setActiveImportId: (id) => set({ activeImportId: id }),
+    setAutosaveChoice: (choice) => set({ autosaveChoice: choice }),
+    discardImportedSession: () => {
+      get().closeDocument()
+      set({ recentImports: [], activeImportId: null, autosaveChoice: 'discard' })
+      void clearMediaLibrary()
+    },
     addRecentImport: ({ id, name, thumbnailDataUrl, blob, workingCanvas }, opts) => {
       const nextId = id ?? uid('imp')
       const entry: RecentImport = { id: nextId, name, thumbnailDataUrl, blob, workingCanvas }
@@ -1136,7 +1147,9 @@ export const useEditorStore = create<EditorState>()((set, get) => {
     },
 
     hydrateMediaLibrary: async () => {
+      if (get().autosaveChoice === 'discard') return
       const stored = await loadMediaLibrary()
+      if (get().autosaveChoice === 'discard') return
       if (!stored.length) return
       const have = new Set(get().recentImports.map((r) => r.id))
       const extras = stored

@@ -43,7 +43,7 @@ export function TextPanel() {
           <span className="panel-label">Title Templates</span>
           <Type size={12} className="text-muted-foreground" />
         </div>
-        <p className="text-[11px] text-muted-foreground mt-1 mb-2">Tap to add — then stretch the box on canvas to size, or OK / Cancel below.</p>
+        <p className="text-[11px] text-muted-foreground mt-1 mb-2">Tap to add. Double-click any text box to edit the words, then click outside the box when you are done. Drag to move, or stretch a corner to resize.</p>
         <div className="grid grid-cols-2 gap-1.5">
           {TEXT_TEMPLATES.map((t) => (
             <button

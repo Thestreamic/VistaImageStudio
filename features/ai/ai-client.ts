@@ -8,7 +8,7 @@
 import { publicBasePath } from '@/lib/public-url'
 import type { AiRequest, AiResponse } from './workers/ai.worker'
 import type { UpscaleFactor } from './algorithms/upscale'
-import { phoneBlurRadius } from './algorithms/bokeh'
+import { blurRadiusForDisc, phoneBlurRadius, LOCKED_DISC_FOCUS } from './algorithms/bokeh'
 
 /** Extract cleanly narrows the discriminated union on `ok`, unlike `AiResponse & { ok: true }`
  *  which doesn't simplify across a union and left every consumer seeing the full union. */
@@ -154,7 +154,7 @@ export const aiClient = {
   portraitBlur: (
     img: PixelBuffer,
     useModel: boolean,
-    opts?: RunOptions & { maxBlurRadius?: number; mask?: Uint8ClampedArray },
+    opts?: RunOptions & { maxBlurRadius?: number; discFocus?: number; mask?: Uint8ClampedArray },
   ) => {
     const data = copyBuffer(img.data)
     const mask = opts?.mask ? copyBuffer(opts.mask) : undefined
@@ -165,7 +165,9 @@ export const aiClient = {
         width: img.width,
         height: img.height,
         useModel,
-        maxBlurRadius: opts?.maxBlurRadius ?? phoneBlurRadius(Math.min(img.width, img.height)),
+        maxBlurRadius:
+          opts?.maxBlurRadius ??
+          blurRadiusForDisc(Math.min(img.width, img.height), opts?.discFocus ?? LOCKED_DISC_FOCUS),
         mask,
       },
       mask ? [data, mask] : [data],

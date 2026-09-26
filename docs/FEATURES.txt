@@ -1,5 +1,7 @@
 VISTA IMAGE STUDIO — FEATURES + HOW TO USE
 
+Visual guide: docs/guide/index.html (open in a browser).
+
 ONE LINE: Local photo editor — open a photo, Optimize Image, crop for social, apply looks, erase objects, cut backgrounds, add text/logo, save .lumen, export a creator pack. Everything stays on your PC (no cloud, no account, no LLM).
 
 FEATURES (1 line each)
@@ -73,8 +75,7 @@ Watermark stamp — optional handle on every file.
 Carousel split — slice a wide photo into Instagram carousel tiles.
 No camera EXIF — export re-encodes the canvas.
 Print (Ctrl+P) — File → Print sends the current canvas to the system printer (no cloud).
-Music (CC0) — Export → Make video… → Choose music. 24 original CC0 beds, preview in-app, no download. Commercial use OK, no attribution.
-Photo video — desktop MP4 of stills + optional music (FFmpeg). Browser can preview tracks; saving MP4 is the Windows app.
+Photo video — Export → Make video… saves an MP4 on the web and in the Windows app. The music picker is not shown.
 
 Recipes & batch (Tools menu)
 Recipes — save crop + look + logo locally; apply later.
@@ -92,7 +93,7 @@ HOW TO USE (very simple)
 6. Text / logo if you need them.
 7. Ctrl+S → save MyShot.lumen.
 8. Ctrl+E → Creator pack → Export.
-9. Optional: Export → Make video… → Choose music (CC0) → Export MP4 (desktop).
+9. Optional: Export → Make video… → Export MP4 (web or Windows app).
 10. Optional: Tools → Recipes → save current / Batch a folder.
 
 Shortcuts: Ctrl+O open · Ctrl+S save · Ctrl+Shift+S Save As · Ctrl+Shift+O project · Ctrl+E export · Ctrl+P print · Ctrl+Z undo · Ctrl+Shift+Z redo · V move · C crop · M select · W wand · H hand.

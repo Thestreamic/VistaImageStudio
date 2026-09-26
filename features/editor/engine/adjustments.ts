@@ -177,6 +177,32 @@ function applySkinSafeSaturation(
 }
 
 /**
+ * Vibrance scale that shrinks only when a channel would leave 0–255.
+ * The extreme channel lands on the gamut edge; hue and the other two
+ * channels stay in proportion. In-range pixels are unchanged.
+ */
+function applyHueSafeVibrance(r: number, g: number, b: number, vib: number): [number, number, number] {
+  const y = 0.2126 * r + 0.7152 * g + 0.0722 * b
+  const chroma = Math.max(r, g, b) - Math.min(r, g, b)
+  const mute = 1 - chroma / 255
+  const boost = 1 + vib * 0.9 * mute
+  let nr = y + (r - y) * boost
+  let ng = y + (g - y) * boost
+  let nb = y + (b - y) * boost
+  const hi = Math.max(nr, ng, nb)
+  const lo = Math.min(nr, ng, nb)
+  if (hi <= 255 && lo >= 0) return [nr, ng, nb]
+  let scale = 1
+  if (hi > 255 && hi > y) scale = Math.min(scale, (255 - y) / (hi - y))
+  if (lo < 0 && lo < y) scale = Math.min(scale, (0 - y) / (lo - y))
+  if (!(scale >= 0)) scale = 0
+  nr = y + (nr - y) * scale
+  ng = y + (ng - y) * scale
+  nb = y + (nb - y) * scale
+  return [nr, ng, nb]
+}
+
+/**
  * Applies adjustments to RGBA pixel data in place. Pure and synchronous so it
  * can run in a worker or in unit tests without a DOM.
  */
@@ -210,13 +236,10 @@ export function applyAdjustmentsToPixels(
       b = l + (b - l) * sat
     }
     if (applyVib) {
-      const y = 0.2126 * r + 0.7152 * g + 0.0722 * b
-      const chroma = Math.max(r, g, b) - Math.min(r, g, b)
-      const mute = 1 - chroma / 255
-      const boost = 1 + vib * 0.9 * mute
-      r = y + (r - y) * boost
-      g = y + (g - y) * boost
-      b = y + (b - y) * boost
+      const next = applyHueSafeVibrance(r, g, b, vib)
+      r = next[0]
+      g = next[1]
+      b = next[2]
     }
     data[i] = r
     data[i + 1] = g

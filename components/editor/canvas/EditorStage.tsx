@@ -16,8 +16,9 @@ import {
   isMediaDrag,
   mediaIdFromTransfer,
 } from '@/features/editor/media-drag'
-import { TextBoxOverlay } from './TextBoxOverlay'
+import { TextBoxOverlay, TextLayerHits } from './TextBoxOverlay'
 import { CollageCellOverlays } from './CollageCellOverlays'
+import { CanvasContextMenu } from './CanvasContextMenu'
 
 function canvasLooksOpaque(source: HTMLCanvasElement): boolean {
   const probe = document.createElement('canvas')
@@ -129,6 +130,7 @@ export function EditorStage({
 
   // Keep rendered canvas updated whenever doc or adjustments change
   const [showSafeZones, setShowSafeZones] = useState(false)
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
 
   const renderTarget = useRef<HTMLCanvasElement | null>(null)
   const userView = useRef(false)
@@ -206,9 +208,19 @@ export function EditorStage({
     return () => ro.disconnect()
   }, [doc?.id, doc?.fileName, fitNow])
 
+  const [editingTextId, setEditingTextId] = useState<string | null>(null)
+
   useEffect(() => {
     if (activeLayer?.textData) startTextSession(activeLayer.id)
   }, [activeLayer?.id, activeLayer?.textData, startTextSession])
+
+  const activeIsText = !!activeLayer?.textData
+  useEffect(() => {
+    if (!editingTextId) return
+    if (activeLayer?.id === editingTextId && activeIsText) return
+    useEditorStore.getState().applyTextSession()
+    setEditingTextId(null)
+  }, [activeLayer?.id, activeIsText, editingTextId])
 
   // ─── Pan (middle-mouse / space+drag) ────────────────────────────────────
   const isPanning = useRef(false)
@@ -362,6 +374,17 @@ export function EditorStage({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onWheel={onWheel}
+      onContextMenu={(event) => {
+        const target = event.target
+        if (
+          target instanceof Element &&
+          target.closest('textarea, input, select, [contenteditable="true"]')
+        ) {
+          return
+        }
+        event.preventDefault()
+        setContextMenu((open) => (open ? null : { x: event.clientX, y: event.clientY }))
+      }}
       onDragOver={(e) => {
         if (isCellDrag(e.dataTransfer)) {
           e.preventDefault()
@@ -422,7 +445,6 @@ export function EditorStage({
             }}
           />
           {showSafeZones && <SafeZoneOverlay />}
-          {activeLayer?.textData && <TextBoxOverlay layer={activeLayer} zoom={zoom} />}
           {selection && <SelectionOverlay selection={selection} />}
           {liveMarquee && liveMarquee.width > 1 && liveMarquee.height > 1 && (
             <div
@@ -446,6 +468,26 @@ export function EditorStage({
               void applyMediaDrop(transfer, clientX, clientY, layerId)
             }}
           />
+          {tool === 'move' && (
+            <TextLayerHits
+              layers={doc.layers}
+              zoom={zoom}
+              activeId={activeLayer?.id ?? null}
+              onEdit={(id) => {
+                setActiveLayer(id)
+                setEditingTextId(id)
+              }}
+            />
+          )}
+          {activeLayer?.textData && (
+            <TextBoxOverlay
+              layer={activeLayer}
+              zoom={zoom}
+              editing={editingTextId === activeLayer.id}
+              onStartEdit={() => setEditingTextId(activeLayer.id)}
+              onExitEdit={() => setEditingTextId(null)}
+            />
+          )}
           {(tool === 'crop' ? cropDraft : doc.crop) && (
             <CropOverlay
               crop={(tool === 'crop' ? cropDraft : doc.crop)!}
@@ -477,6 +519,14 @@ export function EditorStage({
         }}
       />
       <SafeZoneToggle on={showSafeZones} onToggle={() => setShowSafeZones((v) => !v)} />
+
+      {contextMenu && (
+        <CanvasContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
 
       <button
         type="button"

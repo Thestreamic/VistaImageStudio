@@ -1,4 +1,23 @@
 import { describe, it, expect } from 'vitest'
+
+function hueDeg(r: number, g: number, b: number): number {
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  const d = max - min
+  if (d < 1e-3) return 0
+  let h = 0
+  if (max === r) h = ((g - b) / d) % 6
+  else if (max === g) h = (b - r) / d + 2
+  else h = (r - g) / d + 4
+  h *= 60
+  if (h < 0) h += 360
+  return h
+}
+
+function hueDelta(a: number, b: number): number {
+  const d = Math.abs(a - b)
+  return Math.min(d, 360 - d)
+}
 import { adjustmentsFromLook } from '@/features/editor/looks'
 import { defaultAdjustments, isIdentityAdjustments } from '@/features/editor/types'
 import { FILTER_PRESETS } from '@/features/editor/filter-presets'
@@ -57,6 +76,43 @@ describe('looks', () => {
       const y70 = 0.2126 * at70[0] + 0.7152 * at70[1] + 0.0722 * at70[2]
       expect(y70, `${preset.id} at i=70`).toBeGreaterThanOrEqual(32)
     }
+  })
+
+  it('Optimize Image keeps color calm and does not jump a near-clipped red hue', () => {
+    const pro = CAMERA_PROFILES.find((p) => p.id === 'pro-phone')!
+    expect(pro.adjustments.vibrance ?? 0).toBeLessThanOrEqual(12)
+    expect(pro.adjustments.saturation ?? 0).toBe(0)
+    const src = new Uint8ClampedArray([250, 40, 30, 255])
+    const out = applyAdjustmentsToPixels(src.slice(), adjustmentsFromLook(pro.adjustments, 100), 1, 1)
+    expect(out[0]).toBeGreaterThan(out[1])
+    expect(out[0]).toBeGreaterThan(out[2])
+    expect(hueDelta(hueDeg(src[0], src[1], src[2]), hueDeg(out[0], out[1], out[2]))).toBeLessThan(12)
+  })
+
+  it('shrinks vibrance at the gamut edge so a clipped channel does not shift hue', () => {
+    const src = new Uint8ClampedArray([254, 200, 180, 255])
+    const adj = defaultAdjustments()
+    adj.vibrance = 100
+    const out = applyAdjustmentsToPixels(src.slice(), adj, 1, 1)
+    expect(hueDelta(hueDeg(src[0], src[1], src[2]), hueDeg(out[0], out[1], out[2]))).toBeLessThan(3)
+    expect(Math.max(out[0], out[1], out[2])).toBeLessThanOrEqual(255)
+  })
+
+  it('leaves an in-range vibrance pixel on the unclamped scale', () => {
+    const r = 80
+    const g = 90
+    const b = 100
+    const vib = 40
+    const y = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    const chroma = Math.max(r, g, b) - Math.min(r, g, b)
+    const boost = 1 + (vib / 100) * 0.9 * (1 - chroma / 255)
+    const expected = [y + (r - y) * boost, y + (g - y) * boost, y + (b - y) * boost]
+    const adj = defaultAdjustments()
+    adj.vibrance = vib
+    const out = applyAdjustmentsToPixels(new Uint8ClampedArray([r, g, b, 255]), adj, 1, 1)
+    expect(out[0]).toBe(Math.round(expected[0]))
+    expect(out[1]).toBe(Math.round(expected[1]))
+    expect(out[2]).toBe(Math.round(expected[2]))
   })
 
   it('Warm, Cool and B&W grade a sample pixel differently', () => {

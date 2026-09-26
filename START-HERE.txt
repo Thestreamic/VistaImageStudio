@@ -1,3 +1,7 @@
+User guide (open in a browser): docs\guide\index.html
+Short films and stills for Optimize Image, Portrait Bokeh, Remove
+Background, Magic Eraser, and collages, plus how to use every other tool.
+
 Copy this WHOLE folder into your GitHub repo (the one already on your PC).
 Do not pick files out — the website, the Windows .exe, and the .appx all
 come from this same folder. Photos never upload to a server; they stay

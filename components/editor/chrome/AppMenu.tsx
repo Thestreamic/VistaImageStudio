@@ -12,6 +12,8 @@ export type AppMenuHandlers = {
   onSave: () => void
   onSaveAs: () => void
   onCloseProject: () => void
+  onExport?: () => void
+  onMakeVideo?: () => void
   onExit?: () => void
   onUndo: () => void
   onRedo: () => void
@@ -118,6 +120,9 @@ export function AppMenu({
             {item('Save', handlers.onSave, { disabled: !doc, testId: 'menu-save' })}
             {item('Save As…', handlers.onSaveAs, { disabled: !doc, testId: 'menu-save-as' })}
             {item('Close Project', handlers.onCloseProject, { disabled: !doc, testId: 'menu-close-project' })}
+            <div className="h-px bg-border my-1" />
+            {item('Export…', () => handlers.onExport?.(), { disabled: !doc || !handlers.onExport, testId: 'menu-export' })}
+            {item('Make video…', () => handlers.onMakeVideo?.(), { disabled: !doc || !handlers.onMakeVideo, testId: 'menu-make-video' })}
             <div className="h-px bg-border my-1" />
             {item('Print…', () => handlers.onPrint?.(), { disabled: !doc || !handlers.onPrint, testId: 'menu-print' })}
             {electron && handlers.onExit && (

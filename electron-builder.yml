@@ -6,11 +6,67 @@ directories:
   output: dist
   buildResources: resources
 
+# Runtime only. docs, tests, scripts, and the other folders below are not
+# part of the Windows .exe or the .appx. Both build-exe.bat and build-appx.bat
+# use this file.
 files:
   - out/**/*
   - dist-electron/**/*
   - package.json
+  - "!docs"
+  - "!docs/**"
+  - "!tests"
+  - "!tests/**"
+  - "!test-results"
+  - "!test-results/**"
+  - "!playwright-report"
+  - "!playwright-report/**"
+  - "!coverage"
+  - "!coverage/**"
+  - "!scripts"
+  - "!scripts/**"
+  - "!electron"
+  - "!electron/**"
+  - "!resources"
+  - "!resources/**"
+  - "!public"
+  - "!public/**"
+  - "!build"
+  - "!build/**"
+  - "!Git"
+  - "!Git/**"
+  - "!.github"
+  - "!.github/**"
+  - "!.git"
+  - "!.git/**"
+  - "!.next"
+  - "!.next/**"
+  - "!.cursor"
+  - "!.cursor/**"
+  - "!out-web"
+  - "!out-web/**"
+  - "!dist"
+  - "!dist/**"
+  - "!node_modules/.cache"
+  - "!node_modules/.cache/**"
   - "!**/*.map"
+  - "!**/*.md"
+  - "!**/*.log"
+  - "!**/*.bat"
+  - "!**/*.tsbuildinfo"
+  - "!bokeh-preview.png"
+  - "!CNAME"
+  - "!START-HERE.txt"
+  - "!AGENTS.md"
+  - "!CLAUDE.md"
+  - "!pnpm-lock.yaml"
+  - "!package-lock.json"
+  - "!vitest.config.ts"
+  - "!playwright.config.ts"
+  - "!tsconfig.json"
+  - "!next.config.mjs"
+  - "!postcss.config.mjs"
+  - "!components.json"
 
 extraResources:
   - from: public/models

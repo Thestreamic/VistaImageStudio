@@ -139,26 +139,44 @@ export async function filesFromDataTransfer(transfer: DataTransfer | null | unde
   return Array.from(transfer.files ?? [])
 }
 
+function headerBytes(header: ArrayBuffer | Uint8Array): Uint8Array {
+  return header instanceof Uint8Array ? header : new Uint8Array(header)
+}
+
+/** JPEG, PNG, GIF, or WebP bytes. A stored HEIC import is re-saved as one of these but keeps the .HEIC name. */
+function headerIsCommonRaster(bytes: Uint8Array): boolean {
+  if (bytes.byteLength < 3) return false
+  if (bytes[0] === 0xff && bytes[1] === 0xd8) return true
+  if (bytes.byteLength >= 4 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return true
+  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) return true
+  if (bytes.byteLength >= 4 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46) return true
+  return false
+}
+
 export function looksLikeHeic(file: { name?: string; type?: string }, header?: ArrayBuffer | Uint8Array): boolean {
+  if (header) {
+    const bytes = headerBytes(header)
+    if (bytes.byteLength >= 12) {
+      const brand = String.fromCharCode(bytes[8], bytes[9], bytes[10], bytes[11]).replace(/\0/g, ' ').trim()
+      if (HEIC_BRANDS.has(brand)) return true
+    }
+    if (headerIsCommonRaster(bytes)) return false
+  }
   if (file.type && HEIC_MIME.test(file.type)) return true
   if (file.name && HEIC_NAME.test(file.name)) return true
-  if (!header) return false
-  const bytes = header instanceof Uint8Array ? header : new Uint8Array(header)
-  if (bytes.byteLength < 12) return false
-  const brand = String.fromCharCode(bytes[8], bytes[9], bytes[10], bytes[11]).replace(/\0/g, ' ').trim()
-  return HEIC_BRANDS.has(brand)
+  return false
 }
 
 async function blobLooksLikeHeic(blob: Blob, fileName = ''): Promise<boolean> {
   const name = fileName || (blob instanceof File ? blob.name : '')
-  const type = blob instanceof File ? blob.type : ''
-  if (looksLikeHeic({ name, type })) return true
+  const type = blob.type || (blob instanceof File ? blob.type : '')
   try {
     const header = await blob.slice(0, 16).arrayBuffer()
-    return looksLikeHeic({}, header)
+    if (header.byteLength >= 3) return looksLikeHeic({ name, type }, header)
   } catch {
-    return false
+    /* Fall back to the file name when the bytes cannot be read. */
   }
+  return looksLikeHeic({ name, type })
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {

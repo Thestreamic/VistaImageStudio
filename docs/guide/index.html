@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vista Image Studio — How to use it</title>
+<meta name="description" content="A visual guide to Vista Image Studio: Optimize Image, Portrait Bokeh, Remove Background, Magic Eraser, collages, and export. Photos stay on your device.">
+<style>
+  :root {
+    --ink: #241c16;
+    --muted: #6d6258;
+    --line: #e6dccf;
+    --paper: #f7f1e8;
+    --card: #fffdf9;
+    --gold: #9a6b32;
+    --gold-soft: #f3e6d4;
+    --shadow: 0 24px 60px -32px rgba(60, 36, 12, 0.45);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    color: var(--ink);
+    background:
+      radial-gradient(900px 420px at 100% -10%, rgba(196, 148, 90, 0.18), transparent 60%),
+      var(--paper);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  a { color: inherit; }
+  .top {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 14px 28px;
+    background: rgba(247, 241, 232, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 650; letter-spacing: -0.02em; }
+  .mark {
+    width: 14px; height: 14px; border-radius: 4px;
+    background: linear-gradient(145deg, #e7c48a, #8d5a28);
+  }
+  .top small { color: var(--muted); font-size: 13px; }
+  .layout { display: grid; grid-template-columns: 230px 1fr; max-width: 1180px; margin: 0 auto; }
+  nav.rail {
+    position: sticky; top: 62px; align-self: start;
+    padding: 28px 8px 40px 28px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  nav.rail a {
+    text-decoration: none; font-size: 14px; color: var(--muted);
+    padding: 8px 12px; border-radius: 999px;
+  }
+  nav.rail a.active, nav.rail a:hover { background: var(--gold-soft); color: var(--ink); }
+  main { padding: 28px 28px 80px 12px; min-width: 0; }
+  .hero {
+    display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 36px; align-items: center;
+    margin-bottom: 18px;
+  }
+  .kicker {
+    display: inline-block; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700; margin-bottom: 10px;
+  }
+  h1 { font-family: Georgia, "Iowan Old Style", Palatino, serif; font-weight: 500; font-size: clamp(40px, 5vw, 64px); line-height: 0.98; letter-spacing: -0.03em; margin: 0 0 14px; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 38ch; margin: 0 0 18px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
+  .chips button {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    border-radius: 999px; padding: 7px 12px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  .chips button.on { background: var(--ink); color: #fffaf3; border-color: var(--ink); }
+  section.chapter { margin: 0 0 28px; scroll-margin-top: 84px; }
+  section.chapter.hide { display: none; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 22px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .card-copy { padding: 26px 26px 8px; }
+  h2 { font-family: Georgia, "Iowan Old Style", Palatino, serif; font-weight: 500; font-size: 34px; letter-spacing: -0.03em; margin: 0 0 8px; }
+  .where { color: var(--gold); font-size: 13px; font-weight: 700; margin: 0 0 8px; }
+  .card-copy p { margin: 0 0 14px; color: #3d342c; }
+  .stage { margin: 0; background: #1a1613; }
+  .stage img, .stage video { display: block; width: 100%; height: auto; }
+  .stage.portrait { background: transparent; display: flex; justify-content: center; padding: 8px 0 0; }
+  .stage.portrait video {
+    width: min(320px, 100%); border-radius: 18px;
+    box-shadow: var(--shadow); background: #111;
+  }
+  figcaption, .note { padding: 12px 26px 4px; color: var(--muted); font-size: 13px; margin: 0; }
+  .pair { display: grid; grid-template-columns: 1.15fr 0.85fr; }
+  .pair .still { background: #efe8dc; }
+  .pair .still img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  ol.steps { list-style: none; margin: 8px 0 0; padding: 8px 26px 22px; }
+  ol.steps li {
+    display: grid; grid-template-columns: 28px 1fr; gap: 12px;
+    padding: 12px 0; border-top: 1px solid var(--line); align-items: start;
+  }
+  ol.steps label { cursor: pointer; }
+  ol.steps input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--gold); }
+  ol.steps li.done label { color: var(--muted); text-decoration: line-through; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 26px 26px; }
+  .mini {
+    border: 1px solid var(--line); border-radius: 16px; padding: 14px 14px 12px; background: #fff;
+  }
+  .mini h3 { margin: 0 0 4px; font-size: 15px; }
+  .mini p { margin: 0; color: var(--muted); font-size: 13px; }
+  .keys { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 26px 26px; }
+  kbd {
+    font-family: inherit; font-size: 12px; background: var(--gold-soft);
+    border-radius: 8px; padding: 6px 8px;
+  }
+  footer { color: var(--muted); font-size: 13px; padding: 8px 4px 0; }
+  @media (max-width: 900px) {
+    .layout, .hero, .pair, .grid { grid-template-columns: 1fr; }
+    nav.rail { position: static; flex-direction: row; overflow: auto; padding: 12px 16px; }
+    main { padding: 8px 16px 48px; }
+    .top { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="mark"></span> Vista Image Studio</div>
+  <small>Guide · photos stay on this device</small>
+</header>
+<div class="layout">
+  <nav class="rail" aria-label="Guide">
+    <a href="#start">Start</a>
+    <a href="#optimize">Optimize Image</a>
+    <a href="#bokeh">Portrait Bokeh</a>
+    <a href="#remove">Remove Background</a>
+    <a href="#eraser">Magic Eraser</a>
+    <a href="#templates">Templates</a>
+    <a href="#fill">Fill a collage</a>
+    <a href="#desk">Every other tool</a>
+    <a href="#export">Save and export</a>
+  </nav>
+  <main>
+    <header class="hero" id="start">
+      <div>
+        <p class="kicker">How to use the studio</p>
+        <h1>Open a photo. Leave the rest on this PC.</h1>
+        <p class="lede">Tick a step when you have tried it. The films below are the real screens: the button you see is the button you press.</p>
+        <p>Open a picture with <kbd>Ctrl</kbd>+<kbd>O</kbd>, drop it on the window, or click a thumbnail in Media. iPhone HEIC is fine. Media keeps the photos on this computer even when you close the project.</p>
+      </div>
+      <figure class="stage portrait">
+        <video poster="media/ready.jpg" src="media/ready.mp4" controls playsinline preload="metadata"></video>
+      </figure>
+    </header>
+    <p class="kicker" style="margin-top:0">Jump to a tool</p>
+    <div class="chips" role="tablist">
+      <button type="button" class="on" data-filter="all">All</button>
+      <button type="button" data-filter="grade">Colour</button>
+      <button type="button" data-filter="cut">Cut and erase</button>
+      <button type="button" data-filter="layout">Collage</button>
+      <button type="button" data-filter="finish">Export</button>
+    </div>
+
+    <section class="chapter" id="optimize" data-group="grade">
+      <article class="card">
+        <div class="card-copy">
+          <p class="where">AI tab · gold button · also at the top of Filters</p>
+          <h2>Optimize Image</h2>
+          <p>One click grades brightness, colour, vibrance, clarity, and sharpness. The film above is that one-click promise. The still below is the before / after compare inside the app.</p>
+        </div>
+        <figure class="stage">
+          <img src="media/optimize.png" alt="Compare view. Before is the original portrait. After is the same portrait with warmer light and clearer detail. Optimize Image is the gold button in the AI tab.">
+          <figcaption>Hold Compare, or click it, to see the original beside the graded photo. Close returns you to the canvas.</figcaption>
+        </figure>
+        <ol class="steps">
+          <li><input type="checkbox" id="s-opt-1"><label for="s-opt-1">Open the AI tab. The gold button at the top is Optimize Image.</label></li>
+          <li><input type="checkbox" id="s-opt-2"><label for="s-opt-2">Click it once. The same control is also the first item under Filters.</label></li>
+          <li><input type="checkbox" id="s-opt-3"><label for="s-opt-3">Click Compare and step through Original, then −1 back to −5, to see what changed.</label></li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="chapter" id="bokeh" data-group="grade">
+      <article class="card">
+        <div class="card-copy">
+          <p class="where">AI tab · Background slider · Portrait Bokeh</p>
+          <h2>Portrait Bokeh</h2>
+          <p>The subject stays sharp. The room falls soft, the way a phone portrait does. This film is the teal portrait while the studio says “Rendering disc bokeh…”.</p>
+        </div>
+        <figure class="stage">
+          <video poster="media/bokeh.jpg" src="media/bokeh.mp4" controls playsinline preload="metadata"></video>
+          <figcaption>Portrait Bokeh is running on the seated portrait. The progress card is the disc blur, not a removed background.</figcaption>
+        </figure>
+        <ol class="steps">
+          <li><input type="checkbox" id="s-bk-1"><label for="s-bk-1">If the subject is not a person, select the object first (Select, or the Magic Wand). A person is found on their own.</label></li>
+          <li><input type="checkbox" id="s-bk-2"><label for="s-bk-2">Leave Background at f/2 locked. That is the approved look. Left, toward f/4, keeps a bit more of the room in focus. Right, toward f/1.4, opens the blur a little more.</label></li>
+          <li><input type="checkbox" id="s-bk-3"><label for="s-bk-3">Click Portrait Bokeh. Dragging the slider does not reprocess the photo — the click does.</label></li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="chapter" id="remove" data-group="cut">
+      <article class="card">
+        <div class="card-copy">
+          <p class="where">AI tab · Remove Background</p>
+          <h2>Remove Background</h2>
+          <p>The film shows where to click, on the same seated portrait. The still is the result: the coloured wall is gone and the checkerboard means the backdrop is transparent.</p>
+        </div>
+        <div class="pair">
+          <figure class="stage">
+            <video poster="media/remove-background.jpg" src="media/remove-background.mp4" controls playsinline preload="metadata"></video>
+          </figure>
+          <figure class="still">
+            <img src="media/remove-background.png" alt="Before and after Remove Background. The blue wall is gone. The person remains on a grey checkerboard, which means transparency.">
+          </figure>
+        </div>
+        <p class="note">Left: the pointer is on Remove Background. Right: before the blue wall, after the checkerboard.</p>
+        <ol class="steps">
+          <li><input type="checkbox" id="s-rb-1"><label for="s-rb-1">Open the photo, then AI → Remove Background.</label></li>
+          <li><input type="checkbox" id="s-rb-2"><label for="s-rb-2">Wait until the subject is alone on the checkerboard.</label></li>
+          <li><input type="checkbox" id="s-rb-3"><label for="s-rb-3">Export as PNG if you need to keep the transparent backdrop. JPEG will fill it.</label></li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="chapter" id="eraser" data-group="cut">
+      <article class="card">
+        <div class="card-copy">
+          <p class="where">Click the object, or drag a box · AI → Magic Eraser</p>
+          <h2>Magic Eraser</h2>
+          <p>This removes something inside the photo and fills the hole. Both pictures are that moment: the card reads “Filling the selection…” over the couple.</p>
+        </div>
+        <div class="pair">
+          <figure class="stage">
+            <video poster="media/magic-eraser.jpg" src="media/magic-eraser.mp4" controls playsinline preload="metadata"></video>
+          </figure>
+          <figure class="still">
+            <img src="media/magic-eraser.png" alt="Magic Eraser progress card: Filling the selection, over a portrait of two people. The AI tab is open on the right.">
+          </figure>
+        </div>
+        <p class="note">The gold bar is the fill in progress. The first run can take longer while the model loads. The photo is not uploaded.</p>
+        <ol class="steps">
+          <li><input type="checkbox" id="s-me-1"><label for="s-me-1">Click the thing you want gone. A tiny drag is a click. Or press M and drag a box around it.</label></li>
+          <li><input type="checkbox" id="s-me-2"><label for="s-me-2">If nothing is selected, Magic Eraser arms the wand — click the colour or object, then run it.</label></li>
+          <li><input type="checkbox" id="s-me-3"><label for="s-me-3">Press Ctrl+Z if the fill is not the one you wanted, and try a tighter selection.</label></li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="chapter" id="templates" data-group="layout">
+      <article class="card">
+        <div class="card-copy">
+          <p class="where">Tools → Templates</p>
+          <h2>Pick a layout or an occasion</h2>
+          <p>The film is the Layouts grid: two, three, four, five, and six photos. The still is an occasion — Raksha Bandhan — in the same Create a design window.</p>
+        </div>
+        <div class="pair">
+          <figure class="stage">
+            <video poster="media/collage-layouts.jpg" src="media/collage-layouts.mp4" controls playsinline preload="metadata"></video>
+          </figure>
+          <figure class="still">
+            <img src="media/collage-occasion.png" alt="Create a design window on the Raksha Bandhan tab, with a Happy Raksha Bandhan layout, over a portrait in a teal outfit.">
+          </figure>
+        </div>
+        <p class="note">Layouts for any set of photos. Family, Birthday, Anniversary, Wedding, Raksha Bandhan, and Best Wishes for a titled card.</p>
+        <ol class="steps">
+          <li><input type="checkbox" id="s-tp-1"><label for="s-tp-1">Tools → Templates. Choose Layouts, or an occasion tab.</label></li>
+          <li><input type="checkbox" id="s-tp-2"><label for="s-tp-2">Quick start posts are under the grids: Instagram Announcement, YouTube Thumbnail, LinkedIn Update, Instagram / TikTok Story. The title is already placed.</label></li>
+          <li><input type="checkbox" id="s-tp-3"><label for="s-tp-3">Blank social sizes are grouped by platform if you only need a frame, not a collage.</label></li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="chapter" id="fill" data-group="layout">
+      <article class="card">
+        <div class="card-copy">
+          <p class="where">Media rail → drag onto a box</p>
+          <h2>Drop photos into the frames</h2>
+          <p>This film is an empty three-up: a tall frame and two stacked frames, each saying Add a photo. Media on the left is where the pictures already live.</p>
+        </div>
+        <figure class="stage">
+          <video poster="media/collage-fill.jpg" src="media/collage-fill.mp4" controls playsinline preload="metadata"></video>
+          <figcaption>Drag a thumbnail onto a box. Double-click a thumbnail to fill the next empty frame. Photos stay in Media when you switch templates.</figcaption>
+        </figure>
+        <ol class="steps">
+          <li><input type="checkbox" id="s-fl-1"><label for="s-fl-1">Drag from Media onto a frame, or double-click to fill frames in order.</label></li>
+          <li><input type="checkbox" id="s-fl-2"><label for="s-fl-2">Click a filled frame. Drag inside to pan the photo. Drag an edge or corner to resize it inside the frame.</label></li>
+          <li><input type="checkbox" id="s-fl-3"><label for="s-fl-3">Drag a frame’s top bar onto another frame to swap them. Arrow keys nudge the frame. Optimize Image grades the photos and leaves the frames where they are.</label></li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="chapter" id="desk" data-group="finish">
+      <article class="card">
+        <div class="card-copy">
+          <p class="where">The panels down the right, and the tools on the left</p>
+          <h2>Every other tool</h2>
+          <p>These do not have their own film. The path is the label you already see in the app.</p>
+        </div>
+        <div class="grid">
+          <div class="mini"><h3>Natural Color</h3><p>AI tab. A quieter grade. Skin and sun stay closer to the original.</p></div>
+          <div class="mini"><h3>Auto Color Correct</h3><p>AI tab. Local white balance and levels when a photo looks cast.</p></div>
+          <div class="mini"><h3>Instagram 4:5</h3><p>AI tab. Largest centred 4:5 crop. Confirm it in Transform.</p></div>
+          <div class="mini"><h3>Low Light</h3><p>AI tab. Opens shadows on a dark photo.</p></div>
+          <div class="mini"><h3>Dehaze</h3><p>AI tab. Cuts haze so distant detail comes back.</p></div>
+          <div class="mini"><h3>Clarity and Vibrance</h3><p>AI tab. Clarity lifts local contrast. Vibrance lifts muted colour and leaves skin quieter.</p></div>
+          <div class="mini"><h3>Upscale 2×</h3><p>AI tab. Enlarges the photo and resizes the document.</p></div>
+          <div class="mini"><h3>Denoise</h3><p>Set Strength, then Apply Denoise. Use it on grain, not as a first step on a clean photo.</p></div>
+          <div class="mini"><h3>Face Enhance</h3><p>Smoothing and Clarity sliders, then Apply Face Enhance.</p></div>
+          <div class="mini"><h3>Looks</h3><p>Filters tab. Original, black and white, Warm, Cool. Intensity 0–100 blends back toward the original.</p></div>
+          <div class="mini"><h3>Adjust</h3><p>Exposure, brightness, contrast, colour, highlights, shadows, whites, blacks, sharpness. Curves are RGB or one channel. Reset clears them.</p></div>
+          <div class="mini"><h3>Crop</h3><p>Press C. Free, 1:1 Post, 4:5 Portrait, 9:16 Story, 16:9 Thumb, or a custom ratio. Apply keeps it editable. Bake writes the pixels.</p></div>
+          <div class="mini"><h3>Move, select, pan</h3><p>V moves the layer. M drags a box. W is the wand. H pans when you are zoomed in. The scroll wheel zooms.</p></div>
+          <div class="mini"><h3>Safe zones</h3><p>Story, Reel, and TikTok chrome, so a title stays out of the buttons.</p></div>
+          <div class="mini"><h3>Text</h3><p>Bold Headline, Elegant Subtitle, Pull Quote, Highlight Caption, Story Sticker, Minimal Caption. Then font, size, colour, highlight, outline.</p></div>
+          <div class="mini"><h3>Logo</h3><p>Transform. A PNG or JPEG, or a text handle. Corners or centre, plus opacity and scale. Brand kit stores your colours and default font.</p></div>
+          <div class="mini"><h3>Layers</h3><p>Show, lock, opacity, duplicate, reorder, delete. Blend modes include multiply, screen, overlay, and soft light.</p></div>
+          <div class="mini"><h3>Recipes and batch</h3><p>Tools → Recipes saves the crop, look, and logo on this PC. Batch runs a recipe on a folder and skips a photo that fails.</p></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="chapter" id="export" data-group="finish">
+      <article class="card">
+        <div class="card-copy">
+          <p class="where">Save, Export, Print, Make video</p>
+          <h2>Keep the project, then publish the pixels</h2>
+          <p>A .lumen file is the editable project. Export writes a new picture. Nothing in either step uploads the photo.</p>
+        </div>
+        <ol class="steps">
+          <li><input type="checkbox" id="s-ex-1"><label for="s-ex-1">Ctrl+S saves the .lumen project. Ctrl+Shift+S is Save As. The app also keeps an autosave on this device.</label></li>
+          <li><input type="checkbox" id="s-ex-2"><label for="s-ex-2">Ctrl+E exports. Pick Original, Instagram post or portrait, Story / Reel / TikTok, YouTube thumbnail, Pinterest, LinkedIn, X, or Facebook. Creator pack writes several sizes at once.</label></li>
+          <li><input type="checkbox" id="s-ex-3"><label for="s-ex-3">Choose PNG, JPEG, or WebP. A wide photo can be split into Instagram carousel tiles. Export does not keep the camera’s EXIF.</label></li>
+          <li><input type="checkbox" id="s-ex-4"><label for="s-ex-4">Ctrl+P prints the canvas. Export → Make video… writes an MP4 on the web app and in the Windows app.</label></li>
+        </ol>
+        <div class="keys">
+          <kbd>Ctrl+O open</kbd>
+          <kbd>Ctrl+S save</kbd>
+          <kbd>Ctrl+E export</kbd>
+          <kbd>Ctrl+P print</kbd>
+          <kbd>Ctrl+Z undo</kbd>
+          <kbd>Ctrl+Shift+Z redo</kbd>
+          <kbd>V move</kbd>
+          <kbd>C crop</kbd>
+          <kbd>M select</kbd>
+          <kbd>W wand</kbd>
+          <kbd>H hand</kbd>
+        </div>
+      </article>
+      <footer>
+        <p>Privacy Centre, under Help, is the on-device check: no account, no cloud upload, no telemetry. Compare always shows the imported original, not a copy stored somewhere else.</p>
+      </footer>
+    </section>
+  </main>
+</div>
+<script>
+(function () {
+  var key = 'vista-guide-checks'
+  var saved = {}
+  try { saved = JSON.parse(localStorage.getItem(key) || '{}') } catch (e) { saved = {} }
+  document.querySelectorAll('ol.steps input').forEach(function (box) {
+    if (saved[box.id]) {
+      box.checked = true
+      box.closest('li').classList.add('done')
+    }
+    box.addEventListener('change', function () {
+      saved[box.id] = box.checked
+      box.closest('li').classList.toggle('done', box.checked)
+      try { localStorage.setItem(key, JSON.stringify(saved)) } catch (e) {}
+    })
+  })
+
+  var chips = document.querySelectorAll('.chips button')
+  chips.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      chips.forEach(function (b) { b.classList.remove('on') })
+      btn.classList.add('on')
+      var group = btn.getAttribute('data-filter')
+      document.querySelectorAll('section.chapter').forEach(function (sec) {
+        var ok = group === 'all' || sec.getAttribute('data-group') === group
+        sec.classList.toggle('hide', !ok)
+      })
+      if (group !== 'all') {
+        var first = document.querySelector('section.chapter:not(.hide)')
+        if (first) first.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    })
+  })
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.rail a'))
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute('href')) }).filter(Boolean)
+  function spy() {
+    var mark = window.scrollY + 120
+    var current = sections[0]
+    sections.forEach(function (sec) { if (sec.offsetTop <= mark) current = sec })
+    links.forEach(function (a) {
+      a.classList.toggle('active', current && a.getAttribute('href') === '#' + current.id)
+    })
+  }
+  window.addEventListener('scroll', spy, { passive: true })
+  spy()
+})()
+</script>
+</body>
+</html>

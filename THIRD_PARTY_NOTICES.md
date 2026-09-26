@@ -120,6 +120,7 @@ Declared in `package.json`. The shipped attribution file is
 | lucide-react | ISC |
 | class-variance-authority | Apache-2.0 |
 | heic-to | LGPL-3.0 |
+| mp4-muxer (browser MP4 export) | MIT |
 | ffmpeg-static (desktop MP4 export) | GPL-3.0-or-later |
 
 Do not invent additional model licenses. Music beds are original CC0-1.0

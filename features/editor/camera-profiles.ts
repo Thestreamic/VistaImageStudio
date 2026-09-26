@@ -17,7 +17,7 @@ function curve(points: Array<[number, number]>): Curves {
 /**
  * Flagship Pro Phone grade — tuned to the computational look people expect from
  * recent Pro-class phone cameras (open shadows, controlled highlights, warm-
- * neutral skin, crisp micro-contrast, restrained saturation + strong vibrance).
+ * neutral skin, crisp micro-contrast, calm color).
  * Descriptive style name; not an Apple product or partnership.
  */
 export const PRO_PHONE_LOOK_ID = 'pro-phone'
@@ -32,12 +32,11 @@ export const PRO_PHONE_ADJUSTMENTS: Partial<Adjustments> = {
   shadows: 26,
   whites: -10,
   blacks: 10,
-  // Warm-neutral skin, tiny magenta for healthy skin (not green cast)
-  temperature: 7,
-  tint: -3,
-  // Color: keep saturation calm, push vibrance (muted greens/blues pop, skin safer)
-  saturation: 7,
-  vibrance: 32,
+  // Warm-neutral skin, a light touch so color is not pushed a second time
+  temperature: 2,
+  tint: -1,
+  saturation: 0,
+  vibrance: 10,
   // Edge crispness without crunchy oversharpen
   sharpness: 24,
   // Tone curve: lifted floor, gentle S, soft roll-off on the top

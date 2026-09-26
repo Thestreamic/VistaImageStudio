@@ -8,7 +8,7 @@ import {
 } from '@/features/ai/algorithms/portrait-blur'
 import { isUsableSubjectMatte, objectFocusKeep } from '@/features/ai/algorithms/object-focus'
 import { segmentHeuristic } from '@/features/ai/algorithms/background-removal'
-import { DEFAULT_BOKEH } from '@/features/ai/algorithms/bokeh'
+import { blurRadiusForDisc, DEFAULT_BOKEH, discFocusLabel } from '@/features/ai/algorithms/bokeh'
 
 function fillSubject(
   data: Uint8ClampedArray,
@@ -132,6 +132,16 @@ describe('phone-style object focus', () => {
     expect(phoneBlurRadius(4000)).toBeLessThanOrEqual(120)
     expect(phoneBlurRadius(800)).toBeGreaterThan(16)
     expect(phoneBlurRadius(800)).toBeLessThan(28)
+  })
+
+  it('keeps the locked disc at the centre of the background control', () => {
+    expect(discFocusLabel(50)).toBe('f/2 locked')
+    expect(discFocusLabel(0)).toBe('f/4.0')
+    expect(discFocusLabel(100)).toBe('f/1.4')
+    expect(blurRadiusForDisc(1600, 50)).toBe(phoneBlurRadius(1600))
+    expect(blurRadiusForDisc(1600, 0)).toBeLessThan(phoneBlurRadius(1600))
+    expect(blurRadiusForDisc(1600, 100)).toBeGreaterThan(phoneBlurRadius(1600))
+    expect(blurRadiusForDisc(1600, 100)).toBeLessThanOrEqual(Math.round(phoneBlurRadius(1600) * 1.25))
   })
 
   it('keeps the object sharp and blurs the field without a person model', async () => {

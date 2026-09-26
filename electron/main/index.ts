@@ -397,6 +397,9 @@ function buildMenu() {
         { label: 'Save As…', accelerator: 'CmdOrCtrl+Shift+S', click: () => send('menu:save-as') },
         { label: 'Close Project', accelerator: 'CmdOrCtrl+W', click: () => send('menu:close-project') },
         { type: 'separator' },
+        { label: 'Export…', accelerator: 'CmdOrCtrl+E', click: () => send('menu:export') },
+        { label: 'Make video…', click: () => send('menu:make-video') },
+        { type: 'separator' },
         { label: 'Print…', accelerator: 'CmdOrCtrl+P', click: () => send('menu:print') },
         { type: 'separator' },
         {

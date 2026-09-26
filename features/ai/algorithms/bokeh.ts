@@ -33,13 +33,25 @@ export const DEFAULT_BOKEH: BokehParams = {
 }
 
 /**
- * Circle of confusion as a fraction of the short side, then opened 24%,
- * another 20%, and another 5%. The old absolute cap (~15px) stayed sharp on a real photo.
+ * Locked 25 September 2026. Circle of confusion as a fraction of the short
+ * side, opened 24%, then 20%, then 5%. Do not change these three values.
+ * The old absolute cap (~15px) stayed sharp on a real photo.
  */
-const BACKGROUND_DISC = 1.24 * 1.2 * 1.05
-const PORTRAIT_DISC = 0.018 * BACKGROUND_DISC
-/** Camera-style sharpness on the in-focus subject only. */
-const SUBJECT_SHARPNESS = 0.1
+export const BACKGROUND_DISC = 1.24 * 1.2 * 1.05
+export const PORTRAIT_DISC = 0.018 * BACKGROUND_DISC
+/** Camera-style sharpness on the in-focus subject only. Locked. */
+export const SUBJECT_SHARPNESS = 0.1
+/** Default strength inside phoneBlurRadius. Locked look. */
+export const LOCKED_BLUR_STRENGTH = 0.84
+/**
+ * Manual Background control, centred on the lock.
+ * 0 is a bit more focus (disc × 0.75, shown as f/4).
+ * 50 is the locked look (disc × 1, shown as f/2).
+ * 100 is a bit more blur (disc × 1.25, shown as f/1.4).
+ */
+export const LOCKED_DISC_FOCUS = 50
+export const DISC_SCALE_MIN = 0.75
+export const DISC_SCALE_MAX = 1.25
 
 const GOLDEN_ANGLE = 2.399963229728653
 const GPU_WORK_EDGE = 1440
@@ -48,18 +60,56 @@ const GPU_MIN_PIXELS = 96 * 96
 
 let gpuAvailable: boolean | null = null
 
-/** Portrait disc opened 24%, then 20%, then another 5%, so the background is less in focus. */
-export function phoneBlurRadius(minEdge: number, strength = 0.84): number {
+/** Locked portrait disc. `strength` 0.84 is the approved look. */
+export function phoneBlurRadius(minEdge: number, strength = LOCKED_BLUR_STRENGTH): number {
   const s = Math.max(0, Math.min(1, strength))
   const edge = Math.max(64, minEdge)
   return clampBokehRadius(edge * PORTRAIT_DISC * (0.82 + 0.18 * s), edge, edge)
 }
 
-/** Largest disc that still reads as focus falloff, not a removed background. */
+/** Maps the Background slider onto a disc scale. 50 returns 1. */
+export function discScaleFromFocus(focus: number): number {
+  const t = Math.max(0, Math.min(100, focus))
+  if (t <= LOCKED_DISC_FOCUS) {
+    const u = t / LOCKED_DISC_FOCUS
+    return DISC_SCALE_MIN + (1 - DISC_SCALE_MIN) * u
+  }
+  const u = (t - LOCKED_DISC_FOCUS) / (100 - LOCKED_DISC_FOCUS)
+  return 1 + (DISC_SCALE_MAX - 1) * u
+}
+
+/**
+ * Locked radius at focus 50. Below 50 the background is a bit more in focus.
+ * Above 50 the disc opens a bit, up to DISC_SCALE_MAX.
+ */
+export function blurRadiusForDisc(minEdge: number, focus = LOCKED_DISC_FOCUS): number {
+  const locked = phoneBlurRadius(minEdge, LOCKED_BLUR_STRENGTH)
+  const scale = discScaleFromFocus(focus)
+  const edge = Math.max(64, minEdge)
+  const cap = Math.max(6, Math.round(edge * PORTRAIT_DISC * DISC_SCALE_MAX))
+  return Math.max(2, Math.min(Math.round(locked * scale), cap))
+}
+
+/** f-stop label for the Background slider. Centre is the locked look. */
+export function discFocusLabel(focus: number): string {
+  const f = Math.max(0, Math.min(100, Math.round(focus)))
+  if (f === LOCKED_DISC_FOCUS) return 'f/2 locked'
+  const aperture =
+    f < LOCKED_DISC_FOCUS
+      ? 2 + ((LOCKED_DISC_FOCUS - f) / LOCKED_DISC_FOCUS) * 2
+      : 2 - ((f - LOCKED_DISC_FOCUS) / (100 - LOCKED_DISC_FOCUS)) * 0.6
+  return `f/${aperture.toFixed(1)}`
+}
+
+/**
+ * Ceiling is the manual maximum (locked disc × 1.25), so the Background
+ * slider can open the disc a bit. The locked call still returns the
+ * approved radius, which sits under this cap.
+ */
 export function clampBokehRadius(radius: number, width: number, height: number): number {
   const edge = Math.max(1, Math.min(width, height))
-  const cap = Math.max(6, Math.round(edge * PORTRAIT_DISC))
-  const asked = Number.isFinite(radius) ? radius : cap
+  const cap = Math.max(6, Math.round(edge * PORTRAIT_DISC * DISC_SCALE_MAX))
+  const asked = Number.isFinite(radius) ? radius : Math.round(edge * PORTRAIT_DISC)
   return Math.max(2, Math.min(Math.round(asked), cap))
 }
 

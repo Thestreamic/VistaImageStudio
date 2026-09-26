@@ -5,6 +5,7 @@ import {
   BookMarked,
   Columns2,
   Download,
+  Film,
   FolderKanban,
   FolderOpen,
   Images,
@@ -58,6 +59,7 @@ export function MobileOverflowMenu({
   menu,
   onOpenClick,
   onExportClick,
+  onMakeVideoClick,
   onSaveClick,
   onSaveAsClick,
   onOpenProjectClick,
@@ -74,6 +76,7 @@ export function MobileOverflowMenu({
   menu: AppMenuHandlers
   onOpenClick: () => void
   onExportClick: () => void
+  onMakeVideoClick?: () => void
   onSaveClick: () => void
   onSaveAsClick: () => void
   onOpenProjectClick: () => void
@@ -137,6 +140,12 @@ export function MobileOverflowMenu({
             <Row label={`Save${dirty ? ' •' : ''}`} icon={Save} disabled={!doc} onClick={() => go(onSaveClick)} />
             <Row label="Save as" icon={Save} disabled={!doc} onClick={() => go(onSaveAsClick)} />
             <Row label="Export" icon={Download} disabled={!doc} onClick={() => go(onExportClick)} />
+            <Row
+              label="Make video"
+              icon={Film}
+              disabled={!doc || !onMakeVideoClick}
+              onClick={() => go(() => onMakeVideoClick?.())}
+            />
             <Row label="Print" icon={Printer} disabled={!doc || !menu.onPrint} onClick={() => go(() => menu.onPrint?.())} />
             <Row label="Close project" icon={X} disabled={!doc} onClick={() => go(menu.onCloseProject)} />
             {electron && menu.onExit && <Row label="Exit" icon={X} onClick={() => go(menu.onExit!)} />}

@@ -87,11 +87,31 @@ export function useProjectPersistence() {
     let cancelled = false
     void (async () => {
       const json = await getBridge().readAutosave()
-      if (!json || cancelled || useEditorStore.getState().doc) return
-      if (typeof window !== 'undefined' && sessionStorage.getItem('vista-autosave-prompted') === '1') return
+      if (cancelled) return
+      const store = useEditorStore.getState()
+      // A fresh EULA start already discarded the previous library and autosave.
+      if (store.autosaveChoice === 'discard') return
+      if (!json || store.doc) {
+        if (store.autosaveChoice !== 'discard') store.setAutosaveChoice('none')
+        return
+      }
+      if (typeof window !== 'undefined' && sessionStorage.getItem('vista-autosave-prompted') === '1') {
+        if (useEditorStore.getState().autosaveChoice !== 'discard') store.setAutosaveChoice('none')
+        return
+      }
       sessionStorage.setItem('vista-autosave-prompted', '1')
+      store.setAutosaveChoice('pending')
       const restore = window.confirm('Restore the last autosave?')
-      if (restore) await ingestProjectJson(json, null, 'Autosave.lumen')
+      if (cancelled) return
+      if (restore) {
+        await ingestProjectJson(json, null, 'Autosave.lumen')
+        if (!cancelled && useEditorStore.getState().autosaveChoice !== 'discard') {
+          useEditorStore.getState().setAutosaveChoice('restore')
+        }
+        return
+      }
+      useEditorStore.getState().discardImportedSession()
+      await getBridge().clearAutosave()
     })()
     return () => { cancelled = true }
   }, [ingestProjectJson])

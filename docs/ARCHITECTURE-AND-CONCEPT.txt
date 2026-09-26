@@ -941,6 +941,10 @@ electron-builder.yml
   productName Vista Image Studio
   output dist/
   files: out/**, dist-electron/**, package.json
+  excluded from the .exe and the .appx: docs/, tests/, scripts/,
+  electron/ source, resources/ (copied via extraResources instead),
+  public/ (Next already copies runtime assets into out/), .github/,
+  Git/, markdown, logs, bats, lockfiles
   extraResources: public/models -> models (*.onnx)
   asar true, asarUnpack public/models/**
   publish: null
@@ -1012,8 +1016,10 @@ not a build failure. No features/ code currently imports ffmpeg.
 ---------------------------
 scripts/sync-music-library.mjs copies Vistora-Music-Library into
 public/music (gitignored tracks). If the sibling repo is absent,
-the copy is skipped. FEATURES.txt does not list a music product
-surface; treat as optional bundle plumbing, not a cloud service.
+the copy is skipped. The picker is hidden until paid. To turn it
+on later, follow docs/MUSIC.md (MUSIC_UI_ENABLED in
+features/music/offer.ts). Treat this as on-device bundle plumbing,
+not a cloud service.
 
 7.5 OS targets
 --------------

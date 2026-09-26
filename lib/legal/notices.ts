@@ -147,6 +147,7 @@ SPDX identifiers published by those packages — not additional grants.
 - heic-to — LGPL-3.0 (HEIC import). Full terms:
   https://www.gnu.org/licenses/lgpl-3.0.html
   Source: the heic-to npm package.
+- mp4-muxer — MIT (browser MP4 slideshow export). https://github.com/Vanilagy/mp4-muxer
 - ffmpeg-static — GPL-3.0-or-later (desktop MP4 slideshow export only).
   The packaged binary is an FFmpeg build. FFmpeg is copyright the FFmpeg
   developers. License and source: https://ffmpeg.org/legal.html and

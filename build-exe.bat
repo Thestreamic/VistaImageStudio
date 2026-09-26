@@ -68,6 +68,8 @@ if not exist "node_modules" (
     )
 )
 
+REM electron-builder.yml packs out, dist-electron, and package.json only.
+REM The docs folder is not copied into the .exe.
 echo Closing any running Vista Image Studio so the installer can replace files...
 >>"%LOG%" echo node scripts/unlock-dist.mjs
 call node scripts/unlock-dist.mjs

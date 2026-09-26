@@ -54,6 +54,8 @@ if not exist "node_modules" (
     )
 )
 
+REM electron-builder.yml packs out, dist-electron, and package.json only.
+REM The docs folder is not copied into the .appx.
 echo Building .appx ...
 >>"%LOG%" echo npm.cmd run package:appx
 call npm.cmd run package:appx
