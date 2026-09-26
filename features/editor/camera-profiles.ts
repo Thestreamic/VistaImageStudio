@@ -25,7 +25,7 @@ export const PRO_PHONE_LOOK_ID = 'pro-phone'
 export const PRO_PHONE_ADJUSTMENTS: Partial<Adjustments> = {
   // Photonic Engine-ish exposure + tone
   exposure: 0.1,
-  brightness: 5,
+  brightness: 4.25,
   contrast: 11,
   // Smart HDR: open shadows, tame highlights, keep whites from clipping
   highlights: -22,
@@ -38,7 +38,7 @@ export const PRO_PHONE_ADJUSTMENTS: Partial<Adjustments> = {
   saturation: 0,
   vibrance: 6,
   // Edge crispness without crunchy oversharpen
-  sharpness: 24,
+  sharpness: 20.4,
   // Tone curve: lifted floor, gentle S, soft roll-off on the top
   curves: curve([
     [0, 8],
