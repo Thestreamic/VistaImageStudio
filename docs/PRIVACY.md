@@ -11,7 +11,7 @@ Summary for engineers (not marketing claims):
 - No account is required to edit.
 - The **web app needs network access** to load HTML, scripts, WASM, and model assets from hosting.
 - Core editing is designed to run in the browser/desktop runtime; we do not operate a Streamic photo-storage/viewing service for the user’s library.
-- Analytics / crash SDKs are off by default in the editor.
+- The public web app counts anonymous visits with Umami (cookie-free; no photos, edits or file names). The desktop app has no analytics. No crash-reporting SDK.
 - Production CSP `connect-src` is `'self' blob: data:` (dev also allows the Next.js HMR websocket).
 - Command chat stores **text only** in `localStorage`.
 - Canvas export **rebuilds** the bitmap (no camera EXIF copy).

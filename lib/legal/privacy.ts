@@ -1,10 +1,10 @@
 import { EULA_CONTACT, EULA_LICENSOR, EULA_SITE_PRIMARY, EULA_SITE_PUBLISHER } from '@/lib/legal/eula'
 
 export const PRIVACY_TITLE = 'Privacy Policy'
-export const PRIVACY_VERSION = '2026-09-27'
-export const PRIVACY_LAST_UPDATED = 'September 27, 2026'
+export const PRIVACY_VERSION = '2026-09-30'
+export const PRIVACY_LAST_UPDATED = 'September 30, 2026'
 export const PRIVACY_SHORT =
-  'Vista Image Studio does not require an account. Editing and AI tools run in your browser or desktop app. The web app needs a network connection to load the Software and its assets. We do not operate a photo-storage or photo-viewing service for your library, and the editor does not include a telemetry SDK by default.'
+  'Vista Image Studio does not require an account. Editing and AI tools run in your browser or desktop app. The web app needs a network connection to load the Software and its assets. We do not operate a photo-storage or photo-viewing service for your library. The public web app uses Umami, a cookie-free analytics service, to count visits; it never receives your photos. The desktop app has no analytics.'
 
 export type PrivacySection = {
   heading: string
@@ -42,7 +42,7 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
     ],
     bullets: [
       'No account creation is required to open and edit images in the Software',
-      'No advertising identifier or analytics profile is created by a telemetry SDK in the editor by default',
+      'No advertising identifier, cookie, or personal analytics profile is created. The public web app counts anonymous visits with Umami (see section 7); the desktop app has no analytics',
       'We do not market the Software as a cloud photo library or cloud photo-hosting product',
     ],
   },
@@ -59,14 +59,16 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
   {
     heading: '6. Privacy Centre',
     paragraphs: [
-      'The in-app Privacy Centre is a local status panel. It lists the current host (desktop or web), the Content Security Policy connect-src value reported by the build, analytics = off, and — on desktop — the user-data and autosave paths on that computer. It is not a cloud dashboard and does not imply that the web app works without network access.',
+      'The in-app Privacy Centre is a local status panel. It lists the current host (desktop or web), the Content Security Policy connect-src value reported by the build, whether analytics is on (Umami, on the public web app only), and — on desktop — the user-data and autosave paths on that computer. It is not a cloud dashboard and does not imply that the web app works without network access.',
     ],
   },
   {
-    heading: '7. Telemetry, AI models, and processing',
+    heading: '7. Analytics, AI models, and processing',
     paragraphs: [
-      'Production Content Security Policy for the Software uses connect-src \'self\' blob: data:. The editor is not designed to call a third-party cloud LLM or a photo-upload API for core editing.',
-      'Analytics and crash reporting are off by default. There is no telemetry SDK bundled in the editor by default.',
+      'Web analytics. The public web app at vistaimagestudio.thestreamic.in loads Umami Cloud (umami.is), a privacy-focused analytics service, so we can count how many people visit and use the Software. Umami does not use cookies and does not ask for your name or email. For each visit it records the page address, the referring site, browser, operating system, device type, screen size, language, and approximate country. Umami works out the country from your IP address and states that it does not store IP addresses. We also count clicks on a few kinds of links (downloads, legal pages, the guide, and GitHub) by event name only.',
+      'We use these counts only to understand how many people use the Software. We do not use them for advertising or to identify you, and analytics never receives your photos, edits, or file names. Analytics does not run in the desktop app, on localhost, or on any other address, and browser content blockers usually block it. Where the GDPR applies, we rely on our legitimate interest in measuring use of the Software in a privacy-friendly way; you can object by emailing us or by using a content blocker.',
+      'The desktop app sets a Content Security Policy of connect-src \'self\' blob: data:, so the editor there cannot send data to third-party servers. The editor is not designed to call a third-party cloud LLM or a photo-upload API for core editing.',
+      'Crash reporting is off. No crash-reporting SDK is bundled with the Software.',
       'Model files (for example MODNet, LaMa, and MiDaS, where bundled or served with the Software) are loaded as application assets. On the web they are typically fetched over the network like other static assets; on desktop they may already be on disk. They are used to process images in the Software runtime. See the Third-party notices file shipped with the Software for licenses.',
     ],
   },

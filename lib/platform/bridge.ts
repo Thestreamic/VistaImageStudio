@@ -44,7 +44,8 @@ export interface PrivacyInfo {
   host: 'electron' | 'web'
   platform: string
   csp: string
-  analytics: 'off'
+  /** 'umami' only on the public web host, where public/analytics.js loads Umami. */
+  analytics: 'off' | 'umami'
   modelsFolder: string
   userDataPath: string
   autosavePath: string
@@ -139,11 +140,14 @@ async function detectWebBackend(): Promise<{ backend: InferenceBackend; gpuName?
 const _webListeners = new Map<string, Set<(...args: unknown[]) => void>>()
 const AUTOSAVE_KEY = 'vista-autosave'
 
+/** Same host check as public/analytics.js: Umami runs only on the live web app. */
+export const ANALYTICS_HOST = 'vistaimagestudio.thestreamic.in'
+
 const WEB_PRIVACY: PrivacyInfo = {
   host: 'web',
   platform: typeof navigator !== 'undefined' ? navigator.platform : 'unknown',
   csp: "connect-src 'self' blob: data:",
-  analytics: 'off',
+  analytics: typeof location !== 'undefined' && location.hostname === ANALYTICS_HOST ? 'umami' : 'off',
   modelsFolder: '(not bundled — local heuristics only)',
   userDataPath: 'browser localStorage',
   autosavePath: 'localStorage:vista-autosave',
