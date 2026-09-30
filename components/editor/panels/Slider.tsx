@@ -16,12 +16,15 @@ export function Slider({ label, value, min, max, step = 1, onChange, onCommit, f
   const [dragging, setDragging] = useState(false)
   const text = formatValue ? formatValue(value) : String(value)
   const pct = max === min ? 0 : ((value - min) / (max - min)) * 100
+  // Fill from the neutral point (0 for bipolar sliders, min otherwise).
+  const origin = max === min ? 0 : ((Math.min(max, Math.max(min, 0)) - min) / (max - min)) * 100
+  const fill = { '--a': `${Math.min(origin, pct)}%`, '--b': `${Math.max(origin, pct)}%` } as React.CSSProperties
 
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
-        <span className="panel-label">{label}</span>
-        <span className="num text-foreground/80">{text}</span>
+        <span className="text-[12px] text-foreground/80">{label}</span>
+        <span className="num text-muted-foreground">{text}</span>
       </div>
       <div className="relative">
         {dragging && (
@@ -35,6 +38,8 @@ export function Slider({ label, value, min, max, step = 1, onChange, onCommit, f
         <input
           type="range"
           className="slider"
+          style={fill}
+          aria-label={label}
           min={min}
           max={max}
           step={step}

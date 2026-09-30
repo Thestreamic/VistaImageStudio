@@ -26,8 +26,8 @@ and `docs/AI.md`. Do not rename `.lumen`, `lumen-project`, or `window.lumen`.
   Parameters, how to apply it, and the Background f-stop control are in
   **Locked Portrait Bokeh** below. A file backup of the locked sources is
   `C:\Users\AFF Computers\Downloads\vista-lock-web-exe-2026-09-25`.
-- Magic Eraser: no selection arms `select-wand` (click the object). A drag
-  under 4px is a wand click. LaMa fills the mask. Progress overlay.
+- Magic Eraser: no selection arms `select-rect` (Select, M): click the
+  object or drag a box. A drag under 4px is a wand click. LaMa fills the mask. Progress overlay.
 - Music is built and hidden. To show Choose music again, follow
   `docs/MUSIC.md`: set `MUSIC_UI_ENABLED` in `features/music/offer.ts` to
   `true`, then rebuild. Web mux is `web-slideshow.ts`; the Windows app uses

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useCallback, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
-import { ZoomIn, ZoomOut, Maximize2, X } from 'lucide-react'
+import { ZoomIn, ZoomOut, Maximize2, X, FolderOpen, LayoutTemplate, ImageUp } from 'lucide-react'
 import { useEditorStore, selectPhotoLayer } from '@/features/editor/store/editor-store'
 import { compositor } from '@/features/editor/engine/compositor'
 import { CheckerPattern } from './CheckerPattern'
@@ -41,10 +41,12 @@ function canvasLooksOpaque(source: HTMLCanvasElement): boolean {
 /** The main composited canvas stage with zoom/pan/tool interaction. */
 export function EditorStage({
   onOpenClick,
+  onTemplatesClick,
   onDropFile,
   onClose,
 }: {
   onOpenClick: () => void
+  onTemplatesClick?: () => void
   onDropFile: (file: File | null | undefined) => void
   onClose: () => void
 }) {
@@ -424,6 +426,7 @@ export function EditorStage({
       <EmptyState
         containerRef={containerRef}
         onOpenClick={onOpenClick}
+        onTemplatesClick={onTemplatesClick}
         onDropFile={onDropFile}
         onMediaDrop={(transfer) => applyMediaDrop(transfer)}
       />
@@ -617,14 +620,14 @@ export function EditorStage({
         <X size={16} strokeWidth={2.25} />
       </button>
     </div>
-      <div className="h-12 shrink-0 hidden md:flex items-center justify-center bg-card border-t border-border">
+      <div className="h-10 shrink-0 hidden md:flex items-center justify-center bg-card border-t border-border">
         <button
           type="button"
           data-testid="stage-close-tab"
           aria-label="Close photo"
           title="Close photo"
           onClick={onClose}
-          className="flex items-center gap-1.5 h-9 px-5 text-xs font-medium rounded-md border border-border bg-secondary hover:bg-accent"
+          className="flex items-center gap-1.5 h-7 px-4 text-xs font-medium rounded-md border border-border bg-secondary text-foreground/85 hover:bg-accent hover:text-foreground transition-colors"
         >
           <X size={14} strokeWidth={2.25} /> Close
         </button>
@@ -698,8 +701,9 @@ function SafeZoneToggle({ on, onToggle }: { on: boolean; onToggle: () => void })
       type="button"
       onClick={onToggle}
       onMouseDown={(e) => e.stopPropagation()}
-      className={`absolute bottom-3 left-[11.5rem] px-2 py-0.5 rounded text-[10px] pointer-events-auto ${on ? 'bg-primary text-primary-foreground' : 'bg-black/40 text-white/70 hover:text-white'}`}
-      title="Show Instagram / TikTok UI safe zones so captions aren't covered"
+      aria-pressed={on}
+      className={`absolute bottom-3 left-[11.5rem] h-9 px-3 rounded-lg text-[11px] font-medium pointer-events-auto border backdrop-blur-sm transition-colors ${on ? 'bg-primary text-primary-foreground border-transparent' : 'bg-black/55 border-white/10 text-white/80 hover:text-white hover:bg-black/65'}`}
+      title="Show where Instagram / TikTok buttons cover your photo, so captions stay visible"
     >
       Safe zones
     </button>
@@ -888,80 +892,115 @@ function CropOverlay({ crop, docW, docH, zoom, interactive, onCropChange, onAppl
   )
 }
 
-// ─── Empty state: quiet studio well, paper card on the canvas ────────────────
+// ─── Empty state: "Start editing" — open, template, or drop ─────────────────
 function EmptyState({
   containerRef,
   onOpenClick,
+  onTemplatesClick,
   onDropFile,
   onMediaDrop,
 }: {
   containerRef: React.RefObject<HTMLDivElement | null>
   onOpenClick: () => void
+  onTemplatesClick?: () => void
   onDropFile: (file: File | null | undefined) => void
   onMediaDrop: (transfer: DataTransfer) => Promise<boolean>
 }) {
   const [dragOver, setDragOver] = useState(false)
   return (
-    <div ref={containerRef} className="flex-1 flex items-center justify-center bg-[var(--canvas)] p-10 select-none">
-      <div
-        role="button"
-        tabIndex={0}
-        data-testid="empty-dropzone"
-        onClick={onOpenClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            onOpenClick()
-          }
-        }}
-        onDragEnter={(e) => {
-          e.preventDefault()
-          e.dataTransfer.dropEffect = 'copy'
-          setDragOver(true)
-        }}
-        onDragOver={(e) => {
-          e.preventDefault()
-          e.dataTransfer.dropEffect = 'copy'
-          setDragOver(true)
-        }}
-        onDragLeave={(e) => {
-          e.preventDefault()
-          setDragOver(false)
-        }}
-        onDrop={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          setDragOver(false)
-          void (async () => {
-            if (await onMediaDrop(e.dataTransfer)) return
-            const file = fileFromDataTransfer(e.dataTransfer)
-            if (file && !isImageFile(file)) return
-            onDropFile(file)
-          })()
-        }}
-        className={`brand-dropzone w-full max-w-md rounded-xl flex flex-col items-center justify-center gap-5 py-14 px-8 max-md:py-8 max-md:px-5 cursor-pointer ${dragOver ? 'scale-[1.01] border-solid' : ''}`}
-      >
-        <div className="w-14 h-14 rounded-full bg-secondary text-foreground flex items-center justify-center ring-1 ring-border">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 16V4M12 4l-4 4M12 4l4 4" />
-            <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-          </svg>
-        </div>
+    <div
+      ref={containerRef}
+      className="flex-1 min-w-0 flex items-center justify-center bg-[var(--canvas)] p-10 max-md:py-5 max-md:pr-4 max-md:pl-16 select-none overflow-y-auto"
+    >
+      <div className="w-full max-w-md flex flex-col items-center gap-6 max-md:gap-4">
         <div className="text-center space-y-1.5">
-          <p className="text-[16px] font-semibold tracking-[-0.018em] text-foreground">
-            {dragOver ? 'Drop it right here' : 'Drag & drop a photo'}
-          </p>
-          <p className="hidden md:block text-[13px] text-muted-foreground">or click to browse your files</p>
-          <p className="md:hidden text-[13px] text-muted-foreground">or tap to browse your camera roll</p>
+          <h2 className="text-[22px] max-md:text-[19px] font-semibold tracking-[-0.022em] text-foreground">Start editing</h2>
+          <p className="text-[13px] text-muted-foreground">Open a photo, or start from a social template.</p>
         </div>
-        <span className="min-h-11 inline-flex items-center justify-center px-4 rounded-md bg-primary text-primary-foreground text-sm font-semibold tracking-[-0.01em]">
-          Browse photos
-        </span>
-        <div className="hidden md:flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
+
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <button
+            type="button"
+            data-testid="empty-open"
+            onClick={onOpenClick}
+            className="min-h-10 max-md:min-h-11 inline-flex items-center gap-2 px-4 rounded-md bg-primary text-primary-foreground text-[13.5px] font-semibold shadow-sm transition-[filter,transform] hover:brightness-105 active:translate-y-px"
+          >
+            <FolderOpen size={16} strokeWidth={2.1} />
+            <span className="hidden md:inline">Open Photo</span>
+            <span className="md:hidden">Browse photos</span>
+          </button>
+          {onTemplatesClick && (
+            <button
+              type="button"
+              data-testid="empty-templates"
+              onClick={onTemplatesClick}
+              title="Social sizes, quick-start posts and collages"
+              className="min-h-10 max-md:min-h-11 inline-flex items-center gap-2 px-4 rounded-md border border-border bg-secondary text-foreground text-[13.5px] font-medium transition-colors hover:bg-accent"
+            >
+              <LayoutTemplate size={16} strokeWidth={1.9} /> Choose Template
+            </button>
+          )}
+        </div>
+
+        <div
+          role="button"
+          tabIndex={0}
+          data-testid="empty-dropzone"
+          aria-label="Drop photo here, or click to browse"
+          onClick={onOpenClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              onOpenClick()
+            }
+          }}
+          onDragEnter={(e) => {
+            e.preventDefault()
+            e.dataTransfer.dropEffect = 'copy'
+            setDragOver(true)
+          }}
+          onDragOver={(e) => {
+            e.preventDefault()
+            e.dataTransfer.dropEffect = 'copy'
+            setDragOver(true)
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault()
+            setDragOver(false)
+          }}
+          onDrop={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setDragOver(false)
+            void (async () => {
+              if (await onMediaDrop(e.dataTransfer)) return
+              const file = fileFromDataTransfer(e.dataTransfer)
+              if (file && !isImageFile(file)) return
+              onDropFile(file)
+            })()
+          }}
+          className={`brand-dropzone w-full rounded-xl flex flex-col items-center justify-center gap-3 py-10 px-8 max-md:py-7 max-md:px-5 cursor-pointer ${dragOver ? 'scale-[1.01] border-solid' : ''}`}
+        >
+          <div
+            className={`w-12 h-12 rounded-full flex items-center justify-center ring-1 transition-colors ${dragOver ? 'bg-primary text-primary-foreground ring-primary' : 'bg-secondary text-foreground ring-border'}`}
+          >
+            <ImageUp size={21} strokeWidth={1.7} />
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-[15px] font-semibold tracking-[-0.016em] text-foreground">
+              {dragOver ? 'Drop it right here' : 'Drag & drop a photo'}
+            </p>
+            <p className="hidden md:block text-[12.5px] text-muted-foreground">Drop photo here, or click to browse your files</p>
+            <p className="md:hidden text-[12.5px] text-muted-foreground">or tap to browse your camera roll</p>
+          </div>
+          <p className="text-[11px] text-muted-foreground/80">JPEG · PNG · HEIC · WebP · AVIF · TIFF</p>
+        </div>
+
+        <div className="hidden md:flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <kbd className="px-1.5 py-0.5 rounded-sm bg-secondary border border-border font-mono text-[11px] font-medium">Ctrl</kbd>
           <span>+</span>
           <kbd className="px-1.5 py-0.5 rounded-sm bg-secondary border border-border font-mono text-[11px] font-medium">O</kbd>
-          <span className="ml-1">to open</span>
+          <span className="ml-1">to open · photos stay on this device</span>
         </div>
       </div>
     </div>

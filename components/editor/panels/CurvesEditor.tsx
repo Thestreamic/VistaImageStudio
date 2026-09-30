@@ -86,14 +86,14 @@ export function CurvesEditor({ curves, onChange, onCommit }: CurvesEditorProps) 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="panel-label">Curves</span>
+        <span className="text-[12px] text-foreground/80">Channel</span>
         <div className="flex gap-0.5">
           {CHANNELS.map((c) => (
             <button
               key={c.id}
               onClick={() => setChannel(c.id)}
               className={cn(
-                'w-6 h-5 text-[9px] font-mono rounded-sm',
+                'w-7 h-6 text-[10px] font-mono rounded-sm transition-colors',
                 channel === c.id ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50',
               )}
             >

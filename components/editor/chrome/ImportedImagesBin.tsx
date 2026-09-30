@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { FolderUp, Images, Search, X } from 'lucide-react'
+import { FolderUp, Images, Search, X, PanelLeftClose, ImagePlus } from 'lucide-react'
 import { useEditorStore, type RecentImport } from '@/features/editor/store/editor-store'
 import { isCollageDocument } from '@/features/editor/collage/look-targets'
 import { setMediaDragData } from '@/features/editor/media-drag'
@@ -18,6 +18,7 @@ export function ImportedImagesBin({
   onImportFolder,
   progress,
   onCancelImport,
+  onCollapse,
   className,
 }: {
   onOpenImport: (item: RecentImport) => void
@@ -25,6 +26,8 @@ export function ImportedImagesBin({
   onImportFolder: (files: File[]) => void
   progress: BinImportProgress | null
   onCancelImport?: () => void
+  /** Desktop: hide the bin to give the canvas more room. */
+  onCollapse?: () => void
   className?: string
 }) {
   const items = useEditorStore((s) => s.recentImports)
@@ -33,6 +36,7 @@ export function ImportedImagesBin({
   const removeRecentImports = useEditorStore((s) => s.removeRecentImports)
   const collageOpen = useEditorStore((s) => isCollageDocument(s.doc?.layers ?? []))
   const [query, setQuery] = useState('')
+  const [draggingId, setDraggingId] = useState<string | null>(null)
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null)
   const filesRef = useRef<HTMLInputElement>(null)
   const folderRef = useRef<HTMLInputElement>(null)
@@ -73,7 +77,7 @@ export function ImportedImagesBin({
       ref={rootRef}
       data-testid="imported-images-bin"
       className={cn(
-        'w-64 shrink-0 flex flex-col min-h-0 bg-sidebar border-r border-sidebar-border',
+        'w-60 shrink-0 flex flex-col min-h-0 bg-sidebar border-r border-sidebar-border',
         className,
       )}
       onKeyDown={(e) => {
@@ -86,8 +90,8 @@ export function ImportedImagesBin({
         deleteIds([activeId])
       }}
     >
-      <div className="shrink-0 px-2 pt-2 pb-1.5 space-y-1.5">
-        <div className="flex items-center gap-1.5">
+      <div className="shrink-0 px-2.5 pt-2.5 pb-2 space-y-2">
+        <div className="flex items-center gap-1">
           <span className="panel-label">Media</span>
           {items.length > 0 && (
             <span data-testid="media-bin-count" className="text-[11px] text-muted-foreground tabular-nums">
@@ -99,7 +103,7 @@ export function ImportedImagesBin({
             title="Import photos"
             aria-label="Import photos"
             onClick={() => filesRef.current?.click()}
-            className="ml-auto w-7 h-7 flex items-center justify-center rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
+            className="ml-auto w-7 h-7 flex items-center justify-center rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
           >
             <Images size={14} />
           </button>
@@ -108,10 +112,22 @@ export function ImportedImagesBin({
             title="Import folder"
             aria-label="Import folder"
             onClick={() => folderRef.current?.click()}
-            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground"
+            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
           >
             <FolderUp size={14} />
           </button>
+          {onCollapse && (
+            <button
+              type="button"
+              data-testid="media-bin-collapse"
+              title="Hide Media (more room for the photo)"
+              aria-label="Hide Media"
+              onClick={onCollapse}
+              className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <PanelLeftClose size={14} />
+            </button>
+          )}
           <input
             ref={filesRef}
             type="file"
@@ -144,7 +160,7 @@ export function ImportedImagesBin({
             }}
           />
         </div>
-        <div className="flex items-center gap-1.5 h-7 px-2 rounded-md bg-input border border-border">
+        <div className="flex items-center gap-1.5 h-8 px-2 rounded-md bg-input border border-border focus-within:border-ring/60 transition-colors">
           <Search size={12} className="text-muted-foreground shrink-0" />
           <input
             value={query}
@@ -179,13 +195,27 @@ export function ImportedImagesBin({
           </div>
         )}
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-2">
-        {visible.length === 0 && (
-          <p className="text-[12px] text-muted-foreground px-0.5 py-2 leading-relaxed">
-            Drop a folder or photos
-          </p>
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-thin px-2.5 pb-2.5 pt-1 [scrollbar-gutter:stable]">
+        {items.length === 0 && (
+          <div data-testid="media-bin-empty" className="mt-1 flex flex-col items-center gap-2.5 rounded-lg border border-dashed border-border px-3 py-6 text-center">
+            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground">
+              <ImagePlus size={18} strokeWidth={1.75} />
+            </div>
+            <p className="text-[12.5px] font-medium text-foreground/90">No photos yet</p>
+            <p className="text-[11.5px] text-muted-foreground leading-snug">Import photos or a folder, or drop files anywhere.</p>
+            <button
+              type="button"
+              onClick={() => filesRef.current?.click()}
+              className="mt-0.5 h-8 px-3 rounded-md border border-border bg-secondary text-[12px] font-medium hover:bg-accent transition-colors"
+            >
+              Import photos
+            </button>
+          </div>
         )}
-        <div className="grid grid-cols-2 gap-1.5">
+        {items.length > 0 && visible.length === 0 && (
+          <p className="text-[12px] text-muted-foreground px-0.5 py-2 leading-relaxed">No photos match this search.</p>
+        )}
+        <div className="grid grid-cols-2 gap-2">
           {visible.map((item) => {
             const selected = item.id === activeId
             return (
@@ -203,10 +233,12 @@ export function ImportedImagesBin({
                 aria-label={item.name}
                 aria-current={selected ? 'true' : undefined}
                 onDragStart={(e) => {
+                  setDraggingId(item.id)
                   setMediaDragData(e.dataTransfer, item.id)
                   const thumb = e.currentTarget.querySelector('img')
                   if (thumb) e.dataTransfer.setDragImage(thumb, 24, 24)
                 }}
+                onDragEnd={() => setDraggingId(null)}
                 onClick={() => {
                   setActiveImportId(item.id)
                   if (!collageOpen) onOpenImport(item)
@@ -222,18 +254,21 @@ export function ImportedImagesBin({
                   setMenu({ x: e.clientX, y: e.clientY, id: item.id })
                 }}
                 className={cn(
-                  'relative aspect-square rounded-sm overflow-hidden bg-secondary/80 group text-left cursor-grab active:cursor-grabbing',
-                  selected ? 'brand-gradient-border' : 'border border-transparent hover:border-border',
+                  'relative aspect-square rounded-md overflow-hidden bg-secondary/80 group text-left cursor-grab active:cursor-grabbing transition-[box-shadow,opacity,transform]',
+                  selected
+                    ? 'ring-2 ring-primary ring-offset-2 ring-offset-sidebar'
+                    : 'ring-1 ring-border hover:ring-foreground/30',
+                  draggingId === item.id && 'opacity-45 scale-[0.97]',
                 )}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.thumbnailDataUrl}
                   alt=""
-                  className="h-full w-full object-cover opacity-90 group-hover:opacity-100"
+                  className="h-full w-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
                   draggable={false}
                 />
-                <span className="absolute inset-x-0 bottom-0 truncate bg-black/75 px-1 py-0.5 text-[10px] leading-tight text-white/90">
+                <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/80 to-black/35 px-1.5 pt-2 pb-1 text-[10.5px] leading-tight text-white/95">
                   {item.name}
                 </span>
               </button>
@@ -242,10 +277,10 @@ export function ImportedImagesBin({
         </div>
       </div>
       {items.length > 0 && (
-        <p className="shrink-0 px-2 py-1.5 text-[11px] text-muted-foreground leading-relaxed border-t border-border">
+        <p className="shrink-0 px-2.5 py-2 text-[11px] text-muted-foreground leading-snug border-t border-border">
           {collageOpen
-            ? 'Double-click fills the next empty frame. Drag onto a box. Right-click or Delete removes from Media.'
-            : 'Import photos or a folder. Drag onto a template. Right-click or Delete removes from Media.'}
+            ? 'Double-click fills the next empty frame, or drag onto a box. Right-click to remove.'
+            : 'Click to edit · drag onto a template · right-click to remove.'}
         </p>
       )}
       {menu && (
@@ -303,7 +338,7 @@ function MediaBinContextMenu({
       ref={ref}
       role="menu"
       data-testid="media-bin-context-menu"
-      className="fixed z-[60] min-w-[9rem] rounded-md border border-border bg-card py-1 shadow-lg"
+      className="fixed z-[60] min-w-[9rem] rounded-md border border-border bg-popover p-1 elev-pop"
       style={{ left: x, top: y }}
       onContextMenu={(event) => {
         event.preventDefault()
@@ -314,7 +349,7 @@ function MediaBinContextMenu({
         type="button"
         role="menuitem"
         data-testid="media-bin-menu-delete"
-        className="w-full text-left px-3 py-1.5 text-[13px] hover:bg-secondary text-destructive"
+        className="w-full text-left px-2.5 py-1.5 text-[13px] rounded-sm hover:bg-secondary text-destructive"
         onClick={onDelete}
       >
         Delete from Media

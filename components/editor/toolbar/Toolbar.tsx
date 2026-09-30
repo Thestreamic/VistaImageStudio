@@ -1,5 +1,5 @@
 'use client'
-import { MousePointer2, Crop, Hand, Undo2, Redo2, ZoomIn, ZoomOut, Maximize2, SquareDashed, Wand } from 'lucide-react'
+import { MousePointer2, Crop, Hand, Undo2, Redo2, ZoomIn, ZoomOut, Maximize2, SquareDashed, Wand, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useEditorStore } from '@/features/editor/store/editor-store'
 import type { ToolId } from '@/features/editor/types'
 import { cn } from '@/lib/utils'
@@ -12,7 +12,16 @@ const TOOLS: { id: ToolId; icon: typeof MousePointer2; label: string }[] = [
   { id: 'hand', icon: Hand, label: 'Hand / Pan (H)' },
 ]
 
-export function Toolbar({ variant = 'dock' }: { variant?: 'dock' | 'overlay' }) {
+export function Toolbar({
+  variant = 'dock',
+  mediaOpen,
+  onToggleMedia,
+}: {
+  variant?: 'dock' | 'overlay'
+  /** Desktop dock only: show / hide the Media bin. */
+  mediaOpen?: boolean
+  onToggleMedia?: () => void
+}) {
   const tool = useEditorStore((s) => s.tool)
   const setTool = useEditorStore((s) => s.setTool)
   const undo = useEditorStore((s) => s.undo)
@@ -44,10 +53,12 @@ export function Toolbar({ variant = 'dock' }: { variant?: 'dock' | 'overlay' }) 
           className={cn(
             hit,
             'flex items-center justify-center rounded-md transition-colors',
-            tool === id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+            tool === id
+              ? 'bg-primary/15 text-primary ring-1 ring-inset ring-primary/40'
+              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
           )}
         >
-          <Icon size={16} strokeWidth={1.75} />
+          <Icon size={16} strokeWidth={tool === id ? 2.1 : 1.75} />
         </button>
       ))}
 
@@ -57,7 +68,7 @@ export function Toolbar({ variant = 'dock' }: { variant?: 'dock' | 'overlay' }) 
         <>
           <button
             type="button"
-            title="Zoom in"
+            title="Zoom in (or scroll on the photo)"
             aria-label="Zoom in"
             disabled={!doc}
             onClick={() => zoomBy(1.2)}
@@ -67,7 +78,7 @@ export function Toolbar({ variant = 'dock' }: { variant?: 'dock' | 'overlay' }) 
           </button>
           <button
             type="button"
-            title="Zoom out"
+            title="Zoom out (or scroll on the photo)"
             aria-label="Zoom out"
             disabled={!doc}
             onClick={() => zoomBy(1 / 1.2)}
@@ -112,6 +123,20 @@ export function Toolbar({ variant = 'dock' }: { variant?: 'dock' | 'overlay' }) 
       >
         <Redo2 size={16} strokeWidth={1.75} />
       </button>
+
+      {!overlay && onToggleMedia && (
+        <button
+          type="button"
+          data-testid="media-bin-toggle"
+          title={mediaOpen ? 'Hide Media (more room for the photo)' : 'Show Media'}
+          aria-label={mediaOpen ? 'Hide Media' : 'Show Media'}
+          aria-pressed={mediaOpen}
+          onClick={onToggleMedia}
+          className={`${hit} mt-auto flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors`}
+        >
+          {mediaOpen ? <PanelLeftClose size={16} strokeWidth={1.75} /> : <PanelLeftOpen size={16} strokeWidth={1.75} />}
+        </button>
+      )}
     </div>
   )
 }
