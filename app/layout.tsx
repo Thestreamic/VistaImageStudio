@@ -1,3 +1,4 @@
+import Script from 'next/script'
 import type { Metadata, Viewport } from 'next'
 import { IBM_Plex_Mono, Source_Sans_3 } from 'next/font/google'
 import './globals.css'
@@ -63,6 +64,9 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: STRIP_PROJECT_PAGES_PREFIX }} />
       </head>
+      {!process.env.ELECTRON_BUILD && (
+  <Script src="/analytics.js" strategy="afterInteractive" />
+)}
       <body>{children}</body>
     </html>
   )
