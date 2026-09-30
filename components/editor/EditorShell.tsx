@@ -55,6 +55,8 @@ function transferLooksLikeFiles(transfer: DataTransfer | null | undefined): bool
 
 type EulaGate = 'loading' | 'needed' | 'accepted'
 
+const MEDIA_BIN_KEY = 'vista-media-bin'
+
 function initialEulaGate(): EulaGate {
   if (typeof window === 'undefined') return 'loading'
   if (hasAcceptedCurrentEula()) return 'accepted'
@@ -109,7 +111,25 @@ export function EditorShell() {
   const [mobileMenu, setMobileMenu] = useState(false)
   const [mobileSheet, setMobileSheet] = useState<MobileSheetId | null>(null)
   const [showNewDialog, setShowNewDialog] = useState(false)
+  const [mediaOpen, setMediaOpen] = useState(true)
   const mobile = useMobileLayout()
+
+  // Media bin visibility is a per-viewer UI preference only; the media
+  // library itself (IndexedDB) is untouched when the bin is hidden.
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(MEDIA_BIN_KEY) === 'closed') setMediaOpen(false)
+    } catch {}
+  }, [])
+  const toggleMedia = useCallback(() => {
+    setMediaOpen((open) => {
+      const next = !open
+      try {
+        window.localStorage.setItem(MEDIA_BIN_KEY, next ? 'open' : 'closed')
+      } catch {}
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -534,9 +554,15 @@ export function EditorShell() {
           const state = useEditorStore.getState()
           if (state.textSession) return
           const layer = state.doc?.layers.find((l) => l.id === state.doc?.activeLayerId)
-          if (!layer?.collageCell || layer.collageMat) return
-          e.preventDefault()
-          state.deleteCollageFrame(layer.id)
+          if (layer?.collageCell && !layer.collageMat) {
+            e.preventDefault()
+            state.deleteCollageFrame(layer.id)
+            return
+          }
+          if (state.activeImportId) {
+            e.preventDefault()
+            state.removeRecentImports([state.activeImportId])
+          }
         }
         else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
           const state = useEditorStore.getState()
@@ -752,9 +778,14 @@ export function EditorShell() {
         />
       )}
       <div className="flex-1 flex min-h-0 relative">
-        <Toolbar variant={mobile ? 'overlay' : 'dock'} />
-        {!mobile && (
+        <Toolbar
+          variant={mobile ? 'overlay' : 'dock'}
+          mediaOpen={mediaOpen}
+          onToggleMedia={mobile ? undefined : toggleMedia}
+        />
+        {!mobile && mediaOpen && (
           <ImportedImagesBin
+            onCollapse={toggleMedia}
             onOpenImport={(item) => void openImportedOnCanvas(item)}
             onPlaceImport={(item) => void handlePlaceImport(item)}
             onImportFolder={(files) => void ingestFiles(files)}
@@ -762,7 +793,16 @@ export function EditorShell() {
             onCancelImport={cancelImport}
           />
         )}
-        {compareMode && doc ? <CompareView /> : <EditorStage onOpenClick={handleOpen} onDropFile={ingestFile} onClose={() => void closeCenteredPhoto()} />}
+        {compareMode && doc ? (
+          <CompareView />
+        ) : (
+          <EditorStage
+            onOpenClick={handleOpen}
+            onTemplatesClick={() => setShowNewDialog(true)}
+            onDropFile={ingestFile}
+            onClose={() => void closeCenteredPhoto()}
+          />
+        )}
         {!mobile && (
           <aside
             data-testid="right-sidebar"

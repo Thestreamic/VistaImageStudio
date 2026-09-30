@@ -1,12 +1,13 @@
 import Script from 'next/script'
 import type { Metadata, Viewport } from 'next'
-import { IBM_Plex_Mono, Source_Sans_3 } from 'next/font/google'
+import { IBM_Plex_Mono, Inter } from 'next/font/google'
 import './globals.css'
 
-const sourceSans = Source_Sans_3({
+// Inter (SIL OFL 1.1): screen-first UI face, free for commercial use.
+const uiSans = Inter({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-source-sans',
+  variable: '--font-ui',
 })
 
 const plexMono = IBM_Plex_Mono({
@@ -19,7 +20,7 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: 'Vista Image Studio - Local AI Photo Editor',
   description:
-    'A privacy-first photo editor. Layers, curves, crop, and AI tools such as background removal, denoise and upscaling run entirely on your device. No cloud, no telemetry.',
+    'Vista Image Studio — a social photo editor with layers, curves, crop, and AI tools such as background removal, denoise and upscaling. No account required.',
   generator: 'v0.app',
   applicationName: 'Vista Image Studio',
   icons: {
@@ -60,7 +61,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${sourceSans.variable} ${plexMono.variable} bg-background`}>
+    <html lang="en" className={`${uiSans.variable} ${plexMono.variable} bg-background`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: STRIP_PROJECT_PAGES_PREFIX }} />
       </head>

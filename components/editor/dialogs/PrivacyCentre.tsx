@@ -9,9 +9,9 @@ function streakText() {
   try {
     const raw = localStorage.getItem(STREAK_KEY)
     const data = raw ? (JSON.parse(raw) as { count: number; last: string }) : { count: 0, last: '' }
-    return data.count > 0 ? `${data.count} local session${data.count === 1 ? '' : 's'}` : 'No cloud account — sessions stay on this device'
+    return data.count > 0 ? `${data.count} session${data.count === 1 ? '' : 's'} on this browser` : 'No account required — sessions are counted on this browser only'
   } catch {
-    return 'No cloud account — sessions stay on this device'
+    return 'No account required — sessions are counted on this browser only'
   }
 }
 
@@ -47,8 +47,8 @@ export function PrivacyCentre({ onClose }: { onClose: () => void }) {
           <h2 id="privacy-title" className="text-sm font-semibold">Privacy Centre</h2>
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Vista Image Studio is local-first. Photos stay on this device. There is no account, no telemetry,
-          and no photo upload API in the app.
+          Status for this install. No account is required. The web app needs network access to load.
+          Editing runs in this browser or desktop app; we do not operate a photo-storage service for your library.
         </p>
         <dl className="mt-4 space-y-2 text-xs">
           <Row label="Analytics" value={info?.analytics === 'off' ? 'Off' : 'Off'} />

@@ -218,6 +218,8 @@ interface EditorState {
     },
     opts?: { activate?: boolean },
   ) => void
+  /** Remove one or more Media bin items from memory and IndexedDB. */
+  removeRecentImports: (ids: string[]) => void
 }
 
 function freshDocMeta(fileName: string): Pick<
@@ -1144,6 +1146,21 @@ export const useEditorStore = create<EditorState>()((set, get) => {
         })
       })()
       if (evicted.length) void deleteMediaItems(evicted)
+    },
+
+    removeRecentImports: (ids) => {
+      const unique = [...new Set(ids.filter(Boolean))]
+      if (!unique.length) return
+      const drop = new Set(unique)
+      const recentImports = get().recentImports.filter((row) => !drop.has(row.id))
+      const activeImportId = get().activeImportId
+      set({
+        recentImports,
+        activeImportId: activeImportId && drop.has(activeImportId)
+          ? (recentImports[0]?.id ?? null)
+          : activeImportId,
+      })
+      void deleteMediaItems(unique)
     },
 
     hydrateMediaLibrary: async () => {

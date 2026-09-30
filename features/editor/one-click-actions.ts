@@ -99,8 +99,10 @@ export async function runMagicEraser(): Promise<void> {
   const layer = doc ? selectPhotoLayer(state) : null
   if (!layer || !doc) return
   if (!doc.selection) {
-    state.setTool('select-wand')
-    state.notify('info', 'Click the object to select it, then click Magic Eraser again. Or press M and drag a box.')
+    // Select (M) takes both a click on the object (wand) and a dragged box,
+    // so the highlighted tool matches what the hint below asks for.
+    state.setTool('select-rect')
+    state.notify('info', 'Click the object to select it (or drag a box around it), then click Magic Eraser again.')
     return
   }
   const mask = selectionMaskForLayer(doc.selection, layer)

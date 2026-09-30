@@ -4,7 +4,8 @@ import { PRIVACY_LAST_UPDATED, PRIVACY_SECTIONS, PRIVACY_SHORT, PRIVACY_TITLE } 
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — Vista Image Studio',
-  description: 'Privacy Policy for Vista Image Studio. Photos stay on your device. No account, no telemetry by default.',
+  description:
+    'Privacy Policy for Vista Image Studio. No account required. The web app needs network access to load. Editing runs in your browser or desktop app.',
 }
 
 export default function PrivacyPage() {

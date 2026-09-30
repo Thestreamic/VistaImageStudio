@@ -98,7 +98,7 @@ export function AppMenu({
     <div
       data-testid={testId}
       className={cn(
-        'absolute left-0 top-full mt-0.5 z-[80] rounded-md border border-border bg-popover shadow-lg p-1',
+        'absolute left-0 top-full mt-1 z-[80] rounded-md border border-border bg-popover elev-pop p-1',
         width,
       )}
     >

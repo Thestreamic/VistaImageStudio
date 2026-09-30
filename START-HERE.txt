@@ -4,8 +4,8 @@ Background, Magic Eraser, and collages, plus how to use every other tool.
 
 Copy this WHOLE folder into your GitHub repo (the one already on your PC).
 Do not pick files out — the website, the Windows .exe, and the .appx all
-come from this same folder. Photos never upload to a server; they stay
-in the visitor's browser, same as the desktop app.
+come from this same folder. The web app needs network access to load.
+Working photos are edited in the visitor's browser or desktop app.
 
 ============================================================
 1) PUT THE SITE ONLINE (GitHub Pages)

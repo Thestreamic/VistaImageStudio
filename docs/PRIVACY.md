@@ -1,22 +1,21 @@
 # Privacy
 
-Last updated: September 20, 2026  
+Last updated: September 27, 2026  
 Publisher: The Streamic (`thestreamic@gmail.com`)  
-Sites: [vistaimagestudio.thestreamic.in](https://vistaimagestudio.thestreamic.in), [thestreamic.in](https://thestreamic.in)
+Sites: [vistaimagestudio.thestreamic.in](https://vistaimagestudio.thestreamic.in), [vistaimage.thestreamic.in](https://vistaimage.thestreamic.in), [thestreamic.in](https://thestreamic.in)
 
-Vista Image Studio is local-first.
+Canonical policy text lives in `lib/legal/privacy.ts` (also `/privacy` and Help → About).
 
-- **No account, no telemetry, no photo upload API** in the app.
+Summary for engineers (not marketing claims):
+
+- No account is required to edit.
+- The **web app needs network access** to load HTML, scripts, WASM, and model assets from hosting.
+- Core editing is designed to run in the browser/desktop runtime; we do not operate a Streamic photo-storage/viewing service for the user’s library.
+- Analytics / crash SDKs are off by default in the editor.
 - Production CSP `connect-src` is `'self' blob: data:` (dev also allows the Next.js HMR websocket).
-- Pixels live on `HTMLCanvasElement` in the renderer. AI runs in a Web Worker.
-- Command chat stores **text only** (no pixels, no file paths) in `localStorage`.
-- Canvas export **rebuilds** the bitmap, so camera EXIF is not copied.
-- ONNX portrait matting (**MODNet**, Apache-2.0), inpainting (**LaMa**, Apache-2.0) and depth (**MiDaS**, MIT) are bundled under `public/models/` when present and run via `onnxruntime-web`. Nothing is uploaded.
-- The in-app **Privacy Centre** lists host, user-data path, autosave path, and analytics=off.
-- EULA acceptance (`vista-eula-accepted`) is stored locally (and, on desktop, in the app user-data folder).
-- Optional contact: email `thestreamic@gmail.com`. We only receive what you send.
-- The marketing site (`docs/index.html`) may call the GitHub API. That page is not shipped inside the desktop app.
-
-The canonical policy text used by `/privacy` and Help → About lives in `lib/legal/privacy.ts`.
+- Command chat stores **text only** in `localStorage`.
+- Canvas export **rebuilds** the bitmap (no camera EXIF copy).
+- Privacy Centre is a local status panel — not an offline guarantee.
+- Optional contact: email `thestreamic@gmail.com`.
 
 See also [AI.md](./AI.md) and the [End-User License Agreement](./eula.html).

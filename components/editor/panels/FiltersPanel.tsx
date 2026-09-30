@@ -35,7 +35,7 @@ export function FiltersPanel() {
   if (!layer) {
     return (
       <div className="p-3">
-        <span className="panel-label">Looks</span>
+        <h3 className="section-title">Looks</h3>
         <p className="p-0 mt-2 text-[13px] text-muted-foreground">Open an image to apply a look.</p>
         <p className="text-[12px] text-muted-foreground mt-2">Includes Optimize Image, Original, B&W, Warm, Cool.</p>
       </div>
@@ -51,13 +51,13 @@ export function FiltersPanel() {
         type="button"
         onClick={optimizeImage}
         data-testid="auto-optimize"
-        className="w-full flex items-center justify-center gap-2 py-2.5 mb-3 rounded-md brand-gradient-bg text-white text-[13px] font-semibold"
-        title="One-click grade: tone, color, vibrance, clarity, sharpness"
+        className="w-full flex items-center justify-center gap-2 py-2.5 mb-4 rounded-md brand-gradient-bg text-white text-[13px] font-semibold shadow-sm transition-[filter,transform] hover:brightness-110 active:translate-y-px"
+        title="Improve light, colour and detail in one click (same as AI → Optimize Image)"
       >
         <Sparkles size={14} /> Optimize Image
       </button>
-      <span className="panel-label">Looks</span>
-      <p className="text-[12px] text-muted-foreground mt-1 mb-3">
+      <h3 className="section-title">Looks</h3>
+      <p className="text-[11.5px] text-muted-foreground mt-1.5 mb-2">
         Intensity blends toward the original.
       </p>
       <LookGrid
@@ -96,13 +96,13 @@ function LookGrid({
   return (
     <div className="grid grid-cols-3 gap-2 mt-2">
       {items.map((p) => (
-        <button key={p.id} type="button" onClick={() => onPick(p.id)} className="flex flex-col items-center gap-1.5 group">
-          <div className={cn('w-full aspect-square rounded-lg overflow-hidden bg-secondary border-2 transition-colors', active === p.id ? 'border-primary' : 'border-transparent group-hover:border-border')}>
+        <button key={p.id} type="button" aria-pressed={active === p.id} onClick={() => onPick(p.id)} className="flex flex-col items-center gap-1.5 group rounded-md">
+          <div className={cn('w-full aspect-square rounded-md overflow-hidden bg-secondary transition-shadow', active === p.id ? 'ring-2 ring-primary ring-offset-2 ring-offset-sidebar' : 'ring-1 ring-border group-hover:ring-foreground/25')}>
             {thumb && (
               <img src={thumb} alt="" className="w-full h-full object-contain" style={{ filter: p.css === 'none' ? undefined : p.css }} />
             )}
           </div>
-          <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground">{p.label}</span>
+          <span className={cn('text-[11px] font-medium', active === p.id ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground')}>{p.label}</span>
         </button>
       ))}
     </div>

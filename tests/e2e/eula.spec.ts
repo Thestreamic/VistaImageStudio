@@ -58,5 +58,5 @@ test('static /eula and /privacy pages render canonical text', async ({ page }) =
   await expect(page.getByText(/laws of Ireland/)).toBeVisible()
   await page.goto('/privacy')
   await expect(page.getByRole('heading', { name: 'Privacy Policy' })).toBeVisible()
-  await expect(page.getByText(/no telemetry by default/i)).toBeVisible()
+  await expect(page.getByText(/network connection to load/i)).toBeVisible()
 })

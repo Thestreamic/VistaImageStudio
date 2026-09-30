@@ -78,7 +78,7 @@ export const splashHtml = `<!DOCTYPE html>
     <div class="status" id="status">Starting Vista Image Studio…</div>
     <div class="track"><div class="fill" id="fill"></div></div>
     <div class="pct" id="pct">0%</div>
-    <div class="foot">Privacy-first · nothing leaves this device</div>
+    <div class="foot">Social photo editor · no account required</div>
   </div>
   <script>
     const fill = document.getElementById('fill');

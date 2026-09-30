@@ -35,12 +35,12 @@
   <nav><span class="dot"></span><a href="index.html">Vista Image Studio</a></nav>
   <header>
     <h1>End-User License Agreement</h1>
-    <p>Last updated: September 25, 2026 · The Streamic</p>
+    <p>Last updated: September 27, 2026 · The Streamic</p>
   </header>
   <pre id="eula-canonical">END-USER LICENSE AGREEMENT (EULA)
 VISTA IMAGE STUDIO
 
-Last Updated: September 25, 2026
+Last Updated: September 27, 2026
 
 PLEASE READ THIS END-USER LICENSE AGREEMENT ("AGREEMENT") CAREFULLY BEFORE
 INSTALLING, ACCESSING, OR USING VISTA IMAGE STUDIO (THE "SOFTWARE"). BY
@@ -58,9 +58,10 @@ vistaimagestudio.thestreamic.in and thestreamic.in.
 --------------------------------------------------------------------------
 
 1.1 "Software" means the Vista Image Studio application in any form
-distributed by Licensor, including the desktop application, all
-associated files, on-device AI models and algorithms bundled with it,
-documentation, updates, and any successor versions.
+distributed by Licensor, including the desktop application, the web
+application, all associated files, AI models and algorithms bundled
+with or served alongside it, documentation, updates, and any successor
+versions.
 
 1.2 "User Content" means any photos, images, files, or other content that
 you import into, create with, or export from the Software.
@@ -123,29 +124,40 @@ all right, title, and interest in and to your User Content, including
 all photos and images you import, edit, or export using the Software.
 Licensor claims no ownership over, and no license to, your User Content.
 
-3.2 Local Processing. The Software is designed to process User Content
-locally on your device. Licensor does not transmit, upload, collect, or
-have access to your User Content through your ordinary use of the
-Software's editing, AI-processing, or export features. You acknowledge
-that this representation applies to the Software's core image-processing
-functionality as designed and does not extend to any separate, clearly
-labeled online services you may choose to use (e.g., visiting Licensor's
-website, submitting a support request, or any future opt-in online
-feature that is separately disclosed to you at the time of use).
+3.2 Processing of User Content. The Software is designed so that User
+Content is processed in the Software running on your device (in a
+browser or desktop runtime, including Web Workers where used). Licensor
+does not operate a photo-upload, photo-hosting, or cloud photo-editing
+service for your library as part of core editing, and does not claim a
+licence to use your User Content. You acknowledge that:
+  (a) the web application requires network access to load and update the
+      Software, scripts, styles, fonts, WASM runtimes, model files, and
+      other assets from hosting infrastructure;
+  (b) hosting providers, CDNs, DNS, TLS terminators, browsers, and
+      network operators may log ordinary technical data about those
+      requests;
+  (c) this Section describes the Software as designed for core editing
+      and does not extend to any separate online activity you choose
+      (for example visiting Licensor's marketing site, emailing support,
+      or any future opt-in online feature that is separately disclosed
+      at the time of use); and
+  (d) Licensor does not warrant that every session is offline or that
+      no network traffic occurs when you use the Software.
 
 3.3 Your Responsibility for Content. You are solely responsible for your
 User Content and for ensuring you have all rights necessary to import,
 edit, process, and export it using the Software, including rights
 related to any third-party images, likenesses, trademarks, or copyrighted
-material contained in your User Content. Licensor has no ability to
-review, moderate, or control User Content processed locally on your
-device and disclaims all responsibility for it.
+material contained in your User Content. Licensor has no practical
+ability to review, moderate, or control User Content processed in your
+browser or desktop runtime and disclaims all responsibility for it.
 
-3.4 AI-Assisted Features. The Software includes on-device, automated
-features (including but not limited to background removal, denoising,
-upscaling, face enhancement, low-light correction, dehaze, clarity
-adjustment, and natural-language command parsing) that algorithmically
-alter User Content ("AI Features"). You acknowledge that:
+3.4 AI-Assisted Features. The Software includes automated features
+(including but not limited to background removal, denoising, upscaling,
+face enhancement, low-light correction, dehaze, clarity adjustment, and
+natural-language command parsing) that algorithmically alter User
+Content ("AI Features"). Those features are designed to run in the
+Software on your device. You acknowledge that:
   (a) AI Features are automated and may produce unexpected, inaccurate,
       or undesirable results;
   (b) face enhancement and similar features are experimental and may not
@@ -156,10 +168,11 @@ alter User Content ("AI Features"). You acknowledge that:
       accurate, suitable, or fit for any particular purpose.
 
 3.5 Local Storage of User Content. Imported images, thumbnails, processed
-pixels, and project autosave ("Local Copies") are written only to the
-device on which you use the Software. Licensor does not receive, host,
-or retain Local Copies, and has no server from which they can be
-recovered after you delete them.
+pixels, and project autosave ("Local Copies") are written to storage on
+the device and browser profile on which you use the Software, as
+described below. Licensor does not operate a user photo library from
+which Local Copies can be recovered after you delete them from that
+device.
 
   (a) Web application. Imported photographs and thumbnails are stored in
       the browser's IndexedDB database named "vista-media-library,"
@@ -202,22 +215,24 @@ recovered after you delete them.
 4. PRIVACY
 --------------------------------------------------------------------------
 
-4.1 No Account, No Cloud, No Analytics by Default. The Software does not
-require account creation and does not send User Content to Licensor's
-servers or any third party as part of its core editing functionality.
-Local Copies remain on your device in the locations stated in Section 3.5.
-The Software's Privacy Centre panel is provided to give you visibility
-into the host, the desktop user-data and autosave paths on that computer,
-and the current state of any data-related settings.
+4.1 Accounts and Analytics. The Software does not require account
+creation with Licensor. Analytics and crash-reporting SDKs are off by
+default in the editor. Local Copies are stored in the locations stated
+in Section 3.5. The Software's Privacy Centre panel is a local status
+view of host, desktop paths (where applicable), and related settings; it
+does not mean the web application works without network access.
 
-4.2 Limited Data We May Receive. If you contact Licensor (e.g., via
-thestreamic@gmail.com) for support or feedback, or if the Software
-includes an optional update-check or crash-reporting feature, Licensor
-may receive limited technical information as necessary to provide that
-specific function. Any such feature will be disclosed to you in-app.
-This Agreement does not itself constitute a full Privacy Policy; where a
-separate Privacy Policy is published for the Software, its terms apply
-in addition to this Section 4.
+4.2 Network Delivery and Limited Data We May Receive. Use of the web
+application necessarily involves network requests to obtain the Software
+and its assets. Hosting and related infrastructure may process technical
+logs of those requests as described in the Privacy Policy. If you contact
+Licensor (e.g., via thestreamic@gmail.com) for support or feedback, or if
+the Software includes an optional update-check or crash-reporting feature,
+Licensor may receive limited information as necessary to provide that
+specific function. Any such optional feature will be disclosed to you
+in-app. This Agreement does not itself constitute a full Privacy Policy;
+where a separate Privacy Policy is published for the Software, its terms
+apply in addition to this Section 4.
 
 --------------------------------------------------------------------------
 5. THIRD-PARTY COMPONENTS

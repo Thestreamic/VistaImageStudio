@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* Source Sans 3: humanist UI face (Adobe) — reads as ink on linen, not generic Plex.
-     IBM Plex Mono stays for kbd / .num. next/font self-hosts both into the CSS export. */
-  --font-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Inter: screen-first UI face (SIL OFL 1.1). IBM Plex Mono stays for kbd / .num.
+     next/font self-hosts both into the CSS export — no runtime font requests. */
+  --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
   --color-sidebar-ring: var(--sidebar-ring);
@@ -60,25 +60,25 @@
 */
 :root {
   color-scheme: dark;
-  --background: oklch(0.255 0.012 255);
-  --foreground: oklch(0.93 0.006 255);
-  --card: oklch(0.295 0.013 255);
-  --card-foreground: oklch(0.93 0.006 255);
-  --popover: oklch(0.31 0.014 255);
-  --popover-foreground: oklch(0.93 0.006 255);
+  --background: oklch(0.235 0.01 258);
+  --foreground: oklch(0.94 0.005 255);
+  --card: oklch(0.255 0.011 258);
+  --card-foreground: oklch(0.94 0.005 255);
+  --popover: oklch(0.285 0.012 258);
+  --popover-foreground: oklch(0.94 0.005 255);
   --primary: oklch(0.8 0.14 78);
   --primary-foreground: oklch(0.22 0.03 78);
-  --secondary: oklch(0.34 0.014 255);
-  --secondary-foreground: oklch(0.93 0.006 255);
-  --muted: oklch(0.33 0.013 255);
-  --muted-foreground: oklch(0.68 0.012 255);
-  --accent: oklch(0.36 0.016 255);
-  --accent-foreground: oklch(0.96 0.005 255);
+  --secondary: oklch(0.3 0.012 258);
+  --secondary-foreground: oklch(0.94 0.005 255);
+  --muted: oklch(0.29 0.011 258);
+  --muted-foreground: oklch(0.71 0.012 255);
+  --accent: oklch(0.335 0.014 258);
+  --accent-foreground: oklch(0.97 0.004 255);
   --destructive: oklch(0.64 0.2 25);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 12%);
+  --border: oklch(1 0 0 / 8.5%);
+  --input: oklch(1 0 0 / 11%);
   --ring: oklch(0.8 0.14 78);
-  --canvas: oklch(0.16 0.008 280);
+  --canvas: oklch(0.165 0.006 265);
   --canvas-foreground: oklch(0.9 0 0);
   --success: oklch(0.76 0.14 160);
   --chart-1: oklch(0.8 0.14 78);
@@ -87,14 +87,19 @@
   --chart-4: oklch(0.72 0.17 145);
   --chart-5: oklch(0.65 0.16 255);
   --radius: 0.375rem;
-  --sidebar: oklch(0.255 0.012 255);
-  --sidebar-foreground: oklch(0.93 0.006 255);
+  --sidebar: oklch(0.245 0.011 258);
+  --sidebar-foreground: oklch(0.94 0.005 255);
   --sidebar-primary: oklch(0.8 0.14 78);
   --sidebar-primary-foreground: oklch(0.22 0.03 78);
-  --sidebar-accent: oklch(0.34 0.014 255);
-  --sidebar-accent-foreground: oklch(0.93 0.006 255);
-  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-accent: oklch(0.3 0.012 258);
+  --sidebar-accent-foreground: oklch(0.94 0.005 255);
+  --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.8 0.14 78);
+  /* Elevation + slider tokens (theme-aware). */
+  --shadow-pop: 0 1px 0 oklch(1 0 0 / 4%) inset, 0 10px 28px oklch(0 0 0 / 38%), 0 2px 6px oklch(0 0 0 / 24%);
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 28%);
+  --slider-track: oklch(1 0 0 / 14%);
+  --slider-fill: oklch(0.94 0.005 255 / 62%);
 }
 
 /*
@@ -133,6 +138,10 @@
   --sidebar-accent-foreground: oklch(0.235 0.022 55);
   --sidebar-border: oklch(0.34 0.024 60 / 12%);
   --sidebar-ring: oklch(0.55 0.13 68);
+  --shadow-pop: 0 1px 0 oklch(1 0 0 / 80%) inset, 0 12px 30px oklch(0.38 0.04 60 / 16%), 0 2px 6px oklch(0.38 0.04 60 / 10%);
+  --shadow-soft: 0 1px 2px oklch(0.38 0.04 60 / 12%);
+  --slider-track: oklch(0.32 0.03 60 / 18%);
+  --slider-fill: oklch(0.3 0.03 55 / 62%);
   --brand-1: #c9893a;
   --brand-2: #b56a2b;
   --brand-3: #8a5a24;
@@ -168,8 +177,8 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    font-feature-settings: 'kern' 1, 'liga' 1;
-    letter-spacing: -0.011em;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+    letter-spacing: -0.006em;
   }
   html:not(.theme-light) body {
     -webkit-font-smoothing: antialiased;
@@ -178,7 +187,7 @@
   html.theme-light body {
     -webkit-font-smoothing: auto;
     -moz-osx-font-smoothing: auto;
-    letter-spacing: -0.012em;
+    letter-spacing: -0.006em;
   }
   ::selection {
     background: oklch(0.8 0.14 78 / 35%);
@@ -186,11 +195,91 @@
   .theme-light ::selection {
     background: oklch(0.55 0.13 68 / 28%);
   }
+  /* Keyboard focus: one consistent ring on every interactive control. */
+  button:focus-visible,
+  [role='button']:focus-visible,
+  [role='menuitem']:focus-visible,
+  select:focus-visible,
+  input[type='range']:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--ring) 75%, transparent);
+    outline-offset: 1px;
+  }
+}
+
+/* Shared inspector primitives: one button, one section heading. */
+@layer components {
+  .ui-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.65rem;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: left;
+    border-radius: var(--radius-md);
+    background: var(--secondary);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease, transform 0.08s ease;
+  }
+  .ui-btn > svg {
+    flex-shrink: 0;
+    color: var(--muted-foreground);
+    transition: color 0.14s ease;
+  }
+  .ui-btn:hover {
+    background: var(--accent);
+    border-color: color-mix(in oklab, var(--foreground) 16%, transparent);
+  }
+  .ui-btn:hover > svg {
+    color: var(--foreground);
+  }
+  .ui-btn:active {
+    transform: translateY(0.5px);
+  }
+  .ui-btn:disabled {
+    opacity: 0.42;
+    pointer-events: none;
+  }
+  .ui-btn[data-busy='true'] {
+    opacity: 1;
+    border-color: color-mix(in oklab, var(--primary) 55%, transparent);
+  }
+  .ui-btn[data-busy='true'] > svg {
+    color: var(--primary);
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .elev-pop {
+    box-shadow: var(--shadow-pop);
+  }
+}
+@media (max-width: 767px) {
+  .ui-btn {
+    min-height: 44px;
+  }
 }
 
 @layer utilities {
   .panel-label {
-    @apply text-[11px] font-semibold tracking-[0.04em] text-muted-foreground;
+    @apply text-[11px] font-semibold tracking-[0.02em] text-muted-foreground;
   }
   html.theme-light .panel-label {
     color: oklch(0.34 0.032 52);
@@ -208,47 +297,55 @@
   input[type='range'].slider {
     -webkit-appearance: none;
     appearance: none;
-    height: 14px;
+    height: 16px;
     width: 100%;
     background: transparent;
     cursor: ew-resize;
+    --a: 0%;
+    --b: 0%;
   }
   input[type='range'].slider::-webkit-slider-runnable-track {
-    height: 2px;
-    border-radius: 1px;
-    background: oklch(1 0 0 / 18%);
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--slider-track) 0 var(--a), var(--slider-fill) var(--a) var(--b), var(--slider-track) var(--b) 100%);
   }
   input[type='range'].slider::-moz-range-track {
-    height: 2px;
-    border-radius: 1px;
-    background: oklch(1 0 0 / 18%);
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--slider-track) 0 var(--a), var(--slider-fill) var(--a) var(--b), var(--slider-track) var(--b) 100%);
   }
   input[type='range'].slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 10px;
-    height: 10px;
-    margin-top: -4px;
+    width: 12px;
+    height: 12px;
+    margin-top: -4.5px;
     border-radius: 9999px;
     background: var(--foreground);
     border: 1px solid oklch(0 0 0 / 40%);
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.12s ease;
   }
   input[type='range'].slider::-moz-range-thumb {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     border-radius: 9999px;
     background: var(--foreground);
     border: 1px solid oklch(0 0 0 / 40%);
+    box-shadow: var(--shadow-soft);
+  }
+  input[type='range'].slider:hover::-webkit-slider-thumb,
+  input[type='range'].slider:active::-webkit-slider-thumb {
+    transform: scale(1.15);
   }
   input[type='range'].slider:focus-visible::-webkit-slider-thumb {
     background: var(--primary);
   }
+  .scrollbar-thin:hover {
+    scrollbar-color: oklch(1 0 0 / 24%) transparent;
+  }
   .theme-light .scrollbar-thin {
     scrollbar-color: oklch(0.35 0.03 60 / 32%) transparent;
-  }
-  .theme-light input[type='range'].slider::-webkit-slider-runnable-track,
-  .theme-light input[type='range'].slider::-moz-range-track {
-    background: oklch(0.32 0.03 60 / 22%);
   }
   .theme-light input[type='range'].slider::-webkit-slider-thumb,
   .theme-light input[type='range'].slider::-moz-range-thumb {
@@ -262,7 +359,9 @@
   input[type='range'].slider {
     height: 44px;
   }
-  input[type='range'].slider::-webkit-slider-runnable-track,
+  input[type='range'].slider::-webkit-slider-runnable-track {
+    height: 4px;
+  }
   input[type='range'].slider::-moz-range-track {
     height: 4px;
   }

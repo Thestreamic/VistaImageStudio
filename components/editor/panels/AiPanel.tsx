@@ -1,6 +1,6 @@
 'use client'
-import { useState } from 'react'
-import { Sparkles, Scissors, Wind, ArrowUpToLine, UserRound, Eraser, Moon, CloudFog, Aperture, Palette, WandSparkles, Focus, Leaf, RectangleVertical } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { Sparkles, Scissors, Wind, ArrowUpToLine, UserRound, Eraser, Moon, CloudFog, Aperture, Palette, WandSparkles, Focus, Leaf, RectangleVertical, ShieldCheck, Loader2, type LucideIcon } from 'lucide-react'
 import { useEditorStore, selectPhotoLayer } from '@/features/editor/store/editor-store'
 import { aiClient } from '@/features/ai/ai-client'
 import { Slider } from './Slider'
@@ -31,166 +31,155 @@ export function AiPanel() {
   const [faceSmoothing, setFaceSmoothing] = useState(18)
   const [faceClarity, setFaceClarity] = useState(10)
   const busy = !!aiJob
+  const off = !hasLayer || busy
 
-  const btnBase =
-    'w-full flex items-center gap-2 px-2.5 py-2 text-[13px] font-medium rounded-md bg-secondary hover:bg-secondary/80 disabled:opacity-40 disabled:pointer-events-none transition-colors min-h-9 max-md:min-h-11'
+  // One button style for every AI action; the running one shows a spinner.
+  const tool = (
+    label: string,
+    icon: LucideIcon,
+    onClick: () => void,
+    opts?: { title?: string; testId?: string; job?: string; disabled?: boolean; text?: string },
+  ) => {
+    const running = aiJob?.label === (opts?.job ?? label)
+    const Icon = running ? Loader2 : icon
+    return (
+      <button
+        type="button"
+        disabled={opts?.disabled ?? off}
+        data-testid={opts?.testId}
+        data-busy={running || undefined}
+        onClick={onClick}
+        className="ui-btn"
+        title={opts?.title}
+      >
+        <Icon size={14} className={running ? 'animate-spin' : undefined} /> {opts?.text ?? label}
+      </button>
+    )
+  }
 
   return (
-    <div className="p-3 space-y-4">
-      <div>
-        <span className="panel-label">One-click</span>
-        <div className="one-click-tools mt-2 space-y-1.5">
+    <div className="p-3 space-y-5">
+      <p className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+        <ShieldCheck size={13} className="text-success shrink-0" />
+        One-click AI · runs on this device
+      </p>
+
+      <Group title="Enhance">
+        <div className="one-click-tools grid gap-1.5">
           <button
             type="button"
-            disabled={!hasLayer || busy}
+            disabled={off}
             data-testid="auto-optimize-ai"
             onClick={runOptimizeImage}
-            className="w-full flex items-center gap-2 px-2.5 py-2.5 text-[13px] rounded-md brand-gradient-bg text-white font-semibold disabled:opacity-40 disabled:pointer-events-none min-h-9 max-md:min-h-11"
-            title="One-click grade: brightness, color, vibrance, clarity, sharpness"
+            className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] rounded-md brand-gradient-bg text-white font-semibold shadow-sm transition-[filter,transform] hover:brightness-110 active:translate-y-px disabled:opacity-40 disabled:pointer-events-none min-h-10 max-md:min-h-11"
+            title="Improve light, colour and detail in one click"
           >
-            <WandSparkles size={13} /> Optimize Image
+            <WandSparkles size={14} /> Optimize Image
           </button>
-          <button
-            type="button"
-            disabled={!hasLayer || busy}
-            onClick={runNaturalColor}
-            className={btnBase}
-            title="True-to-life mobile grade — sun stays white-gold"
-          >
-            <Leaf size={13} /> Natural Color
-          </button>
-          <button
-            disabled={!hasLayer || busy}
-            onClick={() => void runAutoColor()}
-            className={btnBase}
-          >
-            <Sparkles size={13} /> Auto Color Correct
-          </button>
-          <Slider
-            label="Background"
-            value={discFocus}
-            min={0}
-            max={100}
-            onChange={(value) => {
-              setDiscFocus(value)
-              setPortraitDiscFocus(value)
-            }}
-            formatValue={discFocusLabel}
-          />
-          <button
-            disabled={!hasLayer || busy}
-            data-testid="portrait-bokeh"
-            onClick={() => void runPortraitBokeh()}
-            className={btnBase}
-            title="Centre is the locked look (f/2). Move left for a bit more background focus, right for a bit more blur, then apply."
-          >
-            <Focus size={13} /> Portrait Bokeh
-          </button>
-          <button
-            disabled={!hasLayer || busy}
-            onClick={() => void runRemoveBackground()}
-            data-testid="remove-background"
-            className={btnBase}
-            title="Cut the subject free on a transparent backdrop"
-          >
-            <Scissors size={13} /> Remove Background
-          </button>
-          <MagicEraserButton disabled={!hasLayer || busy} className={btnBase} />
-          <button
-            type="button"
-            disabled={!hasLayer || busy || !doc}
-            data-testid="instagram-4-5"
-            onClick={runInstagram45}
-            className={btnBase}
-            title="Largest centered 4:5 crop for Instagram portrait"
-          >
-            <RectangleVertical size={13} /> Instagram 4:5
-          </button>
-          <button
-            disabled={!hasLayer || busy}
-            onClick={() => void runLowLight()}
-            className={btnBase}
-          >
-            <Moon size={13} /> Low Light
-          </button>
-          <button
-            disabled={!hasLayer || busy}
-            onClick={() => void runDehaze()}
-            className={btnBase}
-          >
-            <CloudFog size={13} /> Dehaze
-          </button>
-          <button
-            disabled={!hasLayer || busy}
-            onClick={() => void runClarity()}
-            className={btnBase}
-          >
-            <Aperture size={13} /> Clarity
-          </button>
-          <button
-            disabled={!hasLayer || busy}
-            onClick={() => void runVibrance()}
-            className={btnBase}
-          >
-            <Palette size={13} /> Vibrance
-          </button>
-          <button
-            disabled={!hasLayer || busy}
-            onClick={() => void runUpscale2x()}
-            className={btnBase}
-          >
-            <ArrowUpToLine size={13} /> Upscale 2×
-          </button>
+          {tool('Natural Color', Leaf, runNaturalColor, { title: 'True-to-life colour, like a modern phone camera' })}
+          {tool('Auto Color Correct', Sparkles, () => void runAutoColor(), {
+            job: 'Auto Color',
+            title: 'Fix white balance and levels automatically',
+          })}
         </div>
-      </div>
+      </Group>
 
-      <div className="h-px bg-border" />
+      <Group title="Subject">
+        <div className="one-click-tools grid gap-1.5">
+          {tool('Remove Background', Scissors, () => void runRemoveBackground(), {
+            testId: 'remove-background',
+            title: 'Keep your subject, remove the background',
+          })}
+          {tool('Magic Eraser', Eraser, () => void runMagicEraser(), {
+            testId: 'magic-eraser',
+            title: 'Remove unwanted objects. Click the object (or drag a box), then click Magic Eraser again.',
+          })}
+        </div>
+        <div className="mt-1.5 rounded-md border border-border bg-secondary/35 p-2 space-y-2.5">
+          {tool('Portrait Bokeh', Focus, () => void runPortraitBokeh(), {
+            testId: 'portrait-bokeh',
+            title: 'Blur the background behind your subject. Select the subject first if it is not a person.',
+          })}
+          <div className="px-0.5">
+            <Slider
+              label="Background"
+              value={discFocus}
+              min={0}
+              max={100}
+              onChange={(value) => {
+                setDiscFocus(value)
+                setPortraitDiscFocus(value)
+              }}
+              formatValue={discFocusLabel}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">Pick the blur, then click Portrait Bokeh. Centre is the recommended look.</p>
+          </div>
+        </div>
+      </Group>
 
-      <div className="space-y-2">
-        <span className="panel-label">Denoise</span>
-        <Slider label="Strength" value={denoiseStrength} min={0} max={100} onChange={setDenoiseStrength} />
-        <button
-          disabled={!hasLayer || busy}
-          onClick={() => void runAiOp('Denoise', (img, onP) => aiClient.denoise(img, denoiseStrength, { onProgress: onP }))}
-          className={btnBase}
-        >
-          <Wind size={13} /> Apply Denoise
-        </button>
-      </div>
+      <Group title="Fix">
+        <div className="one-click-tools grid grid-cols-2 gap-1.5">
+          {tool('Low Light', Moon, () => void runLowLight(), { title: 'Brighten a dark photo' })}
+          {tool('Dehaze', CloudFog, () => void runDehaze(), { title: 'Cut haze and fog' })}
+          {tool('Clarity', Aperture, () => void runClarity(), { title: 'Boost local contrast and texture' })}
+          {tool('Vibrance', Palette, () => void runVibrance(), {
+            title: 'Boost muted colours, gentle on skin. Fine-tune with Adjust → Vibrance.',
+          })}
+        </div>
 
-      <div className="h-px bg-border" />
+        <SubTool title="Denoise">
+          <Slider label="Strength" value={denoiseStrength} min={0} max={100} onChange={setDenoiseStrength} />
+          {tool(
+            'Denoise',
+            Wind,
+            () => void runAiOp('Denoise', (img, onP) => aiClient.denoise(img, denoiseStrength, { onProgress: onP })),
+            { text: 'Apply Denoise', title: 'Smooth grain and noise from low-light shots' },
+          )}
+        </SubTool>
 
-      <div className="space-y-2">
-        <span className="panel-label">Face Enhance</span>
-        <Slider label="Smoothing" value={faceSmoothing} min={0} max={100} onChange={setFaceSmoothing} />
-        <Slider label="Clarity" value={faceClarity} min={0} max={100} onChange={setFaceClarity} />
-        <button
-          disabled={!hasLayer || busy}
-          onClick={() =>
-            void runAiOp('Face Enhance', (img, onP) =>
-              aiClient.faceEnhance(img, faceSmoothing, faceClarity, { onProgress: onP }),
-            )
-          }
-          className={btnBase}
-        >
-          <UserRound size={13} /> Apply Face Enhance
-        </button>
-      </div>
+        <SubTool title="Face Enhance">
+          <Slider label="Smoothing" value={faceSmoothing} min={0} max={100} onChange={setFaceSmoothing} />
+          <Slider label="Clarity" value={faceClarity} min={0} max={100} onChange={setFaceClarity} />
+          {tool(
+            'Face Enhance',
+            UserRound,
+            () =>
+              void runAiOp('Face Enhance', (img, onP) =>
+                aiClient.faceEnhance(img, faceSmoothing, faceClarity, { onProgress: onP }),
+              ),
+            { text: 'Apply Face Enhance', title: 'Smooth skin and sharpen facial detail' },
+          )}
+        </SubTool>
+      </Group>
+
+      <Group title="Size">
+        <div className="one-click-tools grid grid-cols-2 gap-1.5">
+          {tool('Upscale 2×', ArrowUpToLine, () => void runUpscale2x(), { title: 'Double the width and height of the photo' })}
+          {tool('Instagram 4:5', RectangleVertical, runInstagram45, {
+            testId: 'instagram-4-5',
+            disabled: off || !doc,
+            title: 'Crop to Instagram portrait (4:5). Fine-tune in Transform → Crop.',
+          })}
+        </div>
+      </Group>
     </div>
   )
 }
 
-function MagicEraserButton({ disabled, className }: { disabled: boolean; className: string }) {
+function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      data-testid="magic-eraser"
-      title="Select an object, then fill the hole with surrounding pixels"
-      onClick={() => void runMagicEraser()}
-      className={className}
-    >
-      <Eraser size={13} /> Magic Eraser
-    </button>
+    <section className="space-y-2">
+      <h3 className="section-title">{title}</h3>
+      {children}
+    </section>
+  )
+}
+
+function SubTool({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="mt-3 space-y-2">
+      <p className="text-[12px] font-medium text-foreground/90">{title}</p>
+      {children}
+    </div>
   )
 }

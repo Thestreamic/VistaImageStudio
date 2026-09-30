@@ -65,7 +65,7 @@ export function RecipesDialog({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
       <div className="w-[420px] max-h-[85vh] overflow-y-auto rounded-xl bg-popover border border-border shadow-2xl p-4" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-sm font-semibold">Recipes</h2>
-        <p className="text-[10px] text-muted-foreground mt-1">Save crop + look + logo as a local recipe. Nothing is uploaded.</p>
+        <p className="text-[10px] text-muted-foreground mt-1">Save crop + look + logo as a recipe on this device.</p>
         <div className="mt-3 flex gap-2">
           <input value={name} onChange={(e) => setName(e.target.value)} className="flex-1 bg-input rounded px-2 py-1 text-xs border border-border" />
           <button type="button" disabled={!doc} onClick={capture} className="px-2 py-1 text-xs rounded-md brand-gradient-bg text-white disabled:opacity-40">Save current</button>

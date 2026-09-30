@@ -60,7 +60,7 @@
     "vitest": "^5.0.0",
     "wait-on": "^8.0.1"
   },
-  "description": "Local-first AI photo editor for Windows, macOS and Linux, built on Electron.",
+  "description": "Social photo editor for Windows, macOS and Linux, built on Electron. The web app needs network access to load.",
   "main": "dist-electron/main/index.js",
   "author": "Vista Image Studio",
   "license": "UNLICENSED"

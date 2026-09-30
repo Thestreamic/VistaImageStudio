@@ -138,7 +138,7 @@ export function NewDesignDialog({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold">Create a design</h2>
-          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground"><X size={16} /></button>
+          <button type="button" onClick={onClose} aria-label="Close templates" title="Close" className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"><X size={16} /></button>
         </div>
         <p className="text-[10px] text-muted-foreground mb-3">
           Pick a layout or occasion, then drag photos from Media onto each box.
