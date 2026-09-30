@@ -534,9 +534,15 @@ export function EditorShell() {
           const state = useEditorStore.getState()
           if (state.textSession) return
           const layer = state.doc?.layers.find((l) => l.id === state.doc?.activeLayerId)
-          if (!layer?.collageCell || layer.collageMat) return
-          e.preventDefault()
-          state.deleteCollageFrame(layer.id)
+          if (layer?.collageCell && !layer.collageMat) {
+            e.preventDefault()
+            state.deleteCollageFrame(layer.id)
+            return
+          }
+          if (state.activeImportId) {
+            e.preventDefault()
+            state.removeRecentImports([state.activeImportId])
+          }
         }
         else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
           const state = useEditorStore.getState()

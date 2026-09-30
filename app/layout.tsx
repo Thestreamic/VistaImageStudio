@@ -19,7 +19,7 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: 'Vista Image Studio - Local AI Photo Editor',
   description:
-    'A privacy-first photo editor. Layers, curves, crop, and AI tools such as background removal, denoise and upscaling run entirely on your device. No cloud, no telemetry.',
+    'Vista Image Studio — a social photo editor with layers, curves, crop, and AI tools such as background removal, denoise and upscaling. No account required.',
   generator: 'v0.app',
   applicationName: 'Vista Image Studio',
   icons: {

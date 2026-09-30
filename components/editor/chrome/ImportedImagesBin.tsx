@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { FolderUp, Images, Search, X } from 'lucide-react'
 import { useEditorStore, type RecentImport } from '@/features/editor/store/editor-store'
 import { isCollageDocument } from '@/features/editor/collage/look-targets'
@@ -30,21 +30,61 @@ export function ImportedImagesBin({
   const items = useEditorStore((s) => s.recentImports)
   const activeId = useEditorStore((s) => s.activeImportId)
   const setActiveImportId = useEditorStore((s) => s.setActiveImportId)
+  const removeRecentImports = useEditorStore((s) => s.removeRecentImports)
   const collageOpen = useEditorStore((s) => isCollageDocument(s.doc?.layers ?? []))
   const [query, setQuery] = useState('')
+  const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(null)
   const filesRef = useRef<HTMLInputElement>(null)
   const folderRef = useRef<HTMLInputElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
   const q = query.trim().toLowerCase()
   const visible = q ? items.filter((item) => item.name.toLowerCase().includes(q)) : items
   const pct = progress && progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0
 
+  const deleteIds = (ids: string[]) => {
+    if (!ids.length) return
+    removeRecentImports(ids)
+    setMenu(null)
+  }
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Delete' && e.key !== 'Backspace') return
+      const tag = (e.target as HTMLElement | null)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement | null)?.isContentEditable) return
+      const active = useEditorStore.getState().activeImportId
+      if (!active) return
+      const root = rootRef.current
+      const target = e.target as Node | null
+      const focusInside = !!(root && target && root.contains(target))
+      const activeEl = document.activeElement
+      const activeInside = !!(root && activeEl && root.contains(activeEl))
+      if (!focusInside && !activeInside) return
+      e.preventDefault()
+      e.stopPropagation()
+      deleteIds([active])
+    }
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => window.removeEventListener('keydown', onKeyDown, true)
+  }, [removeRecentImports])
+
   return (
     <div
+      ref={rootRef}
       data-testid="imported-images-bin"
       className={cn(
         'w-64 shrink-0 flex flex-col min-h-0 bg-sidebar border-r border-sidebar-border',
         className,
       )}
+      onKeyDown={(e) => {
+        if (e.key !== 'Delete' && e.key !== 'Backspace') return
+        const tag = (e.target as HTMLElement | null)?.tagName
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return
+        if (!activeId) return
+        e.preventDefault()
+        e.stopPropagation()
+        deleteIds([activeId])
+      }}
     >
       <div className="shrink-0 px-2 pt-2 pb-1.5 space-y-1.5">
         <div className="flex items-center gap-1.5">
@@ -157,8 +197,8 @@ export function ImportedImagesBin({
                 data-import-id={item.id}
                 title={
                   collageOpen
-                    ? `${item.name} — double-click to fill the next empty frame`
-                    : `${item.name} — drag onto a template`
+                    ? `${item.name} — double-click to fill the next empty frame · right-click or Delete to remove`
+                    : `${item.name} — drag onto a template · right-click or Delete to remove`
                 }
                 aria-label={item.name}
                 aria-current={selected ? 'true' : undefined}
@@ -174,6 +214,12 @@ export function ImportedImagesBin({
                 onDoubleClick={() => {
                   setActiveImportId(item.id)
                   onPlaceImport(item)
+                }}
+                onContextMenu={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setActiveImportId(item.id)
+                  setMenu({ x: e.clientX, y: e.clientY, id: item.id })
                 }}
                 className={cn(
                   'relative aspect-square rounded-sm overflow-hidden bg-secondary/80 group text-left cursor-grab active:cursor-grabbing',
@@ -198,10 +244,81 @@ export function ImportedImagesBin({
       {items.length > 0 && (
         <p className="shrink-0 px-2 py-1.5 text-[11px] text-muted-foreground leading-relaxed border-t border-border">
           {collageOpen
-            ? 'Double-click fills the next empty frame. Drag onto a box. Photos stay in Media when you switch templates.'
-            : 'Import photos or a folder — thumbnails stay in Media. Drag onto a template. File → Open still replaces the canvas.'}
+            ? 'Double-click fills the next empty frame. Drag onto a box. Right-click or Delete removes from Media.'
+            : 'Import photos or a folder. Drag onto a template. Right-click or Delete removes from Media.'}
         </p>
       )}
+      {menu && (
+        <MediaBinContextMenu
+          x={menu.x}
+          y={menu.y}
+          onClose={() => setMenu(null)}
+          onDelete={() => deleteIds([menu.id])}
+        />
+      )}
+    </div>
+  )
+}
+
+function MediaBinContextMenu({
+  x,
+  y,
+  onClose,
+  onDelete,
+}: {
+  x: number
+  y: number
+  onClose: () => void
+  onDelete: () => void
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const pad = 8
+    el.style.left = `${Math.max(pad, Math.min(x, window.innerWidth - rect.width - pad))}px`
+    el.style.top = `${Math.max(pad, Math.min(y, window.innerHeight - rect.height - pad))}px`
+  }, [x, y])
+
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      if (ref.current?.contains(event.target as Node)) return
+      onClose()
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('pointerdown', onPointerDown, true)
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown, true)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [onClose])
+
+  return (
+    <div
+      ref={ref}
+      role="menu"
+      data-testid="media-bin-context-menu"
+      className="fixed z-[60] min-w-[9rem] rounded-md border border-border bg-card py-1 shadow-lg"
+      style={{ left: x, top: y }}
+      onContextMenu={(event) => {
+        event.preventDefault()
+        onClose()
+      }}
+    >
+      <button
+        type="button"
+        role="menuitem"
+        data-testid="media-bin-menu-delete"
+        className="w-full text-left px-3 py-1.5 text-[13px] hover:bg-secondary text-destructive"
+        onClick={onDelete}
+      >
+        Delete from Media
+      </button>
     </div>
   )
 }

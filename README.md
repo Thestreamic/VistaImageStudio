@@ -1,9 +1,9 @@
 # Vista Image Studio
 
-A local-first, privacy-first photo editor. Layers, non-destructive crop,
+A social photo editor. Layers, non-destructive crop,
 looks with intensity, a versioned `.lumen` project file, and AI tools
-(background removal, denoise, upscaling, face enhance) run entirely
-on-device — no cloud calls, no telemetry, no account required.
+(background removal, denoise, upscaling, face enhance) in the editor —
+no account required. The web app needs network access to load.
 
 Built with Electron + Next.js/React + Zustand. See
 [`docs/ARCHITECTURE-AND-CONCEPT.txt`](docs/ARCHITECTURE-AND-CONCEPT.txt)

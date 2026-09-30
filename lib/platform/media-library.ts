@@ -1,4 +1,4 @@
-/** Local media-bin library. Thumbnails + blobs stay on this device (IndexedDB). */
+/** Media-bin library. Thumbnails + blobs are stored in IndexedDB on this browser/device. */
 
 export const MEDIA_LIBRARY_DB = 'vista-media-library'
 export const MEDIA_LIBRARY_STORE = 'imports'

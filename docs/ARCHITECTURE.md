@@ -15,7 +15,7 @@ and `docs/AI.md`. Do not rename `.lumen`, `lumen-project`, or `window.lumen`.
   → `https://github.com/Thestreamic/VistaImageStudio` `main`.
 - Live site: `https://vistaimagestudio.thestreamic.in` at `/`.
   `BASE_PATH` must stay empty. A `/VistaImageStudio` base path 404s CSS.
-- No cloud photo upload, no account, no LLM. CSP `connect-src 'self' blob: data:`.
+- Editing and AI tools are designed to run in the browser/desktop runtime. No account required. CSP `connect-src 'self' blob: data:`. The web app needs network access to load assets.
 - EULA gate before the editor (`vista-eula-accepted`, version `2026-09-25`).
   Ireland law. Help → About, Privacy, Notices.
 - Media bin: Zustand `recentImports` + IndexedDB `vista-media-library`.

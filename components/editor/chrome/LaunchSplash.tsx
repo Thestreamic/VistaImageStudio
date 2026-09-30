@@ -87,7 +87,7 @@ export function LaunchSplash({
       </div>
       <p className="mt-2 w-full max-w-[520px] text-right text-[11px] text-muted-foreground num">{pct}%</p>
       <p className="absolute bottom-5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70">
-        Privacy-first · nothing leaves this device
+        Social photo editor · no account required
       </p>
     </div>
   )

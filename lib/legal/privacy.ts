@@ -1,10 +1,10 @@
 import { EULA_CONTACT, EULA_LICENSOR, EULA_SITE_PRIMARY, EULA_SITE_PUBLISHER } from '@/lib/legal/eula'
 
 export const PRIVACY_TITLE = 'Privacy Policy'
-export const PRIVACY_VERSION = '2026-09-25'
-export const PRIVACY_LAST_UPDATED = 'September 25, 2026'
+export const PRIVACY_VERSION = '2026-09-27'
+export const PRIVACY_LAST_UPDATED = 'September 27, 2026'
 export const PRIVACY_SHORT =
-  'Your photos stay on your device. Vista Image Studio does not require an account, does not upload your images, and does not send telemetry by default.'
+  'Vista Image Studio does not require an account. Editing and AI tools run in your browser or desktop app. The web app needs a network connection to load the Software and its assets. We do not operate a photo-storage or photo-viewing service for your library, and the editor does not include a telemetry SDK by default.'
 
 export type PrivacySection = {
   heading: string
@@ -16,7 +16,7 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
   {
     heading: '1. Who we are',
     paragraphs: [
-      `Vista Image Studio is published by ${EULA_LICENSOR} (“we”, “us”). This Privacy Policy describes the desktop application and the web app at ${EULA_SITE_PRIMARY.replace('https://', '')} (together, the “Software”). The publisher site is ${EULA_SITE_PUBLISHER.replace('https://', '')}.`,
+      `Vista Image Studio is published by ${EULA_LICENSOR} (“we”, “us”). This Privacy Policy describes the desktop application and the web app at ${EULA_SITE_PRIMARY.replace('https://', '')} (together, the “Software”). The publisher and marketing sites include ${EULA_SITE_PUBLISHER.replace('https://', '')} and related pages such as vistaimage.thestreamic.in.`,
       `Contact: ${EULA_CONTACT}.`,
     ],
   },
@@ -24,76 +24,85 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
     heading: '2. Short version',
     paragraphs: [
       PRIVACY_SHORT,
-      'Editing, export, and on-device AI features (background removal, inpainting, depth/bokeh, and similar tools) run locally in the app process or a local Web Worker. We do not operate servers that receive, store, or view your photos.',
+      'Image editing, export, and AI-assisted features (background removal, inpainting, depth/bokeh, and similar tools) are designed to run in the Software on your device — in the app process or a Web Worker in your browser or desktop runtime. We do not operate a service whose purpose is to receive, store, or view your photo library for editing.',
     ],
   },
   {
-    heading: '3. What we do not collect',
-    paragraphs: ['The Software is designed so that the following never leave your device as part of core editing:'],
-    bullets: [
-      'The photos, images, or files you open, edit, or export',
-      'The pixels of any layer, adjustment, collage, or AI operation',
-      'Your file-system paths, except as shown to you in the in-app Privacy Centre on this device',
-      'An account, advertising identifier, or analytics profile',
-    ],
-  },
-  {
-    heading: '4. What stays on your device',
+    heading: '3. Network access (important)',
     paragraphs: [
-      'Preferences, theme, first-run state, EULA acceptance, command-chat text, and project autosave are stored locally (browser localStorage / IndexedDB on the web; the operating system application-data folder on desktop). Command chat stores text only — never pixels or file paths.',
-      'Local path of cache and image location. Imported photos and thumbnails stay in this browser’s IndexedDB, database vista-media-library, store imports. On Windows that folder is inside the browser profile: %LOCALAPPDATA%\\Google\\Chrome\\User Data\\<Profile>\\IndexedDB\\https_vistaimagestudio.thestreamic.in_0.indexeddb.leveldb, plus the matching .indexeddb.blob folder beside it. Microsoft Edge uses %LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\<Profile>\\IndexedDB\\ with the same site folder name. <Profile> is usually Default, or Profile 1 for another browser profile. The edited project, including processed pixels, is the localStorage key vista-autosave in that same profile under Local Storage. While you edit, the working image is held in memory. A separate file is written only when you export to a folder you choose.',
+      'The web application requires network access to load and update HTML, scripts, styles, fonts, WASM runtimes, model files, and other assets from the hosting infrastructure that serves the Software. Without a network connection, the web app generally cannot start or reload those assets.',
+      'Desktop builds may still use the network for first-time downloads, updates, or optional features that are disclosed when used. Once models and assets are on disk, many desktop editing flows can continue without further network use, but that is a product characteristic — not a guarantee that every build or session is offline.',
+      'Ordinary hosting, CDN, DNS, TLS, and browser or ISP logs may record technical information about requests to load the Software (for example IP address, user-agent, URLs of assets fetched, and timestamps). That infrastructure logging is separate from uploading your photo library to us for editing, and it is not something we hold out as a private, offline product.',
+    ],
+  },
+  {
+    heading: '4. What we do not operate',
+    paragraphs: [
+      'As designed for core editing, the Software does not require you to create an account with us, and it does not include a photo-upload API whose purpose is to send your images to us for cloud editing, cloud storage, or cloud AI inference.',
+    ],
+    bullets: [
+      'No account creation is required to open and edit images in the Software',
+      'No advertising identifier or analytics profile is created by a telemetry SDK in the editor by default',
+      'We do not market the Software as a cloud photo library or cloud photo-hosting product',
+    ],
+  },
+  {
+    heading: '5. Where your working files are stored',
+    paragraphs: [
+      'Preferences, theme, first-run state, EULA acceptance, command-chat text, and project autosave are stored locally (browser localStorage / IndexedDB on the web; the operating system application-data folder on desktop). Command chat stores text only — not image pixels or file paths.',
+      'Imported photos and thumbnails stay in this browser’s IndexedDB, database vista-media-library, store imports. On Windows that folder is inside the browser profile: %LOCALAPPDATA%\\Google\\Chrome\\User Data\\<Profile>\\IndexedDB\\https_vistaimagestudio.thestreamic.in_0.indexeddb.leveldb, plus the matching .indexeddb.blob folder beside it. Microsoft Edge uses %LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\<Profile>\\IndexedDB\\ with the same site folder name. <Profile> is usually Default, or Profile 1 for another browser profile. The edited project, including processed pixels, is the localStorage key vista-autosave in that same profile under Local Storage. While you edit, the working image is held in memory. A separate file is written only when you export to a folder you choose.',
       'On the desktop app the same data stays under %APPDATA%\\Vista Image Studio\\ (on Windows, C:\\Users\\<you>\\AppData\\Roaming\\Vista Image Studio\\). The last project is autosave\\recovery.lumen in that folder. Imported photos are in the IndexedDB folder inside it, for the lumen://app origin.',
       'Canvas export rebuilds the bitmap, so camera EXIF is not copied into exported images.',
-      'Uninstalling the desktop app or clearing this site’s data in your browser removes that locally stored information. We have no server-side copy to export or delete.',
+      'Uninstalling the desktop app or clearing this site’s data in your browser removes that locally stored information. We do not provide a server-side user library from which those Local Copies can be recovered after you delete them.',
     ],
   },
   {
-    heading: '5. Privacy Centre',
+    heading: '6. Privacy Centre',
     paragraphs: [
-      'The in-app Privacy Centre lists the current host (desktop or web), the Content Security Policy connect-src value, analytics = off, and — on desktop — the user-data and autosave paths on this computer. It is a local status panel, not a cloud dashboard.',
+      'The in-app Privacy Centre is a local status panel. It lists the current host (desktop or web), the Content Security Policy connect-src value reported by the build, analytics = off, and — on desktop — the user-data and autosave paths on that computer. It is not a cloud dashboard and does not imply that the web app works without network access.',
     ],
   },
   {
-    heading: '6. Network, telemetry, and AI',
+    heading: '7. Telemetry, AI models, and processing',
     paragraphs: [
-      'Production Content Security Policy for the Software uses connect-src \'self\' blob: data:. The app does not call a photo-upload API and does not use a cloud LLM.',
-      'Analytics and crash reporting are off by default. There is no telemetry SDK in the editor.',
-      'On-device model files (for example MODNet, LaMa, and MiDaS, where bundled) are loaded from local folders such as /models. They are not uploaded with your images. See the Third-party notices file shipped with the Software for licenses.',
+      'Production Content Security Policy for the Software uses connect-src \'self\' blob: data:. The editor is not designed to call a third-party cloud LLM or a photo-upload API for core editing.',
+      'Analytics and crash reporting are off by default. There is no telemetry SDK bundled in the editor by default.',
+      'Model files (for example MODNet, LaMa, and MiDaS, where bundled or served with the Software) are loaded as application assets. On the web they are typically fetched over the network like other static assets; on desktop they may already be on disk. They are used to process images in the Software runtime. See the Third-party notices file shipped with the Software for licenses.',
     ],
   },
   {
-    heading: '7. Optional contact',
+    heading: '8. Optional contact',
     paragraphs: [
-      `If you email ${EULA_CONTACT} for support or feedback, we receive whatever you choose to send (for example your address, message, and any attachments) so we can reply. We do not use that correspondence to build a marketing profile.`,
+      `If you email ${EULA_CONTACT} for support or feedback, or if you use an optional feedback form that opens your mail client, we receive whatever you choose to send (for example your address, message, and any attachments) so we can reply. We do not use that correspondence to build an advertising profile.`,
     ],
   },
   {
-    heading: '8. Marketing pages',
+    heading: '9. Marketing pages',
     paragraphs: [
-      'Standalone marketing HTML (for example a landing page) is not the editor. That page is not shipped inside the desktop app and may request public information such as GitHub Releases. Visiting it is separate from using the Software.',
+      'Standalone marketing HTML (for example vistaimage.thestreamic.in) is not the editor. That page is not shipped inside the desktop app and may request public information such as GitHub Releases. Visiting marketing pages is separate from editing photos in the Software.',
     ],
   },
   {
-    heading: '9. Children',
+    heading: '10. Children',
     paragraphs: [
       'The Software is not directed at children, and we do not knowingly collect personal information from children through the Software.',
     ],
   },
   {
-    heading: '10. Your choices and rights',
+    heading: '11. Your choices and rights',
     paragraphs: [
-      'Because core use does not require an account and does not transmit your photos to us, there is typically no personal data held by us to access, correct, or erase. You can stop local storage by uninstalling the desktop app or clearing site data.',
+      'Because core editing does not require an account with us and is not designed to transmit your photo library to a Streamic-operated photo service, there is typically no photo library held by us to access, correct, or erase. You can remove local storage by uninstalling the desktop app or clearing site data in your browser.',
       'If you have contacted us by email, you may ask us to delete that correspondence. If you are in the EEA/UK, you may also have rights of access, rectification, erasure, restriction, and objection, and a right to lodge a complaint with a supervisory authority (in Ireland, the Data Protection Commission).',
     ],
   },
   {
-    heading: '11. Changes',
+    heading: '12. Changes',
     paragraphs: [
       `We may update this Privacy Policy. Material changes will be indicated by an updated “Last updated” date (${PRIVACY_LAST_UPDATED} for this version). Where a new EULA version is published, the app may ask you to accept it again before use.`,
     ],
   },
   {
-    heading: '12. Contact',
+    heading: '13. Contact',
     paragraphs: [
       `Questions about this Privacy Policy: ${EULA_CONTACT}.`,
     ],

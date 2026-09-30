@@ -27,7 +27,7 @@ export function FirstRunDialog({ onClose }: { onClose: () => void }) {
       <div className="w-[420px] rounded-xl bg-popover border border-border shadow-2xl p-5" role="dialog" aria-labelledby="first-run-title">
         <h2 id="first-run-title" className="text-base font-semibold">Welcome to Vista Image Studio</h2>
         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-          A privacy-first editor for social posts. Everything runs on this computer — no cloud, no account.
+          A fast editor for social posts. Open a photo, polish it, crop, and export — no account required.
         </p>
         <ol className="mt-4 space-y-2 text-xs list-decimal list-inside text-foreground">
           <li>Open a photo or drop it into the window.</li>
