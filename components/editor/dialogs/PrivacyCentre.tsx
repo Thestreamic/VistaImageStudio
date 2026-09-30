@@ -50,8 +50,17 @@ export function PrivacyCentre({ onClose }: { onClose: () => void }) {
           Status for this install. No account is required. The web app needs network access to load.
           Editing runs in this browser or desktop app; we do not operate a photo-storage service for your library.
         </p>
+        <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+          The public web app counts anonymous visits with Umami (no cookies). Analytics never receives your photos,
+          edits or file names. The desktop app has no analytics.
+        </p>
         <dl className="mt-4 space-y-2 text-xs">
-          <Row label="Analytics" value={info?.analytics === 'off' ? 'Off' : 'Off'} />
+          <Row
+            label="Analytics"
+            value={
+              !info ? '…' : info.analytics === 'umami' ? 'On — Umami, anonymous visit counts (web only)' : 'Off'
+            }
+          />
           <Row label="Network (app)" value={info?.connectSrc ?? "'self' blob: data:"} />
           <Row label="Host" value={info ? `${info.host} / ${info.platform}` : '…'} />
           <Row label="User data" value={info?.userDataPath ?? '…'} />

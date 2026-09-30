@@ -39,11 +39,11 @@
   <nav><span class="dot"></span><a href="index.html">Vista Image Studio</a></nav>
   <header>
     <h1>Privacy Policy</h1>
-    <p>Last updated: September 27, 2026 · The Streamic</p>
+    <p>Last updated: September 30, 2026 · The Streamic</p>
   </header>
 
   <div class="short">
-    <strong>Short version:</strong> Vista Image Studio does not require an account. Editing and AI tools run in your browser or desktop app. The web app needs a network connection to load the Software and its assets. We do not operate a photo-storage or photo-viewing service for your library, and the editor does not include a telemetry SDK by default.
+    <strong>Short version:</strong> Vista Image Studio does not require an account. Editing and AI tools run in your browser or desktop app. The web app needs a network connection to load the Software and its assets. We do not operate a photo-storage or photo-viewing service for your library. The public web app uses Umami, a cookie-free analytics service, to count visits; it never receives your photos. The desktop app has no analytics.
   </div>
 
   <h2>1. Who we are</h2>
@@ -51,7 +51,7 @@
   <p>Contact: thestreamic@gmail.com.</p>
 
   <h2>2. Short version</h2>
-  <p>Vista Image Studio does not require an account. Editing and AI tools run in your browser or desktop app. The web app needs a network connection to load the Software and its assets. We do not operate a photo-storage or photo-viewing service for your library, and the editor does not include a telemetry SDK by default.</p>
+  <p>Vista Image Studio does not require an account. Editing and AI tools run in your browser or desktop app. The web app needs a network connection to load the Software and its assets. We do not operate a photo-storage or photo-viewing service for your library. The public web app uses Umami, a cookie-free analytics service, to count visits; it never receives your photos. The desktop app has no analytics.</p>
   <p>Image editing, export, and AI-assisted features (background removal, inpainting, depth/bokeh, and similar tools) are designed to run in the Software on your device — in the app process or a Web Worker in your browser or desktop runtime. We do not operate a service whose purpose is to receive, store, or view your photo library for editing.</p>
 
   <h2>3. Network access (important)</h2>
@@ -63,7 +63,7 @@
   <p>As designed for core editing, the Software does not require you to create an account with us, and it does not include a photo-upload API whose purpose is to send your images to us for cloud editing, cloud storage, or cloud AI inference.</p>
   <ul>
     <li>No account creation is required to open and edit images in the Software</li>
-    <li>No advertising identifier or analytics profile is created by a telemetry SDK in the editor by default</li>
+    <li>No advertising identifier, cookie, or personal analytics profile is created. The public web app counts anonymous visits with Umami (see section 7); the desktop app has no analytics</li>
     <li>We do not market the Software as a cloud photo library or cloud photo-hosting product</li>
   </ul>
 
@@ -75,11 +75,13 @@
   <p>Uninstalling the desktop app or clearing this site’s data in your browser removes that locally stored information. We do not provide a server-side user library from which those Local Copies can be recovered after you delete them.</p>
 
   <h2>6. Privacy Centre</h2>
-  <p>The in-app Privacy Centre is a local status panel. It lists the current host (desktop or web), the Content Security Policy connect-src value reported by the build, analytics = off, and — on desktop — the user-data and autosave paths on that computer. It is not a cloud dashboard and does not imply that the web app works without network access.</p>
+  <p>The in-app Privacy Centre is a local status panel. It lists the current host (desktop or web), the Content Security Policy connect-src value reported by the build, whether analytics is on (Umami, on the public web app only), and — on desktop — the user-data and autosave paths on that computer. It is not a cloud dashboard and does not imply that the web app works without network access.</p>
 
-  <h2>7. Telemetry, AI models, and processing</h2>
-  <p>Production Content Security Policy for the Software uses connect-src 'self' blob: data:. The editor is not designed to call a third-party cloud LLM or a photo-upload API for core editing.</p>
-  <p>Analytics and crash reporting are off by default. There is no telemetry SDK bundled in the editor by default.</p>
+  <h2>7. Analytics, AI models, and processing</h2>
+  <p>Web analytics. The public web app at vistaimagestudio.thestreamic.in loads Umami Cloud (umami.is), a privacy-focused analytics service, so we can count how many people visit and use the Software. Umami does not use cookies and does not ask for your name or email. For each visit it records the page address, the referring site, browser, operating system, device type, screen size, language, and approximate country. Umami works out the country from your IP address and states that it does not store IP addresses. We also count clicks on a few kinds of links (downloads, legal pages, the guide, and GitHub) by event name only.</p>
+  <p>We use these counts only to understand how many people use the Software. We do not use them for advertising or to identify you, and analytics never receives your photos, edits, or file names. Analytics does not run in the desktop app, on localhost, or on any other address, and browser content blockers usually block it. Where the GDPR applies, we rely on our legitimate interest in measuring use of the Software in a privacy-friendly way; you can object by emailing us or by using a content blocker.</p>
+  <p>The desktop app sets a Content Security Policy of connect-src 'self' blob: data:, so the editor there cannot send data to third-party servers. The editor is not designed to call a third-party cloud LLM or a photo-upload API for core editing.</p>
+  <p>Crash reporting is off. No crash-reporting SDK is bundled with the Software.</p>
   <p>Model files (for example MODNet, LaMa, and MiDaS, where bundled or served with the Software) are loaded as application assets. On the web they are typically fetched over the network like other static assets; on desktop they may already be on disk. They are used to process images in the Software runtime. See the Third-party notices file shipped with the Software for licenses.</p>
 
   <h2>8. Optional contact</h2>
@@ -96,7 +98,7 @@
   <p>If you have contacted us by email, you may ask us to delete that correspondence. If you are in the EEA/UK, you may also have rights of access, rectification, erasure, restriction, and objection, and a right to lodge a complaint with a supervisory authority (in Ireland, the Data Protection Commission).</p>
 
   <h2>12. Changes</h2>
-  <p>We may update this Privacy Policy. Material changes will be indicated by an updated “Last updated” date (September 27, 2026 for this version). Where a new EULA version is published, the app may ask you to accept it again before use.</p>
+  <p>We may update this Privacy Policy. Material changes will be indicated by an updated “Last updated” date (September 30, 2026 for this version). Where a new EULA version is published, the app may ask you to accept it again before use.</p>
 
   <h2>13. Contact</h2>
   <p>Questions about this Privacy Policy: <a class="link" href="mailto:thestreamic@gmail.com">thestreamic@gmail.com</a>.</p>
