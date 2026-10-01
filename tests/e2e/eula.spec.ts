@@ -55,8 +55,9 @@ test('Help → About shows EULA, Privacy, and third-party notices', async ({ pag
 test('static /eula and /privacy pages render canonical text', async ({ page }) => {
   await page.goto('/eula')
   await expect(page.getByRole('heading', { name: /End-User License Agreement/i })).toBeVisible()
-  await expect(page.getByText(/laws of Ireland/)).toBeVisible()
+  // The canonical text wraps between 'laws of' and 'Ireland'.
+  await expect(page.getByText(/laws\s+of\s+Ireland/)).toBeVisible()
   await page.goto('/privacy')
   await expect(page.getByRole('heading', { name: 'Privacy Policy' })).toBeVisible()
-  await expect(page.getByText(/network connection to load/i)).toBeVisible()
+  await expect(page.getByText(/network connection to load/i).first()).toBeVisible()
 })

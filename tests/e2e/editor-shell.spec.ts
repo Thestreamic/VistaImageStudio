@@ -35,7 +35,7 @@ test.describe('Vista Image Studio shell', () => {
   test('loads the empty-state editor', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByText('Drag & drop a photo')).toBeVisible()
-    await expect(page.locator('input[type=file]')).toHaveAttribute('accept', /heic/i)
+    await expect(page.getByTestId('file-open-input')).toHaveAttribute('accept', /heic/i)
   })
 
   test('toolbar tools are selectable', async ({ page }) => {
@@ -63,22 +63,34 @@ test.describe('Vista Image Studio shell', () => {
 
   test('opening an image via file input renders it on the canvas', async ({ page }) => {
     await page.goto('/')
+    // A small test image imports in a few ms, so record the progress UI as it
+    // appears instead of racing to see it on screen.
+    await page.evaluate(() => {
+      const seen = { progress: false, cancel: false, percent: false }
+      ;(window as unknown as { __importSeen: typeof seen }).__importSeen = seen
+      new MutationObserver(() => {
+        const progress = document.querySelector('[data-testid="import-progress"]')
+        if (progress) {
+          seen.progress = true
+          if (/%/.test(progress.textContent ?? '')) seen.percent = true
+        }
+        if (document.querySelector('[data-testid="import-cancel"]')) seen.cancel = true
+      }).observe(document.body, { subtree: true, childList: true, characterData: true })
+    })
     const fileChooserPromise = page.waitForEvent('filechooser')
     await page.getByRole('button', { name: 'Open', exact: true }).click()
     const chooser = await fileChooserPromise
     await chooser.setFiles({
       name: 'test.png',
       mimeType: 'image/png',
-      // 1x1 red PNG
-      buffer: Buffer.from(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-        'base64',
-      ),
+      buffer: await solidPng(page),
     })
-    await expect(page.getByTestId('import-progress')).toBeVisible()
-    await expect(page.getByTestId('import-cancel')).toBeVisible()
-    await expect(page.getByTestId('import-progress')).toContainText('%')
     await expect(page.locator('canvas').first()).toBeVisible()
+    expect(await page.evaluate(() => (window as unknown as { __importSeen: unknown }).__importSeen)).toEqual({
+      progress: true,
+      cancel: true,
+      percent: true,
+    })
     await expect(page.getByTestId('import-progress')).toHaveCount(0)
     await expect(page.getByTestId('zoom-controls')).toBeVisible()
     await expect(page.getByTestId('stage-close')).toBeVisible()
@@ -104,12 +116,14 @@ test.describe('Vista Image Studio shell', () => {
     await page.goto('/')
     await expect(page.getByText('Drag & drop a photo')).toBeVisible()
     await expect(page.getByTestId('editor-shell')).toHaveAttribute('data-ready', 'true')
-    const dataTransfer = await page.evaluateHandle(() => {
-      const binary = atob(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-      )
-      const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
-      const file = new File([bytes], 'dropped.png', { type: 'image/png' })
+    // 16x16: the importer rejects images under 2px as failed decodes.
+    const dataTransfer = await page.evaluateHandle(async () => {
+      const c = document.createElement('canvas')
+      c.width = 16
+      c.height = 16
+      c.getContext('2d')!.fillRect(0, 0, 16, 16)
+      const blob = await new Promise<Blob>((r) => c.toBlob((b) => r(b!), 'image/png'))
+      const file = new File([blob], 'dropped.png', { type: 'image/png' })
       const transfer = new DataTransfer()
       transfer.items.add(file)
       return transfer
@@ -124,12 +138,14 @@ test.describe('Vista Image Studio shell', () => {
   test('dropping onto the empty-state dropzone also imports the photo', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByTestId('empty-dropzone')).toBeVisible()
-    const dataTransfer = await page.evaluateHandle(() => {
-      const binary = atob(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-      )
-      const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
-      const file = new File([bytes], 'zone.png', { type: 'image/png' })
+    // 16x16: the importer rejects images under 2px as failed decodes.
+    const dataTransfer = await page.evaluateHandle(async () => {
+      const c = document.createElement('canvas')
+      c.width = 16
+      c.height = 16
+      c.getContext('2d')!.fillRect(0, 0, 16, 16)
+      const blob = await new Promise<Blob>((r) => c.toBlob((b) => r(b!), 'image/png'))
+      const file = new File([blob], 'zone.png', { type: 'image/png' })
       const transfer = new DataTransfer()
       transfer.items.add(file)
       return transfer
@@ -424,7 +440,7 @@ test.describe('Vista Image Studio shell', () => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Privacy Centre' }).click()
     await expect(page.getByRole('heading', { name: 'Privacy Centre' })).toBeVisible()
-    await expect(page.getByText(/no telemetry/i)).toBeVisible()
+    await expect(page.getByText(/No account is required/i)).toBeVisible()
     await expect(page.getByText(/Analytics/)).toBeVisible()
   })
 
@@ -456,6 +472,9 @@ test.describe('Vista Image Studio shell', () => {
     await expect(page.getByTestId('mobile-sheet')).toBeVisible()
     await expect(page.getByTestId('mobile-sheet')).toHaveAttribute('data-snap', 'compact')
     await expect(page.getByText('No layer selected.')).toBeVisible()
+    // The open sheet's backdrop covers the top bar; dismiss it like a user would.
+    await page.getByRole('button', { name: 'Dismiss panel' }).click({ position: { x: 20, y: 120 } })
+    await expect(page.getByTestId('mobile-sheet')).toHaveCount(0)
     await page.getByTestId('mobile-overflow-toggle').click()
     await expect(page.getByTestId('mobile-overflow-menu')).toBeVisible()
     await expect(page.getByTestId('mobile-menu-open')).toBeVisible()
