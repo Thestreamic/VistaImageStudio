@@ -32,6 +32,7 @@ export function AiPanel() {
   const [faceClarity, setFaceClarity] = useState(10)
   const busy = !!aiJob
   const off = !hasLayer || busy
+  const optimizeRunning = aiJob?.label === 'Optimize Image'
 
   // One button style for every AI action; the running one shows a spinner.
   const tool = (
@@ -52,29 +53,74 @@ export function AiPanel() {
         className="ui-btn"
         title={opts?.title}
       >
-        <Icon size={14} className={running ? 'animate-spin' : undefined} /> {opts?.text ?? label}
+        <Icon size={14} className={running ? 'animate-spin text-primary' : undefined} /> {opts?.text ?? label}
+      </button>
+    )
+  }
+
+  // Subject tools: a full-width row with a short "what it does" hint.
+  const subjectTool = (
+    label: string,
+    icon: LucideIcon,
+    onClick: () => void,
+    opts: { hint: string; testId: string; title: string },
+  ) => {
+    const running = aiJob?.label === label
+    const Icon = running ? Loader2 : icon
+    return (
+      <button
+        type="button"
+        disabled={off}
+        data-testid={opts.testId}
+        data-busy={running || undefined}
+        onClick={onClick}
+        className="ui-btn justify-between bg-card"
+        title={opts.title}
+      >
+        <span className="flex items-center gap-2 font-semibold text-foreground whitespace-nowrap">
+          <Icon size={14} className={running ? 'animate-spin text-primary' : 'text-primary'} />
+          {label}
+        </span>
+        <span className="text-[11.5px] text-muted-foreground whitespace-nowrap">{opts.hint}</span>
       </button>
     )
   }
 
   return (
-    <div className="p-3 space-y-5">
-      <p className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
-        <ShieldCheck size={13} className="text-success shrink-0" />
-        One-click AI · runs on this device
-      </p>
+    <div className="p-3 space-y-4">
+      {/* On-device status: where the AI runs, in one glance. */}
+      <div className="rounded-lg border border-border/80 bg-card p-2.5 space-y-1">
+        <div className="flex items-center gap-1.5 text-[12.5px] font-semibold text-foreground">
+          <ShieldCheck size={14} className="text-success shrink-0" />
+          <span>On-device AI</span>
+          <span className="ml-auto text-[11px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium">Local</span>
+        </div>
+        <p className="text-[11.5px] text-muted-foreground leading-snug">
+          One-click tools · your photos stay on this device
+        </p>
+      </div>
 
       <Group title="Enhance">
-        <div className="one-click-tools grid gap-1.5">
+        <div className="one-click-tools grid gap-2">
+          {/* HERO AI: Optimize Image (token-driven hero button) */}
           <button
             type="button"
             disabled={off}
             data-testid="auto-optimize-ai"
             onClick={runOptimizeImage}
-            className="w-full flex items-center gap-2 px-3 py-2.5 text-[13px] rounded-md brand-gradient-bg text-white font-semibold shadow-sm transition-[filter,transform] hover:brightness-110 active:translate-y-px disabled:opacity-40 disabled:pointer-events-none min-h-10 max-md:min-h-11"
+            className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 text-[13.5px] rounded-lg font-semibold shadow-sm transition-all duration-150 min-h-10 max-md:min-h-11 ${
+              optimizeRunning
+                ? 'bg-secondary border border-primary/60 text-primary animate-pulse'
+                : 'btn-hero-ai hover:brightness-105 active:translate-y-px disabled:opacity-50 disabled:pointer-events-none'
+            }`}
             title="Improve light, colour and detail in one click"
           >
-            <WandSparkles size={14} /> Optimize Image
+            {optimizeRunning ? (
+              <Loader2 size={15} className="animate-spin text-primary" />
+            ) : (
+              <WandSparkles size={15} style={{ color: 'var(--hero-foreground)' }} />
+            )}
+            <span>Optimize Image</span>
           </button>
           {tool('Natural Color', Leaf, runNaturalColor, { title: 'True-to-life colour, like a modern phone camera' })}
           {tool('Auto Color Correct', Sparkles, () => void runAutoColor(), {
@@ -85,24 +131,44 @@ export function AiPanel() {
       </Group>
 
       <Group title="Subject">
+        {/* Core subject tools: name on the left, what it does on the right. */}
         <div className="one-click-tools grid gap-1.5">
-          {tool('Remove Background', Scissors, () => void runRemoveBackground(), {
+          {subjectTool('Remove Background', Scissors, () => void runRemoveBackground(), {
+            hint: 'Subject only',
             testId: 'remove-background',
             title: 'Keep your subject, remove the background',
           })}
-          {tool('Magic Eraser', Eraser, () => void runMagicEraser(), {
+          {subjectTool('Magic Eraser', Eraser, () => void runMagicEraser(), {
+            hint: 'Erase objects',
             testId: 'magic-eraser',
-            title: 'Remove unwanted objects. Click the object (or drag a box), then click Magic Eraser again.',
+            title: 'Remove unwanted objects',
           })}
         </div>
-        <div className="mt-1.5 rounded-md border border-border bg-secondary/35 p-2 space-y-2.5">
-          {tool('Portrait Bokeh', Focus, () => void runPortraitBokeh(), {
-            testId: 'portrait-bokeh',
-            title: 'Blur the background behind your subject. Select the subject first if it is not a person.',
-          })}
+
+        {/* CORE AI: Portrait Bokeh */}
+        <div className="mt-2 rounded-lg border border-border/80 bg-card p-2.5 space-y-2.5">
+          <button
+            type="button"
+            disabled={off}
+            data-testid="portrait-bokeh"
+            data-busy={aiJob?.label === 'Portrait Bokeh' || undefined}
+            onClick={() => void runPortraitBokeh()}
+            className="ui-btn flex items-center justify-between py-2 px-2.5 rounded-md border border-border bg-secondary hover:bg-accent/60 text-foreground font-medium text-[12.5px]"
+            title="Blur the background, keep your subject sharp. Select the subject first if it is not a person."
+          >
+            <span className="flex items-center gap-2">
+              {aiJob?.label === 'Portrait Bokeh' ? (
+                <Loader2 size={14} className="animate-spin text-primary" />
+              ) : (
+                <Focus size={14} className="text-primary" />
+              )}
+              <span className="whitespace-nowrap">Portrait Bokeh</span>
+            </span>
+            <span className="text-[11.5px] text-muted-foreground">Blur background</span>
+          </button>
           <div className="px-0.5">
             <Slider
-              label="Background"
+              label="Background blur"
               value={discFocus}
               min={0}
               max={100}
@@ -119,7 +185,7 @@ export function AiPanel() {
 
       <Group title="Fix">
         <div className="one-click-tools grid grid-cols-2 gap-1.5">
-          {tool('Low Light', Moon, () => void runLowLight(), { title: 'Brighten a dark photo' })}
+          {tool('Low Light', Moon, () => void runLowLight(), { title: 'Brighten dark photos' })}
           {tool('Dehaze', CloudFog, () => void runDehaze(), { title: 'Cut haze and fog' })}
           {tool('Clarity', Aperture, () => void runClarity(), { title: 'Boost local contrast and texture' })}
           {tool('Vibrance', Palette, () => void runVibrance(), {

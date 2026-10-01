@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { FolderUp, Images, Search, X, PanelLeftClose, ImagePlus } from 'lucide-react'
+import { FolderUp, Images, Search, X, PanelLeftClose, ImagePlus, Camera } from 'lucide-react'
 import { useEditorStore, type RecentImport } from '@/features/editor/store/editor-store'
 import { isCollageDocument } from '@/features/editor/collage/look-targets'
 import { setMediaDragData } from '@/features/editor/media-drag'
@@ -197,18 +197,22 @@ export function ImportedImagesBin({
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-thin px-2.5 pb-2.5 pt-1 [scrollbar-gutter:stable]">
         {items.length === 0 && (
-          <div data-testid="media-bin-empty" className="mt-1 flex flex-col items-center gap-2.5 rounded-lg border border-dashed border-border px-3 py-6 text-center">
-            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground">
-              <ImagePlus size={18} strokeWidth={1.75} />
+          <div data-testid="media-bin-empty" className="mt-2 flex flex-col items-center gap-2.5 rounded-xl border border-dashed border-border/80 bg-secondary/20 px-3.5 py-7 text-center">
+            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground ring-1 ring-border/60">
+              <Camera size={19} strokeWidth={1.75} />
             </div>
-            <p className="text-[12.5px] font-medium text-foreground/90">No photos yet</p>
-            <p className="text-[11.5px] text-muted-foreground leading-snug">Import photos or a folder, or drop files anywhere.</p>
+            <div className="space-y-0.5">
+              <p className="text-[13px] font-semibold text-foreground">Add your first photo</p>
+              <p className="text-[11.5px] text-muted-foreground leading-snug">
+                Drop photos here or import from your computer
+              </p>
+            </div>
             <button
               type="button"
               onClick={() => filesRef.current?.click()}
-              className="mt-0.5 h-8 px-3 rounded-md border border-border bg-secondary text-[12px] font-medium hover:bg-accent transition-colors"
+              className="mt-1 h-8 px-3.5 rounded-md border border-border bg-secondary text-[12px] font-medium text-foreground hover:bg-accent transition-colors shadow-xs"
             >
-              Import photos
+              Import Photos
             </button>
           </div>
         )}
@@ -254,11 +258,11 @@ export function ImportedImagesBin({
                   setMenu({ x: e.clientX, y: e.clientY, id: item.id })
                 }}
                 className={cn(
-                  'relative aspect-square rounded-md overflow-hidden bg-secondary/80 group text-left cursor-grab active:cursor-grabbing transition-[box-shadow,opacity,transform]',
+                  'relative aspect-square rounded-md overflow-hidden bg-secondary/80 group text-left cursor-grab active:cursor-grabbing transition-all duration-150',
                   selected
-                    ? 'ring-2 ring-primary ring-offset-2 ring-offset-sidebar'
-                    : 'ring-1 ring-border hover:ring-foreground/30',
-                  draggingId === item.id && 'opacity-45 scale-[0.97]',
+                    ? 'ring-2 ring-primary ring-offset-2 ring-offset-sidebar shadow-md'
+                    : 'ring-1 ring-border/80 hover:ring-foreground/35 hover:scale-[1.02]',
+                  draggingId === item.id && 'opacity-40 scale-[0.96] ring-2 ring-primary',
                 )}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -268,7 +272,7 @@ export function ImportedImagesBin({
                   className="h-full w-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
                   draggable={false}
                 />
-                <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/80 to-black/35 px-1.5 pt-2 pb-1 text-[10.5px] leading-tight text-white/95">
+                <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 to-black/35 px-1.5 pt-2 pb-1 text-[11px] leading-tight text-white/95">
                   {item.name}
                 </span>
               </button>

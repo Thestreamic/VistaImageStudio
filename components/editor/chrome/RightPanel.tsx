@@ -25,10 +25,10 @@ export function RightPanel() {
               aria-label={label}
               onClick={() => setTab(id)}
               className={cn(
-                'relative flex-auto min-w-0 flex flex-col items-center gap-1 px-1 pt-2 pb-2 rounded-t-md text-[10.5px] font-medium tracking-[-0.01em] transition-colors',
+                'relative flex-auto min-w-0 flex flex-col items-center gap-1 px-1 pt-2 pb-2 rounded-t-md text-[11.5px] font-medium tracking-[-0.01em] transition-all',
                 on
-                  ? 'text-foreground bg-secondary/60'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/35',
+                  ? 'text-primary bg-primary/[0.08] font-semibold'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40',
               )}
             >
               <Icon size={15} strokeWidth={on ? 2.1 : 1.75} className={on ? 'text-primary' : undefined} />
@@ -36,8 +36,8 @@ export function RightPanel() {
               <span
                 aria-hidden
                 className={cn(
-                  'absolute inset-x-2 -bottom-px h-0.5 rounded-full transition-colors',
-                  on ? 'bg-primary' : 'bg-transparent',
+                  'absolute inset-x-2 -bottom-px h-[2px] rounded-full transition-all',
+                  on ? 'bg-primary opacity-100' : 'bg-transparent opacity-0',
                 )}
               />
             </button>
@@ -47,7 +47,7 @@ export function RightPanel() {
       {!hasDoc && (
         <div
           data-testid="inspector-no-photo"
-          className="shrink-0 mx-3 mt-3 flex items-start gap-2 rounded-md border border-border bg-secondary/40 px-2.5 py-2 text-[12px] leading-snug text-muted-foreground"
+          className="shrink-0 mx-3 mt-3 flex items-start gap-2 rounded-lg border border-border bg-card px-2.5 py-2 text-[12px] leading-snug text-muted-foreground"
         >
           <ImageIcon size={14} className="mt-px shrink-0" />
           <span>Open a photo to use these tools.</span>

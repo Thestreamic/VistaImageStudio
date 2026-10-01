@@ -51,7 +51,7 @@ export function PrivacyCentre({ onClose }: { onClose: () => void }) {
           Editing runs in this browser or desktop app; we do not operate a photo-storage service for your library.
         </p>
         <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-          The public web app counts anonymous visits with Umami (no cookies). Analytics never receives your photos,
+          The public web app counts anonymous visits with Umami (no cookies); it never receives your photos,
           edits or file names. The desktop app has no analytics.
         </p>
         <dl className="mt-4 space-y-2 text-xs">

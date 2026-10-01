@@ -27,7 +27,7 @@ import {
   type GatedResult,
 } from '../algorithms/gated'
 
-export type AiRequest =
+export type AiRequest = (
   | { id: string; op: 'auto-color'; data: ArrayBuffer; width: number; height: number }
   | { id: string; op: 'denoise'; data: ArrayBuffer; width: number; height: number; strength: number }
   | { id: string; op: 'face-enhance'; data: ArrayBuffer; width: number; height: number; smoothing: number; clarity: number }
@@ -50,6 +50,7 @@ export type AiRequest =
       maxBlurRadius?: number
       mask?: ArrayBuffer
     }
+) & { publicBasePath?: string }
 
 export type AiResponse =
   | { id: string; ok: true; result: ArrayBuffer; width: number; height: number; meta?: Record<string, unknown> }

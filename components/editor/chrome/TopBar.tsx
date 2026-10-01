@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
 const COMPARE_HOLD_MS = 280
 
 const GHOST =
-  'flex items-center gap-1.5 h-8 px-2.5 text-[13px] font-medium rounded-md transition-colors disabled:opacity-30 disabled:pointer-events-none'
+  'flex items-center gap-1.5 h-8 px-2.5 text-[13px] font-medium rounded-md transition-colors disabled:opacity-45 disabled:pointer-events-none'
 const GHOST_IDLE = 'text-foreground/80 hover:text-foreground hover:bg-secondary'
 
 function Divider() {
@@ -166,7 +166,7 @@ export function TopBar({
           aria-expanded={showRecents}
           className={cn(GHOST, showRecents ? 'bg-secondary text-foreground' : GHOST_IDLE)}
         >
-          <History size={14} /> Recent
+          <History size={14} /> Recent Projects
         </button>
         {showRecents && (
           <div className="absolute left-0 top-full mt-1 z-20 w-64 rounded-md border border-border bg-popover elev-pop p-1">
@@ -257,7 +257,7 @@ export function TopBar({
         disabled={!doc}
         data-testid="topbar-export"
         title="Export for social — sizes, creator pack, formats (Ctrl+E)"
-        className="ml-1.5 flex items-center gap-1.5 h-8 px-3.5 text-[13px] font-semibold rounded-md bg-primary text-primary-foreground shadow-sm transition-[filter,transform] hover:brightness-105 active:translate-y-px disabled:opacity-35 disabled:pointer-events-none"
+        className="ml-1.5 flex items-center gap-1.5 h-8 px-3.5 text-[13px] font-semibold rounded-md bg-foreground text-background shadow-sm transition-[background-color,transform] hover:bg-foreground/88 active:translate-y-px disabled:opacity-45 disabled:pointer-events-none"
       >
         <Download size={14} strokeWidth={2.25} /> Export
       </button>
