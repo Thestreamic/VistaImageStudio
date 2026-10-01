@@ -54,15 +54,15 @@ export function Toolbar({
             hit,
             'flex items-center justify-center rounded-md transition-colors',
             tool === id
-              ? 'bg-primary/15 text-primary ring-1 ring-inset ring-primary/40'
-              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+              ? 'bg-primary/10 text-primary ring-1 ring-inset ring-primary/30'
+              : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
           )}
         >
           <Icon size={16} strokeWidth={tool === id ? 2.1 : 1.75} />
         </button>
       ))}
 
-      <div className="h-px w-6 bg-border my-2" />
+      <div className="h-px w-5 bg-border/80 my-1.5" />
 
       {!overlay && (
         <>
@@ -72,7 +72,7 @@ export function Toolbar({
             aria-label="Zoom in"
             disabled={!doc}
             onClick={() => zoomBy(1.2)}
-            className={`${hit} flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:opacity-30 disabled:pointer-events-none`}
+            className={`${hit} flex items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-45 disabled:pointer-events-none`}
           >
             <ZoomIn size={16} strokeWidth={1.75} />
           </button>
@@ -82,7 +82,7 @@ export function Toolbar({
             aria-label="Zoom out"
             disabled={!doc}
             onClick={() => zoomBy(1 / 1.2)}
-            className={`${hit} flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:opacity-30 disabled:pointer-events-none`}
+            className={`${hit} flex items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-45 disabled:pointer-events-none`}
           >
             <ZoomOut size={16} strokeWidth={1.75} />
           </button>
@@ -95,11 +95,11 @@ export function Toolbar({
               const stage = document.querySelector('[data-testid="editor-stage"]') as HTMLElement | null
               if (stage) fitToScreen(stage.clientWidth, stage.clientHeight)
             }}
-            className={`${hit} flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:opacity-30 disabled:pointer-events-none`}
+            className={`${hit} flex items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-45 disabled:pointer-events-none`}
           >
             <Maximize2 size={16} strokeWidth={1.75} />
           </button>
-          <div className="h-px w-6 bg-border my-2" />
+          <div className="h-px w-5 bg-border/80 my-1.5" />
         </>
       )}
 
@@ -109,7 +109,7 @@ export function Toolbar({
         aria-label="Undo"
         disabled={!canUndo}
         onClick={undo}
-        className={`${hit} flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:opacity-30 disabled:pointer-events-none`}
+        className={`${hit} flex items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-45 disabled:pointer-events-none`}
       >
         <Undo2 size={16} strokeWidth={1.75} />
       </button>
@@ -119,7 +119,7 @@ export function Toolbar({
         aria-label="Redo"
         disabled={!canRedo}
         onClick={redo}
-        className={`${hit} flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:opacity-30 disabled:pointer-events-none`}
+        className={`${hit} flex items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-45 disabled:pointer-events-none`}
       >
         <Redo2 size={16} strokeWidth={1.75} />
       </button>

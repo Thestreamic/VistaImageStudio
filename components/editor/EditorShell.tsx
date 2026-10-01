@@ -31,7 +31,6 @@ import { BatchDialog } from './dialogs/BatchDialog'
 import { bumpLocalStreak } from './dialogs/PrivacyCentre'
 import { useEditorStore, selectPhotoLayer, RECENT_IMPORTS_CAP, type RecentImport } from '@/features/editor/store/editor-store'
 import { getBridge, isElectron } from '@/lib/platform/bridge'
-import { hasAcceptedCurrentEula } from '@/lib/legal/acceptance'
 import { declineEulaAndExit, hydrateEulaAcceptance } from '@/lib/legal/persist-eula'
 import { canvasFromBlob, canvasFromRecentImport, canvasToBlob, canvasToOpenFromImport, filesFromDataTransfer, isImageFile, looksLikeHeic, IMAGE_FILE_ACCEPT, thumbnailDataUrl, workingCanvasFromSource } from '@/lib/image/canvas'
 import { putMediaItem } from '@/lib/platform/media-library'
@@ -56,13 +55,6 @@ function transferLooksLikeFiles(transfer: DataTransfer | null | undefined): bool
 type EulaGate = 'loading' | 'needed' | 'accepted'
 
 const MEDIA_BIN_KEY = 'vista-media-bin'
-
-function initialEulaGate(): EulaGate {
-  if (typeof window === 'undefined') return 'loading'
-  if (hasAcceptedCurrentEula()) return 'accepted'
-  if (window.lumen) return 'loading'
-  return 'needed'
-}
 
 export function EditorShell() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -101,7 +93,9 @@ export function EditorShell() {
   const [showFirstRun, setShowFirstRun] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
   const [legalDoc, setLegalDoc] = useState<LegalDocId | null>(null)
-  const [eulaGate, setEulaGate] = useState<EulaGate>(initialEulaGate)
+  // Start as 'loading' on server and client alike (no hydration mismatch);
+  // the mount effect below resolves it to 'accepted' or 'needed'.
+  const [eulaGate, setEulaGate] = useState<EulaGate>('loading')
   const eulaAcceptedRef = useRef(eulaGate === 'accepted')
   eulaAcceptedRef.current = eulaGate === 'accepted'
   const [importJob, setImportJob] = useState<ImportProgress | null>(null)

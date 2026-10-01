@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useCallback, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
-import { ZoomIn, ZoomOut, Maximize2, X, FolderOpen, LayoutTemplate, ImageUp } from 'lucide-react'
+import { ZoomIn, ZoomOut, Maximize2, X, FolderOpen, LayoutTemplate, ImageUp, Sparkles, ArrowRight, LayoutGrid } from 'lucide-react'
 import { useEditorStore, selectPhotoLayer } from '@/features/editor/store/editor-store'
 import { compositor } from '@/features/editor/engine/compositor'
 import { CheckerPattern } from './CheckerPattern'
@@ -892,6 +892,28 @@ function CropOverlay({ crop, docW, docH, zoom, interactive, onCropChange, onAppl
   )
 }
 
+// ─── Quick start: blank social canvases, shown by shape (no platform logos) ──
+const QUICK_STARTS = [
+  { id: 'post', label: 'Instagram Post', ratio: '1:1', width: 1080, height: 1080, glyph: [18, 18] },
+  { id: 'thumbnail', label: 'YouTube Thumbnail', ratio: '16:9', width: 1280, height: 720, glyph: [22, 13] },
+  { id: 'story', label: 'Story / Reel', ratio: '9:16', width: 1080, height: 1920, glyph: [12, 21] },
+] as const
+
+const QUICK_START_TILE =
+  'relative flex flex-col items-center justify-start gap-1.5 px-2 pt-3.5 pb-3 rounded-lg border border-border bg-card text-center transition-[transform,box-shadow,border-color] duration-150 ease-out group shadow-2xs hover:shadow-sm hover:-translate-y-0.5 hover:border-primary/45 active:translate-y-0 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none'
+
+/** The canvas shape at a glance: a small outlined frame at the preset's aspect ratio. */
+function RatioGlyph({ w, h }: { w: number; h: number }) {
+  return (
+    <span className="h-[22px] flex items-center justify-center" aria-hidden>
+      <span
+        className="block rounded-[3px] border-2 border-primary bg-primary/10 transition-transform group-hover:scale-110"
+        style={{ width: w, height: h }}
+      />
+    </span>
+  )
+}
+
 // ─── Empty state: "Start editing" — open, template, or drop ─────────────────
 function EmptyState({
   containerRef,
@@ -907,23 +929,27 @@ function EmptyState({
   onMediaDrop: (transfer: DataTransfer) => Promise<boolean>
 }) {
   const [dragOver, setDragOver] = useState(false)
+  const newDocument = useEditorStore((s) => s.newDocument)
+  const createCollage = useEditorStore((s) => s.createCollage)
+  const notify = useEditorStore((s) => s.notify)
+
   return (
     <div
       ref={containerRef}
       className="flex-1 min-w-0 flex items-center justify-center bg-[var(--canvas)] p-10 max-md:py-5 max-md:pr-4 max-md:pl-16 select-none overflow-y-auto"
     >
-      <div className="w-full max-w-md flex flex-col items-center gap-6 max-md:gap-4">
+      <div className="w-full max-w-[570px] flex flex-col items-center gap-5 max-md:gap-4">
         <div className="text-center space-y-1.5">
-          <h2 className="text-[22px] max-md:text-[19px] font-semibold tracking-[-0.022em] text-foreground">Start editing</h2>
-          <p className="text-[13px] text-muted-foreground">Open a photo, or start from a social template.</p>
+          <h2 className="text-[24px] max-md:text-[20px] font-bold tracking-[-0.022em] text-foreground">Start editing</h2>
+          <p className="text-[13.5px] text-muted-foreground">Open a photo, or start from a social template.</p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2.5">
           <button
             type="button"
             data-testid="empty-open"
             onClick={onOpenClick}
-            className="min-h-10 max-md:min-h-11 inline-flex items-center gap-2 px-4 rounded-md bg-primary text-primary-foreground text-[13.5px] font-semibold shadow-sm transition-[filter,transform] hover:brightness-105 active:translate-y-px"
+            className="min-h-10 max-md:min-h-11 inline-flex items-center gap-2 px-4.5 rounded-lg btn-create text-[13.5px] font-semibold shadow-sm transition-[filter,transform] hover:brightness-105 active:translate-y-px focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
           >
             <FolderOpen size={16} strokeWidth={2.1} />
             <span className="hidden md:inline">Open Photo</span>
@@ -935,7 +961,7 @@ function EmptyState({
               data-testid="empty-templates"
               onClick={onTemplatesClick}
               title="Social sizes, quick-start posts and collages"
-              className="min-h-10 max-md:min-h-11 inline-flex items-center gap-2 px-4 rounded-md border border-border bg-secondary text-foreground text-[13.5px] font-medium transition-colors hover:bg-accent"
+              className="min-h-10 max-md:min-h-11 inline-flex items-center gap-2 px-4.5 rounded-lg border border-border bg-card text-foreground text-[13.5px] font-medium transition-colors hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none"
             >
               <LayoutTemplate size={16} strokeWidth={1.9} /> Choose Template
             </button>
@@ -979,7 +1005,7 @@ function EmptyState({
               onDropFile(file)
             })()
           }}
-          className={`brand-dropzone w-full rounded-xl flex flex-col items-center justify-center gap-3 py-10 px-8 max-md:py-7 max-md:px-5 cursor-pointer ${dragOver ? 'scale-[1.01] border-solid' : ''}`}
+          className={`brand-dropzone w-full rounded-xl flex flex-col items-center justify-center gap-3 py-8 px-6 max-md:py-6 max-md:px-4 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none ${dragOver ? 'scale-[1.01] border-solid' : ''}`}
         >
           <div
             className={`w-12 h-12 rounded-full flex items-center justify-center ring-1 transition-colors ${dragOver ? 'bg-primary text-primary-foreground ring-primary' : 'bg-secondary text-foreground ring-border'}`}
@@ -990,17 +1016,72 @@ function EmptyState({
             <p className="text-[15px] font-semibold tracking-[-0.016em] text-foreground">
               {dragOver ? 'Drop it right here' : 'Drag & drop a photo'}
             </p>
-            <p className="hidden md:block text-[12.5px] text-muted-foreground">Drop photo here, or click to browse your files</p>
-            <p className="md:hidden text-[12.5px] text-muted-foreground">or tap to browse your camera roll</p>
+            <p className="hidden md:block text-[13px] text-muted-foreground">Drop photo here, or click to browse your files</p>
+            <p className="md:hidden text-[13px] text-muted-foreground">or tap to browse your camera roll</p>
           </div>
-          <p className="text-[11px] text-muted-foreground/80">JPEG · PNG · HEIC · WebP · AVIF · TIFF</p>
+          <p className="text-[11.5px] text-muted-foreground num">JPEG · PNG · HEIC · WebP · AVIF · TIFF</p>
         </div>
 
-        <div className="hidden md:flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        {/* Quick Start Section */}
+        <div className="w-full space-y-2.5 pt-0.5">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[12.5px] font-semibold text-foreground tracking-tight flex items-center gap-1.5">
+              <Sparkles size={13} className="text-primary" />
+              Quick Start
+            </span>
+            {onTemplatesClick && (
+              <button
+                type="button"
+                onClick={onTemplatesClick}
+                title="All templates, sizes and collages"
+                className="inline-flex items-center gap-1 text-[12.5px] font-medium text-primary hover:text-primary-hover hover:underline underline-offset-2 transition-colors focus-visible:ring-1 focus-visible:ring-primary/60 focus-visible:outline-none rounded-sm px-1 py-0.5 group"
+              >
+                See all <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-4 max-sm:grid-cols-2 gap-2.5">
+            {QUICK_STARTS.map((q) => (
+              <button
+                key={q.id}
+                type="button"
+                data-testid={`quick-start-${q.id}`}
+                onClick={() => {
+                  newDocument(q.width, q.height)
+                  notify('info', `Started ${q.label} (${q.width} × ${q.height})`)
+                }}
+                title={`${q.label} (${q.ratio} · ${q.width} × ${q.height})`}
+                className={QUICK_START_TILE}
+              >
+                <RatioGlyph w={q.glyph[0]} h={q.glyph[1]} />
+                <span className="text-[12.5px] font-semibold text-foreground leading-tight">{q.label}</span>
+                <span className="text-[11px] text-muted-foreground num leading-none">{q.ratio}</span>
+              </button>
+            ))}
+            <button
+              type="button"
+              data-testid="quick-start-collage"
+              onClick={() => {
+                if (onTemplatesClick) onTemplatesClick()
+                else createCollage('split-2h')
+              }}
+              title="Collage layouts and occasion frames"
+              className={QUICK_START_TILE}
+            >
+              <span className="h-[22px] flex items-center justify-center">
+                <LayoutGrid size={20} strokeWidth={1.9} className="text-primary transition-transform group-hover:scale-110" />
+              </span>
+              <span className="text-[12.5px] font-semibold text-foreground leading-tight">Collage</span>
+              <span className="text-[11px] text-muted-foreground leading-none">2–6 photos</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="hidden md:flex items-center gap-1.5 text-[11.5px] text-muted-foreground pt-1">
           <kbd className="px-1.5 py-0.5 rounded-sm bg-secondary border border-border font-mono text-[11px] font-medium">Ctrl</kbd>
           <span>+</span>
           <kbd className="px-1.5 py-0.5 rounded-sm bg-secondary border border-border font-mono text-[11px] font-medium">O</kbd>
-          <span className="ml-1">to open · photos stay on this device</span>
+          <span className="ml-1.5">to open · On-device AI · No account required</span>
         </div>
       </div>
     </div>

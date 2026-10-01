@@ -92,11 +92,11 @@ export function useProjectPersistence() {
       // A fresh EULA start already discarded the previous library and autosave.
       if (store.autosaveChoice === 'discard') return
       if (!json || store.doc) {
-        if (store.autosaveChoice !== 'discard') store.setAutosaveChoice('none')
+        store.setAutosaveChoice('none')
         return
       }
       if (typeof window !== 'undefined' && sessionStorage.getItem('vista-autosave-prompted') === '1') {
-        if (useEditorStore.getState().autosaveChoice !== 'discard') store.setAutosaveChoice('none')
+        store.setAutosaveChoice('none')
         return
       }
       sessionStorage.setItem('vista-autosave-prompted', '1')

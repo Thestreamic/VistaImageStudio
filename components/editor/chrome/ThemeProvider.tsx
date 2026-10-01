@@ -23,7 +23,7 @@ export function ThemeProvider() {
     document.documentElement.style.colorScheme = theme === 'light' ? 'light' : 'dark'
     const meta = document.querySelector('meta[name="theme-color"]')
     if (meta instanceof HTMLMetaElement) {
-      meta.content = theme === 'light' ? '#efe6d8' : '#2a2d33'
+      meta.content = theme === 'light' ? '#F7F8FC' : '#2a2d33'
     }
   }, [theme])
 
