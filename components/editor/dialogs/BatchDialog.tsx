@@ -61,8 +61,8 @@ export function BatchDialog({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div className="w-[400px] rounded-xl bg-popover border border-border shadow-2xl p-4" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-[2px]" onClick={onClose}>
+      <div className="w-[400px] max-w-[calc(100vw-2rem)] rounded-xl bg-popover border border-border elev-pop p-4" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-sm font-semibold">Batch export</h2>
         <p className="text-[10px] text-muted-foreground mt-1">Apply a local recipe to a folder of photos. Failures are skipped so the rest still export.</p>
         <label className="block mt-3 text-[10px] text-muted-foreground">Recipe</label>

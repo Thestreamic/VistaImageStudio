@@ -23,8 +23,8 @@ export function FirstRunDialog({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[65] flex items-center justify-center bg-black/60">
-      <div className="w-[420px] rounded-xl bg-popover border border-border shadow-2xl p-5" role="dialog" aria-labelledby="first-run-title">
+    <div className="fixed inset-0 z-[65] flex items-center justify-center bg-black/55 backdrop-blur-[2px]">
+      <div className="w-[420px] max-w-[calc(100vw-2rem)] rounded-xl bg-popover border border-border elev-pop p-5" role="dialog" aria-labelledby="first-run-title">
         <h2 id="first-run-title" className="text-base font-semibold">Welcome to Vista Image Studio</h2>
         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
           A fast editor for social posts. Open a photo, polish it, crop, and export — no account required.

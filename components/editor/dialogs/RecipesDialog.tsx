@@ -62,8 +62,8 @@ export function RecipesDialog({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div className="w-[420px] max-h-[85vh] overflow-y-auto rounded-xl bg-popover border border-border shadow-2xl p-4" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-[2px]" onClick={onClose}>
+      <div className="w-[420px] max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl bg-popover border border-border elev-pop p-4" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-sm font-semibold">Recipes</h2>
         <p className="text-[10px] text-muted-foreground mt-1">Save crop + look + logo as a recipe on this device.</p>
         <div className="mt-3 flex gap-2">

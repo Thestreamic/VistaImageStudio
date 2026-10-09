@@ -48,7 +48,7 @@ export function EulaGateDialog({ onAccepted }: { onAccepted: () => void }) {
         role="alertdialog"
         aria-labelledby="eula-blocked-title"
       >
-        <div className="w-full max-w-md rounded-xl border border-border bg-popover p-6 shadow-2xl">
+        <div className="w-full max-w-md rounded-xl border border-border bg-popover p-6 elev-pop">
           <h1 id="eula-blocked-title" className="text-base font-semibold">
             Agreement required
           </h1>
@@ -77,7 +77,7 @@ export function EulaGateDialog({ onAccepted }: { onAccepted: () => void }) {
       aria-modal="true"
       aria-labelledby="eula-gate-title"
     >
-      <div className="flex w-full max-w-3xl max-h-[min(44rem,100%)] flex-col rounded-xl border border-border bg-popover shadow-2xl">
+      <div className="flex w-full max-w-3xl max-h-[min(44rem,100%)] flex-col rounded-xl border border-border bg-popover elev-pop">
         <header className="shrink-0 px-5 pt-5 pb-3 border-b border-border">
           <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">The Streamic</p>
           <h1 id="eula-gate-title" className="mt-1 text-lg font-semibold tracking-[-0.02em]">

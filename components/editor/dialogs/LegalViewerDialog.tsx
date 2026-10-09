@@ -27,7 +27,7 @@ export function LegalViewerDialog({
       onClick={onClose}
     >
       <div
-        className="flex w-full max-w-3xl max-h-[min(44rem,100%)] flex-col rounded-xl border border-border bg-popover shadow-2xl"
+        className="flex w-full max-w-3xl max-h-[min(44rem,100%)] flex-col rounded-xl border border-border bg-popover elev-pop"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-labelledby="legal-viewer-title"

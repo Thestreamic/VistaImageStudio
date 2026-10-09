@@ -253,6 +253,10 @@ export function EditorStage({
   }, [setHoldPreview])
 
   const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    // Controls floating on the stage (zoom, close, safe zones, crop Apply…)
+    // must get their own click. Starting a drag here would capture the
+    // pointer and swallow that click.
+    if (e.target instanceof Element && e.target.closest('button, a, input, select, textarea')) return
     const isMiddle = e.button === 1
     const isSpacePan = tool === 'hand'
     if (isMiddle || isSpacePan) {
@@ -792,7 +796,7 @@ function CropOverlay({ crop, docW, docH, zoom, interactive, onCropChange, onAppl
       const dx = (e.clientX - session.startX) / zoom
       const dy = (e.clientY - session.startY) / zoom
       const s = session.start
-      let next = { ...s }
+      const next = { ...s }
       const handle = session.handle
       if (handle === 'move') {
         next.x = s.x + dx
@@ -892,23 +896,62 @@ function CropOverlay({ crop, docW, docH, zoom, interactive, onCropChange, onAppl
   )
 }
 
-// ─── Quick start: blank social canvases, shown by shape (no platform logos) ──
+// ─── Quick start: blank social canvases in each platform's colours ──────────
+// Shapes show the canvas size at a glance; platform logos are left out on purpose.
 const QUICK_STARTS = [
-  { id: 'post', label: 'Instagram Post', ratio: '1:1', width: 1080, height: 1080, glyph: [18, 18] },
-  { id: 'thumbnail', label: 'YouTube Thumbnail', ratio: '16:9', width: 1280, height: 720, glyph: [22, 13] },
-  { id: 'story', label: 'Story / Reel', ratio: '9:16', width: 1080, height: 1920, glyph: [12, 21] },
+  {
+    id: 'post',
+    label: 'Instagram Post',
+    ratio: '1:1',
+    width: 1080,
+    height: 1080,
+    glyph: [18, 18],
+    accent: 'linear-gradient(90deg, #f09433 0%, #dc2743 50%, #bc1888 100%)',
+    tint: '#dc2743',
+  },
+  {
+    id: 'thumbnail',
+    label: 'YouTube Thumbnail',
+    ratio: '16:9',
+    width: 1280,
+    height: 720,
+    glyph: [24, 14],
+    accent: '#ff1f1f',
+    tint: '#ff1f1f',
+  },
+  {
+    id: 'story',
+    label: 'Story / Reel',
+    ratio: '9:16',
+    width: 1080,
+    height: 1920,
+    glyph: [13, 22],
+    accent: 'linear-gradient(90deg, #7f56d9 0%, #e63592 50%, #2e90fa 100%)',
+    tint: '#9b5de5',
+  },
 ] as const
 
 const QUICK_START_TILE =
-  'relative flex flex-col items-center justify-start gap-1.5 px-2 pt-3.5 pb-3 rounded-lg border border-border bg-card text-center transition-[transform,box-shadow,border-color] duration-150 ease-out group shadow-2xs hover:shadow-sm hover:-translate-y-0.5 hover:border-primary/45 active:translate-y-0 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none'
+  'relative overflow-hidden flex flex-col items-center justify-start gap-1.5 px-1.5 pt-4 pb-3 rounded-lg border border-border bg-card text-center transition-[transform,box-shadow,border-color] duration-150 ease-out group shadow-2xs hover:shadow-md hover:-translate-y-0.5 hover:border-[color:var(--qs-tint)] active:translate-y-0 focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none'
 
-/** The canvas shape at a glance: a small outlined frame at the preset's aspect ratio. */
-function RatioGlyph({ w, h }: { w: number; h: number }) {
+/** Coloured strip across the top of a quick-start tile. */
+function AccentBar({ accent }: { accent: string }) {
   return (
-    <span className="h-[22px] flex items-center justify-center" aria-hidden>
+    <span
+      aria-hidden
+      className="absolute inset-x-0 top-0 h-[3px] opacity-85 transition-opacity group-hover:opacity-100"
+      style={{ background: accent }}
+    />
+  )
+}
+
+/** The canvas shape at a glance, filled with the platform colour. */
+function RatioGlyph({ w, h, accent }: { w: number; h: number; accent: string }) {
+  return (
+    <span className="h-[24px] flex items-center justify-center" aria-hidden>
       <span
-        className="block rounded-[3px] border-2 border-primary bg-primary/10 transition-transform group-hover:scale-110"
-        style={{ width: w, height: h }}
+        className="block rounded-[4px] shadow-sm transition-transform group-hover:scale-110"
+        style={{ width: w, height: h, background: accent }}
       />
     </span>
   )
@@ -1052,10 +1095,12 @@ function EmptyState({
                 }}
                 title={`${q.label} (${q.ratio} · ${q.width} × ${q.height})`}
                 className={QUICK_START_TILE}
+                style={{ '--qs-tint': q.tint } as React.CSSProperties}
               >
-                <RatioGlyph w={q.glyph[0]} h={q.glyph[1]} />
-                <span className="text-[12.5px] font-semibold text-foreground leading-tight">{q.label}</span>
-                <span className="text-[11px] text-muted-foreground num leading-none">{q.ratio}</span>
+                <AccentBar accent={q.accent} />
+                <RatioGlyph w={q.glyph[0]} h={q.glyph[1]} accent={q.accent} />
+                <span className="text-[12px] font-semibold text-foreground leading-tight whitespace-nowrap">{q.label}</span>
+                <span className="text-[11px] text-muted-foreground num leading-none">{q.width} × {q.height}</span>
               </button>
             ))}
             <button
@@ -1067,11 +1112,13 @@ function EmptyState({
               }}
               title="Collage layouts and occasion frames"
               className={QUICK_START_TILE}
+              style={{ '--qs-tint': 'var(--primary)' } as React.CSSProperties}
             >
-              <span className="h-[22px] flex items-center justify-center">
-                <LayoutGrid size={20} strokeWidth={1.9} className="text-primary transition-transform group-hover:scale-110" />
+              <AccentBar accent="var(--brand-gradient)" />
+              <span className="h-[24px] flex items-center justify-center">
+                <LayoutGrid size={21} strokeWidth={2} className="text-primary transition-transform group-hover:scale-110" />
               </span>
-              <span className="text-[12.5px] font-semibold text-foreground leading-tight">Collage</span>
+              <span className="text-[12px] font-semibold text-foreground leading-tight whitespace-nowrap">Collage</span>
               <span className="text-[11px] text-muted-foreground leading-none">2–6 photos</span>
             </button>
           </div>

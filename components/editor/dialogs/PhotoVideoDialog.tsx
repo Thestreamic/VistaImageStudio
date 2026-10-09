@@ -106,10 +106,10 @@ export function PhotoVideoDialog({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-[2px]" onClick={onClose}>
       <div
         data-testid="photo-video-dialog"
-        className="w-[420px] max-h-[85vh] overflow-y-auto rounded-xl bg-popover border border-border shadow-2xl p-4"
+        className="w-[420px] max-w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto rounded-xl bg-popover border border-border elev-pop p-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3">

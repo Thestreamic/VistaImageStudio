@@ -56,10 +56,10 @@ export function MusicPickerDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 backdrop-blur-[2px]" onClick={onClose}>
       <div
         data-testid="music-picker"
-        className="w-[520px] max-h-[85vh] flex flex-col rounded-xl bg-popover border border-border shadow-2xl"
+        className="w-[520px] max-w-[calc(100vw-2rem)] max-h-[85vh] flex flex-col rounded-xl bg-popover border border-border elev-pop"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">

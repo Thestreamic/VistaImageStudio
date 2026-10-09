@@ -90,9 +90,9 @@ export function autoColor(
     const y = 0.2126 * r + 0.7152 * g + 0.0722 * b
     if (y < 1) continue
     const gain = lut[Math.round(Math.min(255, y))] / y
-    let nr = r * gain
-    let ng = g * gain
-    let nb = b * gain
+    const nr = r * gain
+    const ng = g * gain
+    const nb = b * gain
     data[i] = nr < 0 ? 0 : nr > 255 ? 255 : nr
     data[i + 1] = ng < 0 ? 0 : ng > 255 ? 255 : ng
     data[i + 2] = nb < 0 ? 0 : nb > 255 ? 255 : nb

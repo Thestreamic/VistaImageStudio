@@ -40,7 +40,7 @@ export function LayersPanel() {
   return (
     <div className="flex flex-col">
       <div className="px-3 pt-3 pb-1.5 flex items-center justify-between">
-        <span className="panel-label">Layers</span>
+        <h3 className="section-title flex-1 mr-2">Layers</h3>
         <span className="num text-muted-foreground">{doc.layers.length}</span>
       </div>
       <div className="flex-1 overflow-y-auto scrollbar-thin pb-2">

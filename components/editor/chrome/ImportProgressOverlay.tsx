@@ -26,7 +26,7 @@ export function ImportProgressOverlay({
       onClick={onCancel}
     >
       <div
-        className="relative w-[320px] rounded-xl bg-popover border border-border shadow-2xl px-5 py-5"
+        className="relative w-[320px] rounded-xl bg-popover border border-border elev-pop px-5 py-5"
         onClick={(e) => e.stopPropagation()}
       >
         <button

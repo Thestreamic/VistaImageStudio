@@ -101,7 +101,7 @@ export function depthFromAlphaMatte(
   const featherR = Math.max(2, Math.min(7, Math.round(edge * 0.0036)))
   const core = erodeMap(keep, width, height, erodeR)
   const subjectAlpha = featherDepth(core, width, height, featherR)
-  let depth = featherDepth(backgroundDepthMap(core, width, height), width, height, Math.max(4, featherR))
+  const depth = featherDepth(backgroundDepthMap(core, width, height), width, height, Math.max(4, featherR))
   for (let i = 0; i < keep.length; i++) {
     if (core[i] > 0.5) depth[i] = 1
   }
