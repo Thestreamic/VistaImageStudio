@@ -10,7 +10,7 @@ and `docs/AI.md`. Do not rename `.lumen`, `lumen-project`, or `window.lumen`.
 ## Handover (current facts)
 
 - Product: Vista Image Studio 0.1.0. Working copy:
-  `C:\Users\AFF Computers\Downloads\lumen-studio` (no git remote).
+  `C:\Users\AFF Computers\Downloads\lumen-studio` (origin: Thestreamic/VistaImageStudio).
   Live Pages source: `C:\Users\AFF Computers\Documents\GitHub\VistaImageStudio\VistaImageStudio`
   → `https://github.com/Thestreamic/VistaImageStudio` `main`.
 - Live site: `https://vistaimagestudio.thestreamic.in` at `/`.
@@ -35,6 +35,57 @@ and `docs/AI.md`. Do not rename `.lumen`, `lumen-project`, or `window.lumen`.
 - Mobile chrome at 767px (`useMobileLayout`). Desktop title bar otherwise.
 - `replaceLayerPixels` clones the canvas so an AI result does not share
   pixels with the Media cache.
+
+## Changes since handover (30 Sep – 9 Oct 2026)
+
+Workflow
+- Work on a branch, open a PR to `main`, merge. A push to `main` runs the
+  Pages deploy (live site). GitHub Desktop uses the Documents clone; both
+  clones share `origin`.
+- CI: `npm run lint` is the ESLint CLI (`eslint.config.mjs`,
+  eslint-config-next); `next lint` was removed in Next 16. React Compiler
+  rules `react-hooks/set-state-in-effect` and `refs` are warnings.
+  `npm run typecheck` is clean. e2e is 36/36; test photos must be at least
+  2px and, for Low Light / Vibrance, dark and muted (scene gate).
+
+UI (look only; handlers unchanged)
+- Themes: dark = slate with gold creator accent (Optimize Image is the gold
+  hero); light = cool white with indigo accent. UI font Inter (SIL OFL).
+  Export is a high-contrast solid (white on dark, ink on light).
+- Start screen: Open Photo, Choose Template, drop zone, and Quick Start tiles
+  (Instagram Post, YouTube Thumbnail, Story/Reel, Collage) in platform
+  colours, shown by shape, not logos.
+- AI panel groups: Enhance, Subject, Fix, Size. Adjust groups: Light,
+  Colour, Detail, Curves. Shared styles: `.ui-btn`, `.ui-tile-btn`,
+  `.ui-input`, `.section-title`, `.elev-pop` in `app/globals.css`.
+- Media bin can be hidden (rail button or bin header); stored per browser in
+  localStorage `vista-media-bin`.
+- Export dialog: fixed header and footer, so Export is always visible.
+
+Behaviour fixes
+- Magic Eraser with no selection arms `select-rect` (Select, M).
+- Compare: a hold of 280ms or more peeks at the original; releasing it no
+  longer also opens split view.
+- Stage controls (zoom, close, safe zones) work with a real mouse: the stage
+  ignores pointerdown on buttons/inputs instead of capturing the pointer.
+- EULA gate starts as `'loading'` on server and client (no hydration error);
+  the mount effect resolves it. New visitors still see the EULA.
+
+Analytics and privacy
+- The live web host loads Umami via `public/analytics.js` (loader in
+  `app/layout.tsx`, skipped when `ELECTRON_BUILD`). Desktop has none.
+- Privacy Policy 2026-09-30 discloses it; the Privacy Centre shows
+  "On — Umami" on the live host, "Off" elsewhere (`ANALYTICS_HOST` in
+  `lib/platform/bridge.ts`).
+
+Known open items
+- EULA 4.1 still says analytics SDKs are off by default; changing it needs
+  a new EULA version (everyone re-accepts).
+- Slider undo: `updateAdjustments(…, commit=false)` writes each drag frame
+  into `doc`, so `commit()` pushes the post-drag doc; undo cannot restore the
+  pre-drag value.
+- Templates dialog has no Escape-to-close. `pnpm-lock.yaml` is not updated
+  (CI uses npm).
 
 ## Process model
 
