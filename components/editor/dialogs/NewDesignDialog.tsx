@@ -128,26 +128,26 @@ export function NewDesignDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed top-0 right-0 bottom-0 z-50 flex items-center justify-center bg-black/50 left-[19rem]"
+      className="fixed top-0 right-0 bottom-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-[2px] left-[19rem]"
       onClick={onClose}
       data-testid="templates-dialog"
     >
       <div
-        className="w-[480px] max-h-[75vh] overflow-y-auto rounded-xl bg-popover border border-border shadow-2xl p-4"
+        className="w-[480px] max-w-[calc(100%-2rem)] max-h-[80vh] overflow-y-auto overscroll-contain scrollbar-thin rounded-xl bg-popover border border-border elev-pop p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold">Create a design</h2>
+          <h2 className="text-[15px] font-semibold tracking-[-0.01em]">Create a design</h2>
           <button type="button" onClick={onClose} aria-label="Close templates" title="Close" className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"><X size={16} /></button>
         </div>
-        <p className="text-[10px] text-muted-foreground mb-3">
+        <p className="text-[12px] text-muted-foreground mb-4">
           Pick a layout or occasion, then drag photos from Media onto each box.
         </p>
 
         <div className="mb-5">
           <div className="flex items-center gap-1.5 mb-1">
             <LayoutGrid size={11} className="text-muted-foreground" />
-            <span className="panel-label">Collage — pick a layout, add your photos</span>
+            <h3 className="section-title flex-1 normal-case tracking-normal text-[12.5px] text-foreground/90">Collage — pick a layout, add your photos</h3>
           </div>
           <div className="mt-2 flex flex-wrap gap-1">
             {CATEGORIES.map((category) => (
@@ -189,7 +189,7 @@ export function NewDesignDialog({ onClose }: { onClose: () => void }) {
         <div className="mb-5">
           <div className="flex items-center gap-1.5 mb-1">
             <Sparkles size={11} className="text-muted-foreground" />
-            <span className="panel-label">Quick start — post + title, ready to edit</span>
+            <h3 className="section-title flex-1 normal-case tracking-normal text-[12.5px] text-foreground/90">Quick start — post + title, ready to edit</h3>
           </div>
           <div className="mt-2 grid grid-cols-2 gap-1.5">
             {QUICK_START_TEMPLATES.map((t) => (
@@ -211,7 +211,7 @@ export function NewDesignDialog({ onClose }: { onClose: () => void }) {
 
         {groups.map((group) => (
           <div key={group} className="mb-4">
-            <span className="panel-label">{group}</span>
+            <h3 className="section-title">{group}</h3>
             <div className="mt-2 grid grid-cols-2 gap-1.5">
               {SIZE_TEMPLATES.filter((t) => t.group === group).map((t) => (
                 <button

@@ -40,8 +40,8 @@ export function TextPanel() {
     <div className="p-3 space-y-4">
       <div>
         <div className="flex items-center justify-between">
-          <span className="panel-label">Title Templates</span>
-          <Type size={12} className="text-muted-foreground" />
+          <h3 className="section-title flex-1">Title Templates</h3>
+          <Type size={12} className="ml-2 text-muted-foreground" />
         </div>
         <p className="text-[11px] text-muted-foreground mt-1 mb-2">Tap to add. Double-click any text box to edit the words, then click outside the box when you are done. Drag to move, or stretch a corner to resize.</p>
         <div className="grid grid-cols-2 gap-1.5">
@@ -73,8 +73,7 @@ export function TextPanel() {
 
       {isTextLayer && layer && (
         <>
-          <div className="h-px bg-border" />
-          <TextEditControls
+              <TextEditControls
             layerId={layer.id}
             data={layer.textData!}
             brandKit={brandKit}
@@ -93,9 +92,8 @@ export function TextPanel() {
         </p>
       )}
 
-      <div className="h-px bg-border" />
       <div>
-        <span className="panel-label">Brand Kit</span>
+        <h3 className="section-title">Brand Kit</h3>
         <p className="text-[11px] text-muted-foreground mt-1 mb-2">Your go-to colors and font — keeps every post on-brand.</p>
         <div className="flex items-center gap-1.5 mb-2">
           {brandKit.colors.map((c, i) => (
@@ -140,8 +138,8 @@ function TextEditControls({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="panel-label">Edit Text</span>
-        <button onClick={onDelete} className="text-muted-foreground hover:text-destructive"><Trash2 size={12} /></button>
+        <h3 className="section-title flex-1">Edit Text</h3>
+        <button type="button" onClick={onDelete} title="Delete text" aria-label="Delete text" className="ml-2 w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"><Trash2 size={13} /></button>
       </div>
 
       <textarea
@@ -175,7 +173,7 @@ function TextEditControls({
         formatValue={(v) => `${v}%`} />
 
       <div className="flex items-center justify-between">
-        <span className="panel-label">Align</span>
+        <span className="text-[12px] text-foreground/80">Align</span>
         <div className="flex gap-0.5">
           {(['left', 'center', 'right'] as TextAlign[]).map((a) => {
             const Icon = a === 'left' ? AlignLeft : a === 'center' ? AlignCenter : AlignRight
@@ -193,7 +191,7 @@ function TextEditControls({
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="panel-label">Color</span>
+        <span className="text-[12px] text-foreground/80">Color</span>
         <input type="color" value={data.color} onChange={(e) => onPatch({ color: e.target.value }, true)} className="w-8 h-6 rounded border border-border bg-transparent" />
       </div>
       <div className="flex items-center gap-1.5">
@@ -215,12 +213,12 @@ function TextEditControls({
       </div>
 
       <label className="flex items-center justify-between">
-        <span className="panel-label">Uppercase</span>
+        <span className="text-[12px] text-foreground/80">Uppercase</span>
         <input type="checkbox" checked={data.uppercase} onChange={(e) => onPatch({ uppercase: e.target.checked }, true)} />
       </label>
 
       <label className="flex items-center justify-between">
-        <span className="panel-label">Highlight background</span>
+        <span className="text-[12px] text-foreground/80">Highlight background</span>
         <input
           type="checkbox"
           checked={!!data.backgroundColor}
@@ -232,7 +230,7 @@ function TextEditControls({
       )}
 
       <label className="flex items-center justify-between">
-        <span className="panel-label">Outline</span>
+        <span className="text-[12px] text-foreground/80">Outline</span>
         <input
           type="checkbox"
           checked={!!data.strokeColor}

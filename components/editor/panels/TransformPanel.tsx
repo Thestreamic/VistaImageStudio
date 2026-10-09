@@ -81,42 +81,40 @@ export function TransformPanel() {
   return (
     <div className="p-3 space-y-4">
       <div>
-        <span className="panel-label">Resize</span>
+        <h3 className="section-title">Resize</h3>
         <div className="mt-2 flex items-center gap-2">
           <input type="number" value={w} onChange={(e) => onWidthChange(Number(e.target.value))}
-            className="w-full bg-input rounded px-2 py-1 text-xs num border border-border" />
+            className="w-full ui-input num" />
           <span className="text-muted-foreground text-xs">×</span>
           <input type="number" value={h} onChange={(e) => onHeightChange(Number(e.target.value))}
-            className="w-full bg-input rounded px-2 py-1 text-xs num border border-border" />
+            className="w-full ui-input num" />
         </div>
-        <label className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <input type="checkbox" checked={lockRatio} onChange={(e) => setLockRatio(e.target.checked)} />
+        <label className="mt-2 flex items-center gap-2 text-[12px] text-foreground/80 cursor-pointer">
+          <input type="checkbox" checked={lockRatio} onChange={(e) => setLockRatio(e.target.checked)} className="w-3.5 h-3.5 accent-[var(--primary)]" />
           Lock aspect ratio
         </label>
         <button
           type="button"
           onClick={() => resize(w, h)}
-          className="mt-2 w-full py-1.5 text-xs rounded-md bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+          className="mt-2 w-full ui-tile-btn"
         >
           Apply Resize
         </button>
       </div>
 
-      <div className="h-px bg-border" />
-
       <div>
-        <span className="panel-label">Transform</span>
+        <h3 className="section-title">Transform</h3>
         <div className="mt-2 grid grid-cols-2 gap-1.5">
-          <button type="button" onClick={() => rotate90(1)} className="flex items-center justify-center gap-1.5 py-1.5 text-xs rounded-md bg-secondary hover:bg-secondary/80"><RotateCw size={13} /> 90° CW</button>
-          <button type="button" onClick={() => rotate90(-1)} className="flex items-center justify-center gap-1.5 py-1.5 text-xs rounded-md bg-secondary hover:bg-secondary/80"><RotateCcw size={13} /> 90° CCW</button>
-          <button type="button" onClick={() => flip('horizontal')} className="flex items-center justify-center gap-1.5 py-1.5 text-xs rounded-md bg-secondary hover:bg-secondary/80"><FlipHorizontal size={13} /> Flip H</button>
-          <button type="button" onClick={() => flip('vertical')} className="flex items-center justify-center gap-1.5 py-1.5 text-xs rounded-md bg-secondary hover:bg-secondary/80"><FlipVertical size={13} /> Flip V</button>
+          <button type="button" onClick={() => rotate90(1)} className="ui-tile-btn"><RotateCw size={13} /> 90° CW</button>
+          <button type="button" onClick={() => rotate90(-1)} className="ui-tile-btn"><RotateCcw size={13} /> 90° CCW</button>
+          <button type="button" onClick={() => flip('horizontal')} className="ui-tile-btn"><FlipHorizontal size={13} /> Flip H</button>
+          <button type="button" onClick={() => flip('vertical')} className="ui-tile-btn"><FlipVertical size={13} /> Flip V</button>
         </div>
       </div>
 
       {doc.layers.some((l) => l.collageCell) && (
         <div data-testid="collage-frame-picker">
-          <span className="panel-label">Frames</span>
+          <h3 className="section-title">Frames</h3>
           <p className="text-[11px] text-muted-foreground mt-1">
             Click a frame (or its photo on the canvas) to pan, zoom, rotate, or adjust that image.
           </p>
@@ -142,7 +140,7 @@ export function TransformPanel() {
 
       {activeLayer?.collageCell && !activeLayer.collageMat && (
         <div data-testid="collage-frame-position">
-          <span className="panel-label">Frame position</span>
+          <h3 className="section-title">Frame position</h3>
           <p className="text-[11px] text-muted-foreground mt-1">
             Drag an empty frame, Alt-drag a filled frame, or nudge left / right / up / down. Arrow keys also move the selected frame.
           </p>
@@ -152,7 +150,7 @@ export function TransformPanel() {
               <input
                 type="number"
                 data-testid="collage-frame-x"
-                className="mt-1 w-full bg-input rounded px-2 py-1 text-xs num border border-border"
+                className="mt-1 w-full ui-input num"
                 value={activeLayer.x}
                 onChange={(e) => setCollageFramePosition(activeLayer.id, Number(e.target.value), activeLayer.y, true)}
               />
@@ -162,7 +160,7 @@ export function TransformPanel() {
               <input
                 type="number"
                 data-testid="collage-frame-y"
-                className="mt-1 w-full bg-input rounded px-2 py-1 text-xs num border border-border"
+                className="mt-1 w-full ui-input num"
                 value={activeLayer.y}
                 onChange={(e) => setCollageFramePosition(activeLayer.id, activeLayer.x, Number(e.target.value), true)}
               />
@@ -183,7 +181,7 @@ export function TransformPanel() {
                 data-testid={`collage-nudge-${nudge.id}`}
                 title={`Move ${nudge.label.toLowerCase()}`}
                 onClick={() => offsetLayer(activeLayer.id, nudge.dx, nudge.dy, true)}
-                className="flex items-center justify-center gap-1 py-1.5 text-[11px] rounded-md bg-secondary hover:bg-secondary/80"
+                className="ui-tile-btn"
               >
                 <nudge.icon size={12} /> {nudge.label}
               </button>
@@ -194,7 +192,7 @@ export function TransformPanel() {
 
       {activeLayer?.collageCell && activeLayer.collageFilled && (
         <div data-testid="collage-frame-adjust">
-          <span className="panel-label">Frame photo</span>
+          <h3 className="section-title">Frame photo</h3>
           <p className="text-[11px] text-muted-foreground mt-1">
             Drag inside the highlighted box to pan the photo. Use edge/corner handles or these sliders.
           </p>
@@ -246,7 +244,7 @@ export function TransformPanel() {
                 </label>
                 <button
                   type="button"
-                  className="w-full py-1.5 text-[11px] rounded-md bg-secondary hover:bg-secondary/80"
+                  className="w-full ui-tile-btn"
                   onClick={() => setCollageFit(activeLayer.id, DEFAULT_COLLAGE_FIT, true)}
                 >
                   Reset photo in frame
@@ -258,56 +256,54 @@ export function TransformPanel() {
       )}
 
       <div>
-        <span className="panel-label">Crop</span>
-        <p className="text-[11px] text-muted-foreground mt-1">Live crop stays editable. Bake writes pixels.</p>
+        <h3 className="section-title">Crop</h3>
+        <p className="text-[11.5px] text-muted-foreground mt-1.5">Live crop stays editable. Bake writes pixels.</p>
         <div className="mt-1.5 grid grid-cols-2 gap-1.5">
           {CROP_PRESETS.map((crop) => (
             <button
               key={crop.id}
               type="button"
               onClick={() => startCrop(crop.id)}
-              className="py-1.5 text-[11px] rounded-md bg-secondary hover:bg-secondary/80"
+              className="ui-tile-btn"
             >
               {crop.label}
             </button>
           ))}
         </div>
         <div className="mt-1.5 flex items-center gap-1.5">
-          <input type="number" value={customW} min={1} onChange={(e) => setCustomW(Number(e.target.value))} className="w-full bg-input rounded px-2 py-1 text-[11px] border border-border" />
+          <input type="number" value={customW} min={1} onChange={(e) => setCustomW(Number(e.target.value))} className="w-full ui-input num" />
           <span className="text-[11px] text-muted-foreground">:</span>
-          <input type="number" value={customH} min={1} onChange={(e) => setCustomH(Number(e.target.value))} className="w-full bg-input rounded px-2 py-1 text-[11px] border border-border" />
+          <input type="number" value={customH} min={1} onChange={(e) => setCustomH(Number(e.target.value))} className="w-full ui-input num" />
           <button
             type="button"
             onClick={() => {
               setTool('crop')
               setCropDraft(cropRectForCustom(doc.width, doc.height, customW, customH))
             }}
-            className="px-2 py-1 text-[11px] rounded-md bg-secondary"
+            className="ui-tile-btn shrink-0 px-3"
           >
             Custom
           </button>
         </div>
         <div className="mt-1.5 grid grid-cols-2 gap-1.5">
-          <button type="button" onClick={() => { if (useEditorStore.getState().cropDraft) setLiveCrop(useEditorStore.getState().cropDraft) }} className="flex items-center justify-center gap-1 py-1.5 text-[11px] rounded-md bg-secondary">
+          <button type="button" onClick={() => { if (useEditorStore.getState().cropDraft) setLiveCrop(useEditorStore.getState().cropDraft) }} className="ui-tile-btn">
             <Crop size={12} /> Apply crop
           </button>
-          <button type="button" onClick={() => bakeCrop()} disabled={!doc.crop} className="py-1.5 text-[11px] rounded-md bg-secondary disabled:opacity-40">
+          <button type="button" onClick={() => bakeCrop()} disabled={!doc.crop} className="ui-tile-btn">
             Bake crop
           </button>
         </div>
       </div>
 
-      <div className="h-px bg-border" />
-
       <div>
-        <span className="panel-label">Logo / watermark</span>
-        <button type="button" onClick={() => void pickLogo()} className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 text-xs rounded-md bg-secondary">
+        <h3 className="section-title">Logo / watermark</h3>
+        <button type="button" onClick={() => void pickLogo()} className="mt-2 w-full ui-tile-btn">
           <ImagePlus size={13} /> Add PNG/JPEG logo
         </button>
         <button
           type="button"
           onClick={() => addWatermarkLayer({ kind: 'text', text: '@studio', corner: 'br' })}
-          className="mt-1.5 w-full py-1.5 text-xs rounded-md bg-secondary"
+          className="mt-1.5 w-full ui-tile-btn"
         >
           Add text handle
         </button>
@@ -318,7 +314,7 @@ export function TransformPanel() {
                 key={c.id}
                 type="button"
                 onClick={() => updateWatermark(watermark.id, { corner: c.id }, undefined, true)}
-                className={`py-1 text-[11px] rounded ${watermark.watermark?.corner === c.id ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}
+                className={`h-7 text-[11px] font-medium rounded-md border transition-colors ${watermark.watermark?.corner === c.id ? 'bg-primary/10 border-primary/60 text-foreground' : 'bg-secondary border-transparent hover:bg-accent'}`}
               >
                 {c.label}
               </button>

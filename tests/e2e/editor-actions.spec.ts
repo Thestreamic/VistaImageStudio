@@ -74,13 +74,14 @@ test('a filter still reaches the photo when a text layer is selected', async ({ 
 })
 
 test('Remove Background one-click completes and edits the image', async ({ page }) => {
+  // Loads and runs the ~25MB MODNet model; give it more than the default 30s test budget.
+  test.setTimeout(90_000)
   await importPhoto(page)
   const before = await stagePixels(page)
 
   await page.getByRole('button', { name: 'Remove Background' }).click()
 
-  // First run loads the ~25MB MODNet model, which is slow on a busy runner.
-  await expect(page.getByText(/Remove Background complete/i)).toBeVisible({ timeout: 30_000 })
+  await expect(page.getByText(/Remove Background complete/i)).toBeVisible({ timeout: 75_000 })
   await expect.poll(() => stagePixels(page)).not.toBe(before)
 })
 

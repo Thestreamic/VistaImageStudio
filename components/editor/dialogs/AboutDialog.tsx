@@ -21,9 +21,9 @@ export function AboutDialog({
   onOpenLegal: (doc: LegalDocId) => void
 }) {
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/55 backdrop-blur-[2px] p-4" onClick={onClose}>
       <div
-        className="w-full max-w-md rounded-xl border border-border bg-popover shadow-2xl p-5"
+        className="w-full max-w-md rounded-xl border border-border bg-popover elev-pop p-5"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-labelledby="about-title"

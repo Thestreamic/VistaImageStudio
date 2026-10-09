@@ -22,11 +22,11 @@ export function ConfirmDialog({
   onExtra?: () => void
 }) {
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/55 backdrop-blur-[2px]">
       <div
         role="alertdialog"
         aria-labelledby="confirm-title"
-        className="w-[380px] rounded-xl bg-popover border border-border shadow-2xl p-4"
+        className="w-[380px] max-w-[calc(100vw-2rem)] rounded-xl bg-popover border border-border elev-pop p-4"
       >
         <h2 id="confirm-title" className="text-sm font-semibold">{title}</h2>
         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{body}</p>
