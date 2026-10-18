@@ -50,3 +50,4 @@ public/models/*.onnx
 public/models/*.onnx.part
 resources/models/*.onnx
 resources/models/*.onnx.part
+out-mobile/

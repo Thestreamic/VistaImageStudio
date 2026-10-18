@@ -18,6 +18,7 @@ import { compositor } from '@/features/editor/engine/compositor'
 import { canvasToBlob } from '@/lib/image/canvas'
 import { getBridge } from '@/lib/platform/bridge'
 import { cn } from '@/lib/utils'
+import { CAPABILITIES } from '@/lib/platform/capabilities'
 
 type ExportFormat = 'png' | 'jpeg' | 'webp'
 
@@ -333,17 +334,19 @@ export function ExportDialog({ onClose, onMakeVideo }: { onClose: () => void; on
               }, 0),
             )}
           </p>
-          <button
-            type="button"
-            data-testid="make-video"
-            onClick={() => {
-              onMakeVideo?.()
-              onClose()
-            }}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-md border border-border bg-card text-[12.5px] font-medium hover:bg-accent transition-colors"
-          >
-            <Film size={14} /> Make video…
-          </button>
+          {CAPABILITIES.videoExport && (
+            <button
+              type="button"
+              data-testid="make-video"
+              onClick={() => {
+                onMakeVideo?.()
+                onClose()
+              }}
+              className="flex items-center gap-1.5 h-9 px-3 rounded-md border border-border bg-card text-[12.5px] font-medium hover:bg-accent transition-colors"
+            >
+              <Film size={14} /> Make video…
+            </button>
+          )}
           <button
             type="button"
             onClick={handleExport}

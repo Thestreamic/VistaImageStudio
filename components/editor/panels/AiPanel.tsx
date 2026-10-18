@@ -4,6 +4,7 @@ import { Sparkles, Scissors, Wind, ArrowUpToLine, UserRound, Eraser, Moon, Cloud
 import { useEditorStore, selectPhotoLayer } from '@/features/editor/store/editor-store'
 import { aiClient } from '@/features/ai/ai-client'
 import { Slider } from './Slider'
+import { CAPABILITIES } from '@/lib/platform/capabilities'
 import { discFocusLabel, LOCKED_DISC_FOCUS } from '@/features/ai/algorithms/bokeh'
 import {
   runAiOp,
@@ -130,6 +131,7 @@ export function AiPanel() {
         </div>
       </Group>
 
+      {CAPABILITIES.subjectAi && (
       <Group title="Subject">
         {/* Core subject tools: name on the left, what it does on the right. */}
         <div className="one-click-tools grid gap-1.5">
@@ -182,6 +184,7 @@ export function AiPanel() {
           </div>
         </div>
       </Group>
+      )}
 
       <Group title="Fix">
         <div className="one-click-tools grid grid-cols-2 gap-1.5">
@@ -203,6 +206,7 @@ export function AiPanel() {
           )}
         </SubTool>
 
+        {CAPABILITIES.faceEnhance && (
         <SubTool title="Face Enhance">
           <Slider label="Smoothing" value={faceSmoothing} min={0} max={100} onChange={setFaceSmoothing} />
           <Slider label="Clarity" value={faceClarity} min={0} max={100} onChange={setFaceClarity} />
@@ -216,11 +220,13 @@ export function AiPanel() {
             { text: 'Apply Face Enhance', title: 'Smooth skin and sharpen facial detail' },
           )}
         </SubTool>
+        )}
       </Group>
 
       <Group title="Size">
         <div className="one-click-tools grid grid-cols-2 gap-1.5">
-          {tool('Upscale 2×', ArrowUpToLine, () => void runUpscale2x(), { title: 'Double the width and height of the photo' })}
+          {CAPABILITIES.upscale &&
+            tool('Upscale 2×', ArrowUpToLine, () => void runUpscale2x(), { title: 'Double the width and height of the photo' })}
           {tool('Instagram 4:5', RectangleVertical, runInstagram45, {
             testId: 'instagram-4-5',
             disabled: off || !doc,

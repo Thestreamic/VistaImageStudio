@@ -7,11 +7,12 @@
  */
 
 import { IMAGE_FILE_ACCEPT } from '@/lib/image/canvas'
+import { isNativeApp, makeCapacitorBridge } from './capacitor-bridge'
 
 export type InferenceBackend = 'directml' | 'webgpu' | 'wasm' | 'cpu'
 
 export interface HostInfo {
-  host: 'electron' | 'web'
+  host: 'electron' | 'web' | 'android'
   platform: string
   arch?: string
   electronVersion?: string
@@ -41,7 +42,7 @@ export interface SaveProjectResult {
 }
 
 export interface PrivacyInfo {
-  host: 'electron' | 'web'
+  host: 'electron' | 'web' | 'android'
   platform: string
   csp: string
   /** 'umami' only on the public web host, where public/analytics.js loads Umami. */
@@ -57,6 +58,8 @@ export interface LumenBridge {
   openImage(): Promise<OpenedFile | null>
   saveImage(blob: Blob, suggestedName: string): Promise<boolean>
   saveImages(files: { blob: Blob; name: string }[]): Promise<boolean>
+  /** Android: hand exported files to the system share sheet. */
+  shareImages?(files: { blob: Blob; name: string }[]): Promise<boolean>
   openProject(): Promise<OpenedProject | null>
   openProjectPath?(filePath: string): Promise<OpenedProject | null>
   saveProject(json: string, suggestedName: string, existingPath?: string | null): Promise<SaveProjectResult>
@@ -357,7 +360,12 @@ let _bridge: LumenBridge | null = null
 
 export function getBridge(): LumenBridge {
   if (!_bridge) {
-    _bridge = typeof window !== 'undefined' && window.lumen ? makeElectronBridge() : webBridge
+    _bridge =
+      typeof window !== 'undefined' && window.lumen
+        ? makeElectronBridge()
+        : isNativeApp()
+          ? makeCapacitorBridge(webBridge)
+          : webBridge
   }
   return _bridge
 }

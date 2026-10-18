@@ -29,5 +29,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "out", "out-web", "dist", "dist-electron"]
+  "exclude": ["node_modules", "out", "out-web", "out-mobile", "android", "dist", "dist-electron"]
 }

@@ -25,6 +25,8 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     // Build output, packaged app, and generated or vendored files:
     'out-web/**',
+    'out-mobile/**',
+    'android/**',
     'dist/**',
     'dist-electron/**',
     'coverage/**',

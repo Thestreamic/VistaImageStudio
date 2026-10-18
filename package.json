@@ -6,6 +6,10 @@
     "dev": "node scripts/sync-legal-files.mjs && node scripts/sync-ort-wasm.mjs && node scripts/sync-models.mjs && node scripts/sync-music-library.mjs && next dev",
     "web": "node scripts/sync-legal-files.mjs && node scripts/sync-ort-wasm.mjs && node scripts/sync-models.mjs && node scripts/sync-music-library.mjs && next dev -p 3100",
     "build:web": "node scripts/sync-legal-files.mjs && node scripts/sync-ort-wasm.mjs && node scripts/sync-models.mjs && node scripts/sync-music-library.mjs && cross-env WEB_EXPORT=1 next build && node scripts/alias-github-pages.mjs",
+    "build:mobile": "node scripts/sync-legal-files.mjs && cross-env MOBILE_BUILD=1 next build && node scripts/prune-mobile-web.mjs",
+    "cap:sync": "npm run build:mobile && cap sync android",
+    "android:debug": "npm run cap:sync && cd android && gradlew.bat assembleDebug",
+    "android:install": "adb install -r android/app/build/outputs/apk/debug/app-debug.apk",
     "preview:web": "node scripts/preview-web.mjs",
     "dev:electron": "node scripts/sync-ort-wasm.mjs && node scripts/sync-models.mjs && node scripts/sync-music-library.mjs && cross-env NODE_ENV=development concurrently -k \"next dev\" \"npm:electron:watch\" \"npm:electron:start\"",
     "electron:watch": "tsc -p electron -w",
@@ -27,6 +31,12 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/camera": "8.2.6",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/share": "8.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "heic-to": "^1.5.2",
@@ -42,6 +52,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.5.3",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24",
